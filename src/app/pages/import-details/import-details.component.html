@@ -1,0 +1,221 @@
+<!-- HEADER -->
+<div class="page-header">
+  <div class="breadcrumb">Import &gt; <strong>Détails Import</strong></div>
+  <div class="header-content">
+    <h2 class="title">{{ importData.nomProduit || 'Nom produit non défini' }}</h2>
+    <div class="subtitle">
+      <i class="pi pi-briefcase mr-2"></i>
+      {{ importData.numeroImport }}
+    </div>
+    <button pButton type="button" icon="pi pi-check" label="Enregistrer" class="bica-btn-orange-save"></button>
+  </div>
+</div>
+<!-- FORM INFOS IMPORT -->
+<p-card class="section-card">
+  <h4>Informations Import</h4>
+  <div class="grid formgrid p-fluid">
+    <div class="field col-12 md:col-4">
+      <label>Numéro d'import</label>
+      <input pInputText [(ngModel)]="importData.numeroImport" />
+    </div>
+
+    <div class="field col-12 md:col-4">
+      <label>Date d'import</label>
+      <input type="date" pInputText [(ngModel)]="importData.dateImport" />
+    </div>
+    <div class="field col-12 md:col-4">
+      <label>Fournisseur</label>
+      <input pInputText [(ngModel)]="importData.fournisseur" />
+    </div>
+
+    <div class="field col-12 md:col-4">
+      <label>Total Métrage</label>
+      <input pInputText [(ngModel)]="importData.totalMetrage" />
+    </div>
+    <div class="field col-12 md:col-4">
+      <label>Total Rouleaux</label>
+      <input pInputText [(ngModel)]="importData.totalRouleaux" />
+    </div>
+
+    <div class="field col-12 md:col-4">
+      <label>Prix</label>
+      <input pInputText [(ngModel)]="importData.prix" />
+    </div>
+    <div class="field col-12 md:col-4">
+      <label>Fichier d'import (PDF)</label>
+      <p-fileUpload
+        mode="basic"
+        name="importFile"
+        accept=".pdf"
+        customUpload="true"
+        (uploadHandler)="onFileUpload($event)"
+        chooseLabel="Choisir un fichier"
+        class="w-full"
+      />
+    </div>
+
+    <div class="field col-12">
+      <label>Observations</label>
+      <textarea pInputTextarea [(ngModel)]="importData.observations"></textarea>
+    </div>
+  </div>
+</p-card>
+
+<!-- FORM AJOUT ROULEAU -->
+<p-card class="section-card">
+  <h4>Ajouter Rouleau</h4>
+  <div class="grid formgrid p-fluid">
+    <div class="field col-6 md:col-2">
+      <label for="numero">N° Rouleau</label>
+      <input id="numero" pInputText [(ngModel)]="newRouleau.numero" />
+    </div>
+    <div class="field col-6 md:col-2">
+      <label for="metrage">Métrage</label>
+      <input id="metrage" pInputText [(ngModel)]="newRouleau.metrage" />
+    </div>
+    <div class="field col-6 md:col-2">
+      <label for="laize">Laize</label>
+      <input id="laize" pInputText [(ngModel)]="newRouleau.laize" />
+    </div>
+    <div class="field col-6 md:col-2">
+      <label for="poids">Poids</label>
+      <input id="poids" pInputText [(ngModel)]="newRouleau.poids" />
+    </div>
+    <div class="field col-6 md:col-2 flex align-items-end">
+      <button 
+        pButton 
+        icon="pi pi-plus" 
+        label="{{ rouleauEnCours ? 'Modifier' : 'Ajouter' }}" 
+        class="bica-btn-orange" 
+        (click)="addRouleau()">
+      </button>
+    </div>
+  </div>
+</p-card>
+<!-- TABLEAU DES ROULEAUX -->
+<p-card class="section-card">
+  <div class="flex justify-content-between align-items-center mb-2">
+    <h4>Rouleaux</h4>
+    <div class="flex flex-wrap gap-2 justify-content-end">
+      <p-multiSelect 
+        [options]="colonnesOptions" 
+        [(ngModel)]="colonnesAffichees"
+        optionLabel="label"
+        display="chip"
+        placeholder="Colonnes"
+        class="w-full md:w-20rem"
+      ></p-multiSelect>
+    </div>
+  </div>
+
+  <div class="table-header flex justify-content-between align-items-center mb-2">
+    <span></span>
+    <span class="p-input-icon-left">
+      <i class="pi pi-search"></i>
+      <input pInputText type="text" placeholder="Search..." class="p-inputtext-sm" />
+    </span>
+  </div>
+
+  <p-table [value]="rouleaux" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 20]" responsiveLayout="scroll">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>N° Rouleau</th>
+        <th>Métrage</th>
+        <th>Laize</th>
+        <th>Poids</th>
+        <th *ngIf="isColVisible('status')">Status</th>
+        <th *ngIf="isColVisible('dispo')">Disponibilité</th>
+        <th>Actions</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-r>
+      <tr>
+        <td>{{ r.numero }}</td>
+        <td>{{ r.metrage }}</td>
+        <td>{{ r.laize }}</td>
+        <td>{{ r.poids }}</td>
+        <td *ngIf="isColVisible('status')">
+          <p-tag 
+            [value]="r.valide ? 'Validé' : 'Non validé'" 
+            [styleClass]="r.valide ? 'custom-valide' : 'custom-non-valide'">
+          </p-tag>
+
+        </td>
+        <td *ngIf="isColVisible('dispo')">
+          <p-tag 
+            [value]="r.disponible ? 'Disponible' : 'Indisponible'" 
+            [styleClass]="r.disponible ? 'custom-dispo' : 'custom-non-dispo'">
+          </p-tag>
+
+        </td>
+        <td class="flex gap-2">
+          <button pButton icon="pi pi-pencil" class="p-button-text p-button-sm text-green-600" (click)="openEditDialog(r)"></button>
+          <button pButton icon="pi pi-trash" class="p-button-text p-button-sm text-red-500" (click)="confirmDelete(r)"></button>
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</p-card>
+
+  <!-- DIALOG AJOUT / MODIF -->
+  <p-dialog [(visible)]="rouleauDialog" header="Rouleau" [modal]="true" [style]="{ width: '400px' }" class="p-fluid" [dismissableMask]="true">
+    <ng-template pTemplate="content">
+      <div class="field">
+        <label>N° Rouleau</label>
+        <input pInputText [(ngModel)]="rouleauData.numero" />
+      </div>
+      <div class="field">
+        <label>Métrage</label>
+        <input pInputText [(ngModel)]="rouleauData.metrage" />
+      </div>
+      <div class="field">
+        <label>Laize</label>
+        <input pInputText [(ngModel)]="rouleauData.laize" />
+      </div>
+      <div class="field">
+        <label>Poids</label>
+        <input pInputText [(ngModel)]="rouleauData.poids" />
+      </div>
+
+      <!-- ✅ Statut -->
+      <div class="field">
+        <label>Statut</label>
+        <p-dropdown 
+          [options]="[{label: 'Validé', value: true}, {label: 'Non validé', value: false}]"
+          [(ngModel)]="rouleauData.valide"
+          placeholder="Sélectionner un statut"
+          appendTo="body">
+        </p-dropdown>
+      </div>
+
+      <!-- ✅ Disponibilité -->
+      <div class="field">
+        <label>Disponibilité</label>
+        <p-dropdown 
+          [options]="[{label: 'Disponible', value: true}, {label: 'Indisponible', value: false}]"
+          [(ngModel)]="rouleauData.disponible"
+          placeholder="Sélectionner disponibilité"
+          appendTo="body">
+        </p-dropdown>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+      <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="rouleauDialog = false"></button>
+      <button pButton label="Enregistrer" icon="pi pi-check" class="p-button-text" (click)="saveRouleau()"></button>
+    </ng-template>
+  </p-dialog>
+
+
+<!-- DIALOG CONFIRMATION SUPPRESSION -->
+<p-dialog [(visible)]="deleteRouleauDialog" header="Confirmation" [modal]="true" [style]="{ width: '350px' }">
+  <div class="confirmation-content">
+    <i class="pi pi-exclamation-triangle mr-2" style="font-size: 2rem;"></i>
+    <span>Supprimer le rouleau <strong>{{ rouleauToDelete?.numero }}</strong> ?</span>
+  </div>
+  <ng-template pTemplate="footer">
+    <button pButton label="Non" icon="pi pi-times" class="p-button-text" (click)="deleteRouleauDialog = false"></button>
+    <button pButton label="Oui" icon="pi pi-check" class="p-button-text" (click)="deleteConfirmed()"></button>
+  </ng-template>
+</p-dialog>
