@@ -19,27 +19,47 @@
                         </span>
                     </div>
 
+                    <form (ngSubmit)="login()">
                     <!-- Formulaire -->
                     <div>
                         <label for="email1" class="block text-900 text-xl font-medium mb-2 label">
-                            Email
+                            Nom d'utilisateur
                         </label>
-                        <input id="email1"
+                        <!-- <input id="email1"
                                type="text"
                                placeholder="Email address"
                                pInputText
-                               class="w-full md:w-30rem input" />
+                               class="w-full md:w-30rem input" /> -->
+                               <input
+                               id="username"
+                               type="text"
+                               [(ngModel)]="username"
+                               name="username"
+                               placeholder="Entrez votre nom d'utilisateur"
+                               pInputText
+                               class="w-full md:w-30rem input" 
+                             />
 
                         <label for="password1" class="block text-900 font-medium text-xl mb-2 label">
                             Password
                         </label>
-                        <p-password id="password1"
+                        <!-- <p-password id="password1"
                                     [(ngModel)]="password"
                                     placeholder="Password"
                                     [toggleMask]="true"
                                     styleClass="mb-5"
                                     inputStyleClass="w-full p-3 md:w-30rem password-input">
-                        </p-password>
+                        </p-password> -->
+
+                        <p-password
+            id="password"
+            [(ngModel)]="password"
+            name="password"
+            placeholder="Entrez votre mot de passe"
+            [toggleMask]="true"
+            inputStyleClass="w-full p-3 md:w-30rem password-input"
+            styleClass="mb-5"
+          ></p-password>
 
                         <!-- Options : remember me / forgot -->
                         <div class="flex align-items-center justify-content-between mb-5 gap-5 options">
@@ -56,11 +76,12 @@
                         <button pButton
                                 pRipple
                                 label="Sign In"
+                                type="submit"
                                 class="w-full p-3 text-xl submit-btn"
-                                [routerLink]="['/']">
+                               >
                         </button>
                     </div>
-
+                </form>
                 </div>
             </div>
         </div>

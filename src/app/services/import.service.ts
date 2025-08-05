@@ -1,35 +1,56 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { ImportModel, RouleauImport } from '../models/import';
+import { environment } from 'src/environments/environment.prod';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ImportService {
 
-  private apiUrl = 'http://localhost:8080/api/imports'; // adapte selon ton backend
+  private apiUrl = `${environment.apiUrl}imports`;
 
   constructor(private http: HttpClient) {}
 
-  getImportById(id: number): Observable<any> {
-    return this.http.get(`${this.apiUrl}/${id}`);
+  // ▶ Ajouter un nouvel import
+  createImport(data: ImportModel): Observable<ImportModel> {
+    return this.http.post<ImportModel>(this.apiUrl, data);
   }
 
-  saveImport(importData: any): Observable<any> {
-    return this.http.post(this.apiUrl, importData);
+  // ▶ Obtenir un import par ID
+  getImportById(id: number): Observable<ImportModel> {
+    return this.http.get<ImportModel>(`${this.apiUrl}/${id}`);
   }
 
-  updateImport(id: number, importData: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}`, importData);
+  // ▶ Obtenir tous les imports
+  getAllImports(): Observable<ImportModel[]> {
+    return this.http.get<ImportModel[]>(this.apiUrl);
   }
 
-  uploadImportFile(file: File, importId: number): Observable<any> {
-    const formData = new FormData();
-    formData.append('file', file);
-    return this.http.post(`${this.apiUrl}/${importId}/upload`, formData);
+  // ▶ Supprimer un import
+  deleteImport(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 
-  deleteRouleau(importId: number, rouleauId: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${importId}/rouleaux/${rouleauId}`);
+  // ▶ Ajouter un rouleau à un import
+  addRouleauToImport(importId: number, rouleau: RouleauImport): Observable<RouleauImport> {
+    return this.http.post<RouleauImport>(`${this.apiUrl}/${importId}/rouleaux`, rouleau);
   }
+
+  // ▶ Modifier un rouleau
+  updateRouleau(rouleauId: number, rouleau: RouleauImport): Observable<RouleauImport> {
+    return this.http.put<RouleauImport>(`${this.apiUrl}/rouleaux/${rouleauId}`, rouleau);
+  }
+
+  // ▶ Supprimer un rouleau
+  deleteRouleau(rouleauId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/rouleaux/${rouleauId}`);
+  }
+
+  // ▶ Update complet (si nécessaire)
+updateImport(importData: ImportModel): Observable<ImportModel> {
+  return this.http.post<ImportModel>(`${this.apiUrl}`, importData); // ou PUT si ton backend supporte update par PUT
+}
+
 }

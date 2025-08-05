@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { Table } from 'primeng/table';
 import { ImportModel } from '../../models/import'; // assure-toi que ce fichier existe
+import { ImportService } from 'src/app/services/import.service';
 
 @Component({
     selector: 'app-import',
@@ -29,7 +30,7 @@ export class ImportComponent implements OnInit {
 
     constructor(
         private messageService: MessageService,
-        private router: Router
+        private router: Router , private importService  : ImportService
     ) {}
 
     ngOnInit(): void {
@@ -43,7 +44,7 @@ export class ImportComponent implements OnInit {
                 dateImport: new Date()
             }
         ];
-
+            this.getAllImports() ; 
         this.cols = [
             { field: 'numeroImport', header: 'N° Import' },
             { field: 'nomProduit', header: 'Produit' },
@@ -52,6 +53,15 @@ export class ImportComponent implements OnInit {
         ];
     }
 
+
+    getAllImports(){
+
+        this.importService.getAllImports().subscribe({
+            next: data => this.imports = data,
+            error: err => console.error('Erreur chargement imports:', err)
+          });
+          
+    }
     openNew() {
         this.importData = {
             numeroImport: '',
@@ -96,29 +106,72 @@ export class ImportComponent implements OnInit {
         this.selectedImports = [];
     }
 
+    // saveImport() {
+    //     this.submitted = true;
+    //     if (this.importData.numeroImport?.trim() && this.importData.nomProduit?.trim()) {
+    //         if (this.importData.id) {
+    //             const index = this.findIndexById(this.importData.id);
+    //             this.imports[index] = { ...this.importData };
+    //             this.messageService.add({ severity: 'success', summary: 'Mis à jour', detail: 'Import modifié', life: 3000 });
+    //         } else {
+    //             this.importData.id = this.createId();
+    //             this.imports.push({ ...this.importData });
+    //             this.messageService.add({ severity: 'success', summary: 'Créé', detail: 'Nouvel import ajouté', life: 3000 });
+    //         }
+    //         this.imports = [...this.imports];
+    //         this.importDialog = false;
+    //         this.importData = {
+    //             numeroImport: '',
+    //             nomProduit: '',
+    //             fournisseur: '',
+    //             dateImport: new Date()
+    //         };
+    //     }
+    // }
     saveImport() {
         this.submitted = true;
+      
         if (this.importData.numeroImport?.trim() && this.importData.nomProduit?.trim()) {
-            if (this.importData.id) {
-                const index = this.findIndexById(this.importData.id);
-                this.imports[index] = { ...this.importData };
+          if (this.importData.id) {
+            // ▶️ Update
+            this.importService.updateImport(this.importData).subscribe({
+              next: (updated) => {
+                const index = this.findIndexById(updated.id!);
+                this.imports[index] = updated;
                 this.messageService.add({ severity: 'success', summary: 'Mis à jour', detail: 'Import modifié', life: 3000 });
-            } else {
-                this.importData.id = this.createId();
-                this.imports.push({ ...this.importData });
+                this.afterSave();
+              },
+              error: err => {
+                this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Échec de la mise à jour', life: 3000 });
+              }
+            });
+          } else {
+            // ➕ Create
+            this.importService.createImport(this.importData).subscribe({
+              next: (created) => {
+                this.imports.push(created);
                 this.messageService.add({ severity: 'success', summary: 'Créé', detail: 'Nouvel import ajouté', life: 3000 });
-            }
-            this.imports = [...this.imports];
-            this.importDialog = false;
-            this.importData = {
-                numeroImport: '',
-                nomProduit: '',
-                fournisseur: '',
-                dateImport: new Date()
-            };
+                this.afterSave();
+              },
+              error: err => {
+                this.messageService.add({ severity: 'error', summary: 'Erreur', detail: 'Échec de la création', life: 3000 });
+              }
+            });
+          }
         }
-    }
-
+      }
+      afterSave() {
+        this.imports = [...this.imports]; // Forcer détection changement
+        this.importDialog = false;
+        this.importData = {
+          numeroImport: '',
+          nomProduit: '',
+          fournisseur: '',
+          dateImport: new Date()
+        };
+        this.submitted = false;
+      }
+            
     findIndexById(id: number): number {
         return this.imports.findIndex(i => i.id === id);
     }

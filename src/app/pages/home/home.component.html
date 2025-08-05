@@ -3,8 +3,8 @@
     <img src="assets/layout/images/bicapack.webp" alt="Logo Bicapack" class="logo" />
     <div class="user-box">
       <p-avatar icon="pi pi-user" shape="circle" styleClass="user-avatar"></p-avatar>
-      <span class="username">AMINE BELHEDI</span>
-      <button class="logout-btn">
+      <span class="username">{{ user?.firstname + ' ' + user?.lastname }}</span>
+      <button class="logout-btn" (click)="logout()">
         <i class="pi pi-sign-out"></i>
       </button>
     </div>
