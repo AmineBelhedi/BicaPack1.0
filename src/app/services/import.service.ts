@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpEventType } from '@angular/common/http';
+import { filter, map, Observable } from 'rxjs';
 import { ImportModel, RouleauImport } from '../models/import';
 import { environment } from 'src/environments/environment.prod';
 
@@ -36,6 +36,30 @@ export class ImportService {
   // ▶ Ajouter un rouleau à un import
   addRouleauToImport(importId: number, rouleau: RouleauImport): Observable<RouleauImport> {
     return this.http.post<RouleauImport>(`${this.apiUrl}/${importId}/rouleaux`, rouleau);
+  }
+  uploadFacture(importId: number, file: File): Observable<void> {
+    const form = new FormData();
+    form.append('file', file, file.name); // le nom du champ DOIT être "file"
+    return this.http.post<void>(`${this.apiUrl}/${importId}/fichier/upload`, form);
+  }
+
+  uploadFactureWithProgress(importId: number, file: File): Observable<number> {
+    const form = new FormData();
+    form.append('file', file, file.name);
+    return this.http.post(`${this.apiUrl}/${importId}/fichier/upload`, form, {
+      reportProgress: true,
+      observe: 'events'
+    }).pipe(
+      filter(evt => evt.type === HttpEventType.UploadProgress || evt.type === HttpEventType.Response),
+      map(evt => {
+        if (evt.type === HttpEventType.UploadProgress) {
+          const percent = evt.total ? Math.round((100 * evt.loaded) / evt.total) : 0;
+          return percent;
+        }
+        // Réponse finale (202/200) => 100%
+        return 100;
+      })
+    );
   }
 
   // ▶ Modifier un rouleau

@@ -1,9 +1,17 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CommandeModel, StatutCommande } from 'src/app/models/commande.model';
+import { CommandeDTO } from 'src/app/models/CommandeDTO';
 import { CommandeService } from 'src/app/services/commande.service';
 
-type PieceJointe = { name: string; size: number; type: string; url: string };
+type Allocation = {
+  id: number;
+  rouleauId: number;
+  poidsReserve: number;
+  etat: 'RESERVED' | 'CONSUMED' | 'CANCELED';
+  dateAllocation?: string;
+  dateConsommation?: string;
+  dateAnnulation?: string;
+};
 
 @Component({
   selector: 'app-detail-commande',
@@ -13,24 +21,16 @@ type PieceJointe = { name: string; size: number; type: string; url: string };
 export class DetailCommandeComponent implements OnInit {
   loading = true;
   notFound = false;
-  commande?: CommandeModel;
+  commande?: CommandeDTO;
 
-  // QR
+  // QR (optionnel : si tu utilises un composant QR, la valeur à encoder)
   qrValue = '';
 
-  // Pièces jointes (local front)
-  pieces: PieceJointe[] = [];
+  // Allocations (si exposées par l’API)
+  allocations: Allocation[] = [];
 
-  // Rouleaux utilisés
-  rouleaux: string[] = [];
-
-  // options de statut (sans "Brouillon")
-  statutOptions = [
-    { label: 'Confirmée',     value: 'Confirmée'     as StatutCommande },
-    { label: 'En production', value: 'En production' as StatutCommande },
-    { label: 'Livrée',        value: 'Livrée'        as StatutCommande },
-    { label: 'Annulée',       value: 'Annulée'       as StatutCommande }
-  ];
+  // Paramètre métier (si tu déclenches le calcul poids depuis le front)
+  grammage = 80; // g/m² (exemple)
 
   constructor(
     private route: ActivatedRoute,
@@ -42,21 +42,17 @@ export class DetailCommandeComponent implements OnInit {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (!id) { this.notFound = true; this.loading = false; return; }
 
-    this.svc.getAll().subscribe({
-      next: list => {
-        const found = list.find(c => c.id === id);
-        if (found) {
-          this.commande = { ...found, dateCommande: new Date(found.dateCommande) };
+    this.svc.getById(id).subscribe({
+      next: (cmd) => {
+        this.commande = cmd;
+        this.qrValue = `${location.origin}/pages/detail-commande/${id}`;
 
-          // URL encodée dans le QR (scannable)
-          this.qrValue = `${location.origin}/pages/detail-commande/${id}`;
+        // Charger les allocations si endpoint dispo
+        this.svc.getAllocations?.(id).subscribe({
+          next: (rows) => (this.allocations = rows as any),
+          error: () => {} // silencieux si pas d’allocations encore
+        });
 
-          // Charger des données annexes si le modèle les contient déjà
-          this.rouleaux = (found as any).rouleaux ?? [];
-          this.pieces = (found as any).piecesJointes ?? [];
-        } else {
-          this.notFound = true;
-        }
         this.loading = false;
       },
       error: () => { this.notFound = true; this.loading = false; }
@@ -65,67 +61,58 @@ export class DetailCommandeComponent implements OnInit {
 
   backToList() { this.router.navigate(['/pages/commandes']); }
 
-  // Statut
-  changeStatut(newStatut: StatutCommande) {
-    if (!this.commande) return;
-    const updated: CommandeModel = { ...this.commande, statut: newStatut, rouleaux: this.rouleaux as any };
-    this.svc.update(updated).subscribe(res => this.commande = res);
+  /* --------- Actions métier optionnelles --------- */
+
+  calculerPoids() {
+    if (!this.commande?.id) return;
+    this.svc.calculPoidsNecessaire?.(this.commande.id, this.grammage).subscribe({
+      next: () => this.reload(),
+      error: () => {}
+    });
   }
 
-  // Copie du N° commande
-  async copyNumero() {
-    if (!this.commande?.numeroCommande) return;
-    try { await navigator.clipboard.writeText(this.commande.numeroCommande); } catch {}
+  reserver() {
+    if (!this.commande?.id) return;
+    this.svc.reserver?.(this.commande.id).subscribe({
+      next: () => { this.reloadAllocations(); },
+      error: () => {}
+    });
   }
 
-  // Pièces jointes (upload custom)
-  onUploadPieces(event: any) {
-    const files: File[] = event.files || [];
-    for (const f of files) {
-      const url = URL.createObjectURL(f);
-      this.pieces.push({ name: f.name, size: f.size, type: f.type, url });
-    }
-    // Nettoie la file d'attente visuelle
-    if (event.options?.clear) event.options.clear();
+  consommer() {
+    if (!this.commande?.id) return;
+    this.svc.consommer?.(this.commande.id).subscribe({
+      next: () => { this.reloadAllocations(); this.reload(); },
+      error: () => {}
+    });
   }
 
-  downloadPiece(p: PieceJointe) {
-    const a = document.createElement('a');
-    a.href = p.url;
-    a.download = p.name;
-    a.click();
+  annulerReservations() {
+    if (!this.commande?.id) return;
+    this.svc.annulerReservation?.(this.commande.id).subscribe({
+      next: () => { this.reloadAllocations(); this.reload(); },
+      error: () => {}
+    });
   }
 
-  removePiece(i: number) {
-    URL.revokeObjectURL(this.pieces[i].url);
-    this.pieces.splice(i, 1);
+  /* --------- Helpers --------- */
+
+  private reload() {
+    if (!this.commande?.id) return;
+    this.svc.getById(this.commande.id).subscribe({
+      next: (cmd) => (this.commande = cmd)
+    });
   }
 
-  // Rouleaux: persiste côté commande
-  saveRouleaux() {
-    if (!this.commande) return;
-    const updated: any = { ...this.commande, rouleaux: this.rouleaux, piecesJointes: this.pieces };
-    this.svc.update(updated).subscribe(res => this.commande = res);
+  private reloadAllocations() {
+    if (!this.commande?.id || !this.svc.getAllocations) return;
+    this.svc.getAllocations(this.commande.id).subscribe({
+      next: (rows) => (this.allocations = rows as any)
+    });
   }
-  saveAll() {
-  if (!this.commande) return;
-  const updated: any = {
-    ...this.commande,
-    // assure un Date correct
-    dateCommande: new Date(this.commande.dateCommande),
-    rouleaux: this.rouleaux,
-    piecesJointes: this.pieces
-  };
-  this.svc.update(updated).subscribe(res => this.commande = res);
-}
 
-  getSeverity(statut?: StatutCommande) {
-    switch (statut) {
-      case 'Livrée':        return 'success';
-      case 'Confirmée':     return 'info';
-      case 'En production': return 'warning';
-      case 'Annulée':       return 'danger';
-      default:              return 'secondary';
-    }
+  // petite utilité pour formater des nombres
+  n(v?: number, d = 2) {
+    return v == null ? '—' : v.toFixed(d);
   }
 }

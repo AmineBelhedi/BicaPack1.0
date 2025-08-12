@@ -1,8 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { ImportService } from 'src/app/services/import.service';
 import { ImportModel, RouleauImport } from 'src/app/models/import';
+import { FileUpload, FileUploadHandlerEvent } from 'primeng/fileupload';
 
 @Component({
   selector: 'app-import-details',
@@ -13,7 +14,10 @@ import { ImportModel, RouleauImport } from 'src/app/models/import';
 export class ImportDetailsComponent implements OnInit {
 
   importId!: number;
+  uploading = false;
+  uploadProgress: number | null = null;
 
+  @ViewChild('factureUpload') factureUpload!: FileUpload;
   importData: ImportModel = {
     numeroImport: '',
     fournisseur: '',
@@ -60,12 +64,38 @@ export class ImportDetailsComponent implements OnInit {
     this.loadAll();
   }
 
+  prixTotalImport = 0;
+
+  private toNumber(v: any, def = 0): number {
+    const n = Number(v);
+    return Number.isFinite(n) ? n : def;
+  }
+  
+  getPrixTotal(): void {
+    const list = this.importData?.rouleaux ?? [];
+    this.prixTotalImport = list.reduce((sum, item) => {
+      const prix = this.toNumber(item?.prix);
+      const poidsKg = this.toNumber(item?.poids) / 1000; // si poids est en grammes
+      return sum + (prix * poidsKg);
+    }, 0);
+    // Optionnel: arrondir à 3 décimales
+    this.prixTotalImport = Math.round(this.prixTotalImport * 1000) / 1000;
+  }
   loadAll(): void {
     this.loading = true;
 
     // 1) Charger l'entête
     this.importService.getImportById(this.importId).subscribe({
       next: (imp) => {
+
+        const list = imp?.rouleaux ?? [];
+    this.prixTotalImport = list.reduce((sum, item) => {
+      const prix = this.toNumber(item?.prix);
+      const poidsKg = this.toNumber(item?.poids) / 1000; // si poids est en grammes
+      return sum + (prix * poidsKg);
+    }, 0);
+    // Optionnel: arrondir à 3 décimales
+    this.prixTotalImport = Math.round(this.prixTotalImport * 1000) / 1000;
         // si back renvoie yyyy-MM-dd, adapter en Date pour p-calendar
         // APRES
       if (imp.dateImport) {
@@ -75,27 +105,73 @@ export class ImportDetailsComponent implements OnInit {
           dateImport: raw.slice(0, 10)                // "YYYY-MM-DD"
         };
       } else {
-        this.importData = imp;
-      }
 
+        this.importData = imp;
+
+       
+      }
+      
       },
       error: () => this.message.add({ severity: 'error', summary: 'Erreur', detail: 'Chargement entête' })
     });
 
     // 2) Charger les rouleaux
-    this.importService.listRouleaux(this.importId).subscribe({
-      next: (rows) => {
-        this.rouleaux = rows || [];
-        this.recalculateTotals();
-        this.loading = false;
+    // this.importService.listRouleaux(this.importId).subscribe({
+    //   next: (rows) => {
+    //     this.rouleaux = rows || [];
+    //     this.recalculateTotals();
+    //     this.loading = false;
+    //   },
+    //   error: () => {
+    //     this.message.add({ severity: 'error', summary: 'Erreur', detail: 'Chargement rouleaux' });
+    //     this.loading = false;
+    //   }
+    // });
+  }
+  
+  onUploadFacture(evt: FileUploadHandlerEvent): void {
+    const file = evt.files?.[0];
+    if (!file) {
+      this.message.add({severity: 'warn', summary: 'Aucun fichier', detail: 'Sélectionnez un PDF.'});
+      return;
+    }
+
+    this.uploading = true;
+    this.uploadProgress = null;
+
+    // 👉 Choisis l’une des deux méthodes : simple ou progression
+
+    // --- Méthode simple ---
+    this.importService.uploadFacture(this.importId, file).subscribe({
+      next: () => {
+        this.message.add({severity: 'success', summary: 'Téléversé', detail: 'Facture envoyée.'});
+        this.factureUpload.clear();
+        this.uploading = false;
       },
-      error: () => {
-        this.message.add({ severity: 'error', summary: 'Erreur', detail: 'Chargement rouleaux' });
-        this.loading = false;
+      error: (err) => {
+        this.message.add({severity: 'error', summary: 'Erreur', detail: 'Échec de l’upload.'});
+        console.error(err);
+        this.uploading = false;
       }
     });
-  }
 
+    // --- OU: Méthode avec progression ---
+    // this.importService.uploadFactureWithProgress(this.importId, file).subscribe({
+    //   next: (percent) => {
+    //     this.uploadProgress = percent;
+    //     if (percent === 100) {
+    //       this.message.add({severity: 'success', summary: 'Téléversé', detail: 'Facture envoyée.'});
+    //       this.factureUpload.clear();
+    //       this.uploading = false;
+    //     }
+    //   },
+    //   error: (err) => {
+    //     this.message.add({severity: 'error', summary: 'Erreur', detail: 'Échec de l’upload.'});
+    //     console.error(err);
+    //     this.uploading = false;
+    //   }
+    // });
+  }
   // ====== ENTÊTE ======
 saveImportHeader(): void {
   // Normaliser la date en string 'YYYY-MM-DD'
@@ -136,11 +212,34 @@ saveImportHeader(): void {
 }
 
 
-  onFileUpload(event: any) {
-    const file: File = event.files?.[0];
-    if (!file) return;
-    // à brancher quand tu ajoutes l’endpoint upload côté back
-    this.message.add({ severity: 'info', summary: 'Upload', detail: 'Endpoint upload à brancher côté back' });
+  // onFileUpload(event: any) {
+  //   const file: File = event.files?.[0];
+  //   if (!file) return;
+  //   // à brancher quand tu ajoutes l’endpoint upload côté back
+  //   this.message.add({ severity: 'info', summary: 'Upload', detail: 'Endpoint upload à brancher côté back' });
+  // }
+  onFileUpload(evt: FileUploadHandlerEvent, uploader: FileUpload): void {
+    const file = evt.files?.[0];
+    if (!file) {
+      this.message.add({severity:'warn', summary:'Aucun fichier', detail:'Sélectionnez un PDF.'});
+      return;
+    }
+
+    this.uploading = true;
+    this.importService.uploadFacture(this.importId, file).subscribe({
+      next: () => {
+        this.message.add({severity:'success', summary:'Téléversé', detail:'Facture envoyée.'});
+        uploader.clear();      
+           // réinitialiser le bouton
+           this.loadAll();
+        this.uploading = false;
+        // éventuellement: this.reloadDocuments();
+      },
+      error: () => {
+        this.message.add({severity:'error', summary:'Erreur', detail:'Échec de l’upload.'});
+        this.uploading = false;
+      }
+    });
   }
 
   // ====== ROULEAUX ======
@@ -182,13 +281,19 @@ saveImportHeader(): void {
         laize: Number(this.newRouleau.laize) || 0,
         poids: Number(this.newRouleau.poids) || 0,
         valide: false,
-        disponible: true
+        disponible: true,
+        numeroInterne: String(this.newRouleau.numeroInterne),
+        description:String(this.newRouleau.description),
+        code: String(this.newRouleau.code),
+        prix: Number(this.newRouleau.prix), 
+        grammage : Number(this.newRouleau.grammage)
       };
       this.importService.addRouleauToImport(this.importId, body).subscribe({
         next: (saved) => {
           this.rouleaux.unshift(saved);
           this.resetNewRouleau();
           this.message.add({ severity: 'success', summary: 'OK', detail: 'Rouleau ajouté' });
+          this.loadAll();
           this.recalculateTotals();
         },
         error: () => this.message.add({ severity: 'error', summary: 'Erreur', detail: 'Échec ajout' })
@@ -209,7 +314,12 @@ saveImportHeader(): void {
       laize: Number(this.rouleauData.laize) || 0,
       poids: Number(this.rouleauData.poids) || 0,
       valide: this.rouleauData.valide ?? false,
-      disponible: this.rouleauData.disponible ?? true
+      disponible: this.rouleauData.disponible ?? true,
+      numeroInterne: String(this.newRouleau.numeroInterne),
+      description:String(this.newRouleau.description),
+      code: String(this.newRouleau.code),
+      prix: Number(this.newRouleau.prix), 
+      grammage : Number(this.newRouleau.grammage)
     };
 
     const obs = body.id
@@ -227,6 +337,7 @@ saveImportHeader(): void {
         this.rouleauDialog = false;
         this.rouleauData = {};
         this.recalculateTotals();
+        this.loadAll();
         this.message.add({ severity: 'success', summary: 'OK', detail: 'Rouleau enregistré' });
       },
       error: () => this.message.add({ severity: 'error', summary: 'Erreur', detail: 'Échec enregistrement' })
@@ -242,15 +353,22 @@ saveImportHeader(): void {
     if (!this.rouleauToDelete?.id) return;
     this.importService.deleteRouleau(this.rouleauToDelete.id).subscribe({
       next: () => {
-        this.rouleaux = this.rouleaux.filter(x => x.id !== this.rouleauToDelete!.id);
+        if (this.importData?.rouleaux) {
+          this.importData.rouleaux = this.importData.rouleaux.filter(
+            x => x.id !== this.rouleauToDelete!.id
+          );
+        }
+  
         this.deleteRouleauDialog = false;
         this.rouleauToDelete = null;
-        this.recalculateTotals();
+        this.getPrixTotal(); // recalcul après suppression
         this.message.add({ severity: 'success', summary: 'Supprimé', detail: 'Rouleau supprimé' });
       },
-      error: () => this.message.add({ severity: 'error', summary: 'Erreur', detail: 'Suppression échouée' })
+      error: () =>
+        this.message.add({ severity: 'error', summary: 'Erreur', detail: 'Suppression échouée' })
     });
   }
+  
 
   private resetNewRouleau() {
     this.newRouleau = {};

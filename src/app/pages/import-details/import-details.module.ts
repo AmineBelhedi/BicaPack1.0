@@ -14,6 +14,9 @@ import { DropdownModule } from 'primeng/dropdown';
 import { TagModule } from 'primeng/tag';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { MultiSelectModule } from 'primeng/multiselect';
+import { ToastModule } from 'primeng/toast';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { CalendarModule } from 'primeng/calendar';
 
 
 @NgModule({
@@ -29,8 +32,11 @@ import { MultiSelectModule } from 'primeng/multiselect';
     ]),
     TableModule,
     ButtonModule,
+    ToastModule, 
     CardModule,
+    CalendarModule, 
     InputTextModule,
+    InputNumberModule, 
     DropdownModule,
     TagModule,
     InputTextareaModule,

@@ -2,10 +2,19 @@ export interface RouleauImport {
   id?: number;
   numero: string;
   metrage: number;
+  numeroInterne : string ; 
+  description : string ; 
+  grammage : number ; 
+  code : string ; 
+  prix : number ; 
   poids: number;
   laize: number;
   valide: boolean;
   disponible: boolean;
+
+   partiel ?: boolean;
+ status  ?: boolean;
+  reserved  ?: boolean;
 }
 
 export interface ImportModel {
@@ -14,6 +23,7 @@ export interface ImportModel {
   dateImport: string | Date  ;
   fournisseur: string;
   nomProduit: string;
+  
   totalMetrage?: number;
   totalRouleaux?: number;
   prix?: number;

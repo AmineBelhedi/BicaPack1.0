@@ -1,105 +1,53 @@
-import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { delay } from 'rxjs/operators';
-import { CommandeModel } from '../models/commande.model';
+import { Injectable, inject } from '@angular/core';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Observable, forkJoin } from 'rxjs';
+import { CommandeDTO } from '../models/CommandeDTO';
+import { environment } from 'src/environments/environment.prod';
 
-const LS_KEY = 'bicapack_commandes_v1';
+export interface RouleauCommandeDTO {
+  id: number;
+  commandeId: number;
+  rouleauId: number;
+  poidsReserve: number;
+  metrageReserve?: number;
+  etat: 'RESERVED' | 'CONSUMED' | 'CANCELED';
+  dateAllocation?: string;
+  dateConsommation?: string;
+  dateAnnulation?: string;
+}
 
 @Injectable({ providedIn: 'root' })
 export class CommandeService {
+  private http = inject(HttpClient);
+  private baseUrl = `${environment.apiUrl}commandes`; // ajuste si besoin
 
-  private load(): CommandeModel[] {
-    try {
-      const raw = localStorage.getItem(LS_KEY);
-      if (!raw) return this.seed();
-      const parsed = JSON.parse(raw) as CommandeModel[];
-      // assure un Date object en lecture
-      return parsed.map(c => ({ ...c, dateCommande: new Date(c.dateCommande) }));
-    } catch {
-      return this.seed();
-    }
+  /* CRUD */
+  getAll(): Observable<CommandeDTO[]> { return this.http.get<CommandeDTO[]>(this.baseUrl); }
+  getById(id: number): Observable<CommandeDTO> { return this.http.get<CommandeDTO>(`${this.baseUrl}/${id}`); }
+  create(payload: CommandeDTO): Observable<CommandeDTO> { return this.http.post<CommandeDTO>(this.baseUrl, payload); }
+  update(payload: CommandeDTO): Observable<CommandeDTO> { return this.http.put<CommandeDTO>(`${this.baseUrl}/${payload.id}`, payload); }
+  delete(id: number): Observable<void> { return this.http.delete<void>(`${this.baseUrl}/${id}`); }
+  deleteMany(ids: number[]): Observable<void[]> { return forkJoin(ids.map(id => this.delete(id))); }
+
+  /* Métier */
+  calculPoidsNecessaire(commandeId: number, grammage: number): Observable<void> {
+    const params = new HttpParams().set('grammage', grammage);
+    return this.http.post<void>(`${this.baseUrl}/${commandeId}/calcul-poids`, null, { params });
   }
 
-  private persist(list: CommandeModel[]) {
-    localStorage.setItem(LS_KEY, JSON.stringify(list));
+  reserver(commandeId: number): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${commandeId}/reserver`, null);
   }
 
-  // Données de démo -> sans "client", avec un statut valide
-  private seed(): CommandeModel[] {
-    const demo: CommandeModel[] = [
-      {
-        id: 1,
-        numeroCommande: 'CMD-2025-001',
-        nomCommande: 'Boîtes carton Type A',
-        quantite: 1200,
-        dateCommande: new Date(),
-        statut: 'Confirmée',
-        imageUrl: ''
-      },
-      {
-        id: 2,
-        numeroCommande: 'CMD-2025-002',
-        nomCommande: 'Boîtes luxe dorure',
-        quantite: 500,
-        dateCommande: new Date(),
-        statut: 'En production',
-        imageUrl: ''
-      }
-    ];
-    this.persist(demo);
-    return demo;
+  consommer(commandeId: number): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${commandeId}/consommer`, null);
   }
 
-  /* —— CRUD —— */
-
-  getAll(): Observable<CommandeModel[]> {
-    return of(this.load()).pipe(delay(120));
+  annulerReservation(commandeId: number): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${commandeId}/annuler-reservation`, null);
   }
 
-  create(payload: CommandeModel): Observable<CommandeModel> {
-    const list = this.load();
-
-    // Défauts si besoin (au cas où)
-    const created: CommandeModel = {
-      id: this.nextId(list),
-      numeroCommande: payload.numeroCommande?.trim() || `CMD-${Date.now()}`,
-      nomCommande: payload.nomCommande?.trim() || 'Commande',
-      quantite: payload.quantite ?? 0,
-      dateCommande: payload.dateCommande ? new Date(payload.dateCommande) : new Date(),
-      statut: payload.statut || 'Confirmée',
-      imageUrl: payload.imageUrl || '',
-      // conserve les champs optionnels si tu les utilises
-      ...(payload as any).rouleaux && { rouleaux: (payload as any).rouleaux },
-      ...(payload as any).piecesJointes && { piecesJointes: (payload as any).piecesJointes }
-    };
-
-    const next = [created, ...list];
-    this.persist(next);
-    return of(created).pipe(delay(120));
-  }
-
-  update(payload: CommandeModel): Observable<CommandeModel> {
-    const list = this.load();
-    const next = list.map(c => (c.id === payload.id ? { ...c, ...payload } : c));
-    this.persist(next);
-    const updated = next.find(x => x.id === payload.id)!;
-    return of(updated).pipe(delay(120));
-  }
-
-  delete(id: number): Observable<void> {
-    const list = this.load().filter(c => c.id !== id);
-    this.persist(list);
-    return of(void 0).pipe(delay(120));
-  }
-
-  deleteMany(ids: number[]): Observable<void> {
-    const set = new Set(ids);
-    const list = this.load().filter(c => !set.has(c.id!));
-    this.persist(list);
-    return of(void 0).pipe(delay(120));
-  }
-
-  private nextId(all: CommandeModel[]): number {
-    return (all.reduce((m, c) => Math.max(m, c.id || 0), 0) || 0) + 1;
+  getAllocations(commandeId: number): Observable<RouleauCommandeDTO[]> {
+    return this.http.get<RouleauCommandeDTO[]>(`${this.baseUrl}/${commandeId}/allocations`);
   }
 }

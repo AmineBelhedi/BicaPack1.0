@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { MessageService } from 'primeng/api';
 import { Table } from 'primeng/table';
-import { CommandeModel, StatutCommande } from 'src/app/models/commande.model';
+import { CommandeDTO } from 'src/app/models/CommandeDTO';
 import { CommandeService } from 'src/app/services/commande.service';
 
 @Component({
@@ -11,8 +11,8 @@ import { CommandeService } from 'src/app/services/commande.service';
   providers: [MessageService]
 })
 export class CommandeComponent implements OnInit {
-  rows: CommandeModel[] = [];
-  selected: CommandeModel[] = [];
+  rows: CommandeDTO[] = [];
+  selected: CommandeDTO[] = [];
   rowsPerPageOptions = [10, 20, 30];
 
   // Dialogs
@@ -20,29 +20,18 @@ export class CommandeComponent implements OnInit {
   deleteDialog = false;
   deleteManyDialog = false;
 
-  // Form (sans "Brouillon" : défaut = "Confirmée")
-  form: CommandeModel = {
+  // Form (adapté à CommandeDTO)
+  form: CommandeDTO = {
     numeroCommande: '',
-    nomCommande: '',
     quantite: 0,
-    dateCommande: new Date(),
-    statut: 'Confirmée',
-    imageUrl: ''
+    largeur: 0,
+    longueur: 0,
+    epaisseur: 0,
+    modeleName: ''
   };
 
-  // Fichier sélectionné (nom)
-  selectedFileName: string | null = null;
-
   // Pour confirmation Delete 1
-  current!: CommandeModel;
-
-  // ⚠️ "Brouillon" supprimé de la liste
-  statutOptions = [
-    { label: 'Confirmée',     value: 'Confirmée'     as StatutCommande },
-    { label: 'En production', value: 'En production' as StatutCommande },
-    { label: 'Livrée',        value: 'Livrée'        as StatutCommande },
-    { label: 'Annulée',       value: 'Annulée'       as StatutCommande }
-  ];
+  current!: CommandeDTO;
 
   constructor(
     private svc: CommandeService,
@@ -55,7 +44,7 @@ export class CommandeComponent implements OnInit {
 
   getAll() {
     this.svc.getAll().subscribe({
-      next: data => this.rows = data,
+      next: data => (this.rows = data),
       error: err => console.error('Erreur chargement commandes:', err)
     });
   }
@@ -64,18 +53,17 @@ export class CommandeComponent implements OnInit {
   openNew() {
     this.form = {
       numeroCommande: '',
-      nomCommande: '',
       quantite: 0,
-      dateCommande: new Date(),
-      // défaut sans "Brouillon"
-      statut: 'Confirmée',
-      imageUrl: ''
+      largeur: 0,
+      longueur: 0,
+      epaisseur: 0,
+      modeleName: ''
     };
-    this.selectedFileName = null;
     this.dialogVisible = true;
   }
 
   deleteSelected() {
+    if (!this.selected?.length) return;
     this.deleteManyDialog = true;
   }
 
@@ -88,7 +76,8 @@ export class CommandeComponent implements OnInit {
         this.selected = [];
         this.toast.add({ severity: 'success', summary: 'Supprimées', detail: 'Commandes supprimées', life: 3000 });
         this.deleteManyDialog = false;
-      }
+      },
+      error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Suppression multiple échouée', life: 3000 })
     });
   }
 
@@ -97,13 +86,12 @@ export class CommandeComponent implements OnInit {
     table.filterGlobal((event.target as HTMLInputElement).value, 'contains');
   }
 
-  edit(item: CommandeModel) {
-    this.form = { ...item, dateCommande: new Date(item.dateCommande) };
-    this.selectedFileName = null;
+  edit(item: CommandeDTO) {
+    this.form = { ...item };
     this.dialogVisible = true;
   }
 
-  askDelete(_: Event, item: CommandeModel) {
+  askDelete(_: Event, item: CommandeDTO) {
     this.current = { ...item };
     this.deleteDialog = true;
   }
@@ -115,14 +103,19 @@ export class CommandeComponent implements OnInit {
         this.rows = this.rows.filter(r => r.id !== this.current.id);
         this.toast.add({ severity: 'success', summary: 'Supprimée', detail: 'Commande supprimée', life: 3000 });
         this.deleteDialog = false;
-      }
+      },
+      error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Suppression échouée', life: 3000 })
     });
   }
 
   /* ——— CRUD ——— */
   save() {
-    if (!this.form.numeroCommande?.trim() || !this.form.nomCommande?.trim()) {
-      this.toast.add({ severity: 'warn', summary: 'Champs requis', detail: 'N° commande et Nom commande', life: 2500 });
+    if (!this.form.numeroCommande?.trim()) {
+      this.toast.add({ severity: 'warn', summary: 'Champs requis', detail: 'N° commande obligatoire', life: 2500 });
+      return;
+    }
+    if (this.form.quantite <= 0 || this.form.largeur <= 0 || this.form.longueur <= 0 || this.form.epaisseur < 0) {
+      this.toast.add({ severity: 'warn', summary: 'Vérifier les valeurs', detail: 'Quantité et dimensions', life: 2500 });
       return;
     }
 
@@ -134,7 +127,8 @@ export class CommandeComponent implements OnInit {
           this.rows = [...this.rows];
           this.toast.add({ severity: 'success', summary: 'Mis à jour', detail: 'Commande modifiée', life: 2500 });
           this.dialogVisible = false;
-        }
+        },
+        error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Mise à jour échouée', life: 3000 })
       });
     } else {
       this.svc.create(this.form).subscribe({
@@ -142,32 +136,9 @@ export class CommandeComponent implements OnInit {
           this.rows = [created, ...this.rows];
           this.toast.add({ severity: 'success', summary: 'Créée', detail: 'Nouvelle commande ajoutée', life: 2500 });
           this.dialogVisible = false;
-        }
+        },
+        error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Création échouée', life: 3000 })
       });
-    }
-  }
-
-  /* ——— Image upload (base64) ——— */
-  onImageSelected(evt: Event) {
-    const input = evt.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
-
-    this.selectedFileName = file.name;
-
-    const reader = new FileReader();
-    reader.onload = () => (this.form.imageUrl = reader.result as string);
-    reader.readAsDataURL(file);
-  }
-
-  // Accepte undefined et renvoie une sévérité neutre par défaut
-  getSeverity(statut?: StatutCommande) {
-    switch (statut) {
-      case 'Livrée':        return 'success';
-      case 'Confirmée':     return 'info';
-      case 'En production': return 'warning';
-      case 'Annulée':       return 'danger';
-      default:              return 'secondary';
     }
   }
 }

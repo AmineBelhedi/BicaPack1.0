@@ -2,142 +2,127 @@
   <div class="flex justify-content-between align-items-center mb-4">
     <div>
       <h2 class="m-0">Commande {{ c.numeroCommande }}</h2>
-      <small class="text-600">Dernière mise à jour : {{ c.dateCommande | date:'dd/MM/yyyy' }}</small>
+      <small class="text-600">Modèle : {{ c.modeleName || '—' }}</small>
     </div>
-    <p-tag [value]="c.statut || '—'" [severity]="getSeverity(c.statut)"></p-tag>
+    <!-- plus de statut -->
   </div>
-
+  <p-toast></p-toast>
   <div class="grid">
-    <!-- Image -->
-    <div class="col-12 md:col-4">
-      <div class="surface-card border-1 surface-border border-round p-3 flex align-items-center justify-content-center" style="min-height:220px">
-        <ng-container *ngIf="c.imageUrl; else noimg">
-          <p-image [src]="c.imageUrl" [preview]="true" alt="image commande"></p-image>
-        </ng-container>
-        <ng-template #noimg>
-          <span class="text-500">Pas d'image</span>
-        </ng-template>
+    <!-- Bloc infos -->
+    <div class="col-12 md:col-8">
+      <div class="surface-card border-1 surface-border border-round p-3">
+        <div class="grid formgrid p-fluid">
+          <div class="col-12 md:col-6">
+            <label class="text-600 lbl">N° commande</label>
+            <div class="flex align-items-center gap-2">
+              <span class="font-semibold">{{ c.numeroCommande }}</span>
+              <button pButton type="button"
+                      icon="pi pi-copy"
+                      class="p-button-text p-button-plain p-button-sm"
+                      (click)="copyNumero()" pTooltip="Copier" tooltipPosition="top"></button>
+            </div>
+          </div>
+
+          <div class="col-12 md:col-6">
+            <label class="text-600 lbl">Modèle</label>
+            <div class="font-semibold">{{ c.modeleName || '—' }}</div>
+          </div>
+
+          <div class="col-12 md:col-4">
+            <label class="text-600 lbl">Quantité</label>
+            <div class="font-semibold">{{ c.quantite }}</div>
+          </div>
+
+          <div class="col-12 md:col-4">
+            <label class="text-600 lbl">Largeur (mm)</label>
+            <div class="font-semibold">{{ c.largeur }}</div>
+          </div>
+
+          <div class="col-12 md:col-4">
+            <label class="text-600 lbl">Longueur (mm)</label>
+            <div class="font-semibold">{{ c.longueur }}</div>
+          </div>
+
+          <div class="col-12 md:col-4">
+            <label class="text-600 lbl">Épaisseur</label>
+            <div class="font-semibold">{{ c.epaisseur }}</div>
+          </div>
+
+          <!-- Affichages poids si exposés par l’API -->
+          <div class="col-12 md:col-4" *ngIf="c.poidsNecessaire != null">
+            <label class="text-600 lbl">Poids nécessaire (kg)</label>
+            <div class="font-semibold">{{ n(c.poidsNecessaire) }}</div>
+          </div>
+          <div class="col-12 md:col-4" *ngIf="c.poidsReserve != null">
+            <label class="text-600 lbl">Réservé (kg)</label>
+            <div class="font-semibold">{{ n(c.poidsReserve) }}</div>
+          </div>
+          <div class="col-12 md:col-4" *ngIf="c.poidsConsomme != null">
+            <label class="text-600 lbl">Consommé (kg)</label>
+            <div class="font-semibold">{{ n(c.poidsConsomme) }}</div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Infos -->
-    <div class="col-12 md:col-8">
-      <div class="grid formgrid p-fluid">
-        <div class="col-12 md:col-6">
-          <label class="text-600 lbl">N° commande</label>
-          <div class="flex align-items-center gap-2">
-            <span class="font-semibold">{{ c.numeroCommande }}</span>
-            <button pButton type="button"
-                    icon="pi pi-copy"
-                    class="p-button-text p-button-plain p-button-sm"
-                    (click)="copyNumero()" pTooltip="Copier" tooltipPosition="top"></button>
+    <!-- Bloc actions + QR -->
+    <div class="col-12 md:col-4">
+      <div class="surface-card border-1 surface-border border-round p-3">
+        <h4 class="m-0 mb-3">Actions</h4>
+
+        <div class="flex flex-column gap-2">
+          <div class="p-inputgroup">
+            <span class="p-inputgroup-addon">g/m²</span>
+            <input pInputText type="number" [(ngModel)]="grammage" min="1" />
+            <button pButton label="Calculer" icon="pi pi-calculator" (click)="calculerPoids()"></button>
+          </div>
+
+          <div class="flex flex-wrap gap-2">
+            <button pButton label="Réserver" icon="pi pi-lock" class="p-button-info" (click)="reserver()"></button>
+            <button pButton label="Consommer" icon="pi pi-check-circle" class="p-button-success" (click)="consommer()"></button>
+            <button pButton label="Annuler réservations" icon="pi pi-times-circle" class="p-button-danger" (click)="annulerReservations()"></button>
           </div>
         </div>
 
-        <div class="col-12 md:col-6">
-          <label class="text-600 lbl">Nom commande</label>
-          <div class="font-semibold">{{ c.nomCommande }}</div>
-        </div>
-
-        <div class="col-12 md:col-6">
-          <label class="text-600 lbl">Quantité</label>
-          <div class="font-semibold">{{ c.quantite }}</div>
-        </div>
-
-        <div class="col-12 md:col-6">
-          <label class="text-600 lbl">Date</label>
-          <div class="font-semibold">{{ c.dateCommande | date:'dd/MM/yyyy' }}</div>
-        </div>
-       
-        <div class="col-12 md:col-6">
-          <label class="text-600 lbl">Statut</label>
-          <p-dropdown
-            [options]="statutOptions"
-            optionLabel="label"
-            optionValue="value"
-            [ngModel]="c.statut"
-            (onChange)="changeStatut($event.value)"
-            appendTo="body"
-            [style]="{width:'240px'}">
-          </p-dropdown>
+        <div class="mt-4">
+          <h5 class="m-0 mb-2">QR Code</h5>
+          <!-- Affichage simple de l’URL ; si tu as ngx-qrcode, décommente : -->
+          <!-- <qrcode [qrdata]="qrValue" [width]="180" [errorCorrectionLevel]="'M'"></qrcode> -->
+          <small class="text-600 mt-2 text-center break-all block">{{ qrValue }}</small>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="grid mt-4">
-    <!-- QR code -->
-    <div class="col-12 md:col-4">
-      <div class="surface-card border-1 surface-border border-round p-3 flex flex-column align-items-center">
-        <h4 class="m-0 mb-3">QR Code</h4>
-        <qrcode [qrdata]="qrValue" [width]="180" [errorCorrectionLevel]="'M'"></qrcode>
-        <small class="text-600 mt-2 text-center break-all">{{ qrValue }}</small>
-      </div>
+  <!-- Allocations (si endpoint disponible) -->
+  <div class="surface-card border-1 surface-border border-round p-3 mt-4">
+    <div class="flex justify-content-between align-items-center mb-3">
+      <h4 class="m-0">Allocations (Rouleaux réservés)</h4>
     </div>
 
-    <!-- Pièces jointes -->
-    <div class="col-12 md:col-4">
-      <div class="surface-card border-1 surface-border border-round p-3">
-        <h4 class="m-0 mb-3">Pièces jointes</h4>
-
-        <p-fileUpload
-          name="pieces"
-          mode="advanced"
-          chooseLabel="Ajouter des fichiers"
-          [customUpload]="true"
-          (uploadHandler)="onUploadPieces($event)"
-          [auto]="true"
-          [showUploadButton]="false"
-          [showCancelButton]="false"
-          [multiple]="true"
-          accept=".pdf,.png,.jpg,.jpeg">
-        </p-fileUpload>
-
-        <ul class="mt-3 list-none p-0" *ngIf="pieces.length; else nofiles">
-          <li *ngFor="let p of pieces; let i = index" class="flex align-items-center justify-content-between py-2 border-bottom-1 surface-border">
-            <div class="flex align-items-center gap-2">
-              <i class="pi pi-paperclip"></i>
-              <a [href]="p.url" [download]="p.name">{{ p.name }}</a>
-              <small class="text-600">({{ p.size | number }} o)</small>
-            </div>
-            <div class="flex gap-2">
-              <button pButton icon="pi pi-download" class="p-button-rounded p-button-text p-button-sm" (click)="downloadPiece(p)"></button>
-              <button pButton icon="pi pi-times" class="p-button-rounded p-button-text p-button-danger p-button-sm" (click)="removePiece(i)"></button>
-            </div>
-          </li>
-        </ul>
-        <ng-template #nofiles>
-          <span class="text-500">Aucune pièce jointe</span>
-        </ng-template>
-      </div>
-    </div>
-
-    <!-- Rouleaux utilisés -->
-    <div class="col-12 md:col-4">
-      <div class="surface-card border-1 surface-border border-round p-3">
-        <h4 class="m-0 mb-3">Rouleaux utilisés</h4>
-
-        <p-chips
-          [(ngModel)]="rouleaux"
-          separator=","
-          [addOnTab]="true"
-          allowDuplicate="false"
-          placeholder="Ex: R001, R002">
-        </p-chips>
-
-        <!-- Enregistrer en VERT (#70e410) -->
-        <button pButton type="button"
-                label="Enregistrer"
-                icon="pi pi-save"
-                class="mt-2 p-button-success"
-                (click)="saveRouleaux()"></button>
-
-        <div class="mt-3" *ngIf="rouleaux?.length">
-          <span class="text-600 mr-2">Liste :</span>
-          <p-chip *ngFor="let r of rouleaux" [label]="r" class="mr-2 mb-2"></p-chip>
-        </div>
-      </div>
-    </div>
+    <p-table [value]="allocations" responsiveLayout="scroll" [rows]="5" [paginator]="true" [rowsPerPageOptions]="[5,10,20]">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>ID</th>
+          <th>Rouleau</th>
+          <th>Poids réservé (kg)</th>
+          <th>État</th>
+          <th>Date allocation</th>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-a>
+        <tr>
+          <td>{{ a.id }}</td>
+          <td>{{ a.rouleauId }}</td>
+          <td>{{ a.poidsReserve }}</td>
+          <td>{{ a.etat }}</td>
+          <td>{{ a.dateAllocation | date:'dd/MM/yyyy HH:mm' }}</td>
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="emptymessage">
+        <tr><td colspan="5" class="text-center py-4">Aucune allocation</td></tr>
+      </ng-template>
+    </p-table>
   </div>
 
   <div class="flex justify-content-end gap-2 mt-4">

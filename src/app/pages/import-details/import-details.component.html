@@ -1,4 +1,8 @@
 <!-- HEADER -->
+
+
+
+<p-toast></p-toast>
 <div class="page-header">
   <div class="breadcrumb">Import &gt; <strong>Détails Import</strong></div>
   <div class="header-content">
@@ -18,42 +22,76 @@
       <label>Numéro d'import</label>
       <input pInputText [(ngModel)]="importData.numeroImport" />
     </div>
+    <div class="field col-12 md:col-4">
+      <label>Numéro d'import</label>
+      <input pInputText [(ngModel)]="importData.nomProduit" />
+    </div>
 
     <div class="field col-12 md:col-4">
-      <label>Date d'import</label>
-      <input type="date" pInputText [(ngModel)]="importData.dateImport" />
+      <label for="dateImport">Date d'import</label>
+      <p-calendar
+        inputId="dateImport"
+        [(ngModel)]="importData.dateImport"
+        [showIcon]="true"
+      
+  
+     appendTo="body"
+        [showTime]="false"
+        dateFormat="yy-mm-dd"   
+        class="w-full"
+      ></p-calendar>
     </div>
+    
     <div class="field col-12 md:col-4">
       <label>Fournisseur</label>
       <input pInputText [(ngModel)]="importData.fournisseur" />
     </div>
 
     <div class="field col-12 md:col-4">
-      <label>Total Métrage</label>
-      <input pInputText [(ngModel)]="importData.totalMetrage" />
-    </div>
-    <div class="field col-12 md:col-4">
       <label>Total Rouleaux</label>
-      <input pInputText [(ngModel)]="importData.totalRouleaux" />
+      <input pInputText [value]="importData?.rouleaux?.length" readonly />
     </div>
 
     <div class="field col-12 md:col-4">
-      <label>Prix</label>
-      <input pInputText [(ngModel)]="importData.prix" />
+      <label>Prix total import</label>
+      <input
+        pInputText
+        
+        [value]="prixTotalImport"
+        readonly
+       
+      />
     </div>
+    
     <div class="field col-12 md:col-4">
       <label>Fichier d'import (PDF)</label>
       <p-fileUpload
-        mode="basic"
-        name="importFile"
-        accept=".pdf"
-        customUpload="true"
-        (uploadHandler)="onFileUpload($event)"
-        chooseLabel="Choisir un fichier"
-        class="w-full"
-      />
+      #uploader
+      mode="basic"
+      [customUpload]="true"
+      [auto]="true"
+      accept=".pdf"
+      chooseLabel="Choisir un PDF"
+      (uploadHandler)="onFileUpload($event, uploader)"
+      class="w-full"
+    />
+  
+   
     </div>
-
+    <div class="field col-12">
+    <div *ngIf="importData.fichierImport !== null" class="flex align-items-center gap-2 flex-grow-1 overflow-hidden">
+      <i class="pi pi-download text-primary" style="font-size: 1.2rem;"></i>
+      <a
+        [href]="importData.fichierImport"
+        target="_blank"
+        [download]="importData.fichierImport"
+        class="text-primary underline text-ellipsis white-space-nowrap overflow-hidden max-w-full"
+        style="flex: 1;"
+      >
+        {{ importData.fichierImport }}
+      </a>
+    </div>
+    </div>
     <div class="field col-12">
       <label>Observations</label>
       <textarea pInputTextarea [(ngModel)]="importData.observations"></textarea>
@@ -64,34 +102,102 @@
 <!-- FORM AJOUT ROULEAU -->
 <p-card class="section-card">
   <h4>Ajouter Rouleau</h4>
+
   <div class="grid formgrid p-fluid">
+    <!-- Laize (mm) -->
+    <div class="field col-6 md:col-2">
+      <label for="laize">Laize (mm)</label>
+      <p-inputNumber
+        inputId="laize"
+        [(ngModel)]="newRouleau.laize"
+        [min]="0"
+        [useGrouping]="false"
+        [minFractionDigits]="0"
+        [maxFractionDigits]="2"
+        suffix=" mm">
+      </p-inputNumber>
+    </div>
+
+    <!-- N° Rouleau -->
     <div class="field col-6 md:col-2">
       <label for="numero">N° Rouleau</label>
       <input id="numero" pInputText [(ngModel)]="newRouleau.numero" />
     </div>
+
+    <!-- Code -->
     <div class="field col-6 md:col-2">
-      <label for="metrage">Métrage</label>
-      <input id="metrage" pInputText [(ngModel)]="newRouleau.metrage" />
+      <label for="code">Code</label>
+      <input id="code" pInputText [(ngModel)]="newRouleau.code" />
     </div>
     <div class="field col-6 md:col-2">
-      <label for="laize">Laize</label>
-      <input id="laize" pInputText [(ngModel)]="newRouleau.laize" />
+      <label for="grammage">Grammage (GR)</label>
+      <p-inputNumber
+        inputId="grammage"
+        [(ngModel)]="newRouleau.grammage"
+        [min]="0"
+        [useGrouping]="false"
+        [minFractionDigits]="0"
+        [maxFractionDigits]="2"
+        suffix=" gr">
+      </p-inputNumber>
     </div>
+    <!-- Description (textarea 1 ligne, 40 colonnes) -->
+    <div class="field col-12 md:col-4">
+      <label for="description">Description</label>
+      <textarea
+        id="description"
+        pInputTextarea
+        [(ngModel)]="newRouleau.description"
+        [autoResize]="false"
+        rows="1"
+        cols="40"
+        style="width: 100%;">
+      </textarea>
+    </div>
+
+    <!-- Poids (kg, virgule fr) -->
     <div class="field col-6 md:col-2">
-      <label for="poids">Poids</label>
-      <input id="poids" pInputText [(ngModel)]="newRouleau.poids" />
+      <label for="poids">Poids (kg)</label>
+      <p-inputNumber
+        inputId="poids"
+        [(ngModel)]="newRouleau.poids"
+        mode="decimal"
+        locale="fr-FR"
+        [min]="0"
+        [minFractionDigits]="2"
+        [maxFractionDigits]="3"
+        suffix=" kg">
+      </p-inputNumber>
     </div>
+
+    <!-- Prix (TND, virgule fr) -->
+    <div class="field col-6 md:col-2">
+      <label for="prix">Prix (EUR)</label>
+      <p-inputNumber
+        inputId="prix"
+        [(ngModel)]="newRouleau.prix"
+        mode="decimal"
+        locale="fr-FR"
+        [min]="0"
+        [minFractionDigits]="2"
+        [maxFractionDigits]="3"
+        suffix=" EUR">
+      </p-inputNumber>
+    </div>
+
+    <!-- Bouton -->
     <div class="field col-6 md:col-2 flex align-items-end">
-      <button 
-        pButton 
-        icon="pi pi-plus" 
-        label="{{ rouleauEnCours ? 'Modifier' : 'Ajouter' }}" 
-        class="bica-btn-orange" 
+      <button
+        pButton
+        icon="pi pi-plus"
+        [label]="rouleauEnCours ? 'Modifier' : 'Ajouter'"
+        class="bica-btn-orange"
         (click)="addRouleau()">
       </button>
     </div>
   </div>
 </p-card>
+
 <!-- TABLEAU DES ROULEAUX -->
 <p-card class="section-card">
   <div class="flex justify-content-between align-items-center mb-2">
@@ -116,13 +222,15 @@
     </span>
   </div>
 
-  <p-table [value]="rouleaux" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 20]" responsiveLayout="scroll">
+  <p-table [value]="importData.rouleaux" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 20]" responsiveLayout="scroll">
     <ng-template pTemplate="header">
       <tr>
         <th>N° Rouleau</th>
         <th>Métrage</th>
         <th>Laize</th>
+        <th>Grammage</th>
         <th>Poids</th>
+        <th>Prix</th>
         <th *ngIf="isColVisible('status')">Status</th>
         <th *ngIf="isColVisible('dispo')">Disponibilité</th>
         <th>Actions</th>
@@ -134,7 +242,9 @@
         <td>{{ r.numero }}</td>
         <td>{{ r.metrage }}</td>
         <td>{{ r.laize }}</td>
+        <td>{{ r.grammage }}</td>
         <td>{{ r.poids }}</td>
+        <td>{{ r.prix }}</td>
         <td *ngIf="isColVisible('status')">
           <p-tag 
             [value]="r.valide ? 'Validé' : 'Non validé'" 

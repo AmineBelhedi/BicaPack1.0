@@ -29,7 +29,7 @@ export class LayoutService {
         menuMode: 'static',
         colorScheme: 'light',
         theme: 'lara-light-indigo',
-        scale: 14,
+        scale: 13,
     };
 
     config = signal<AppConfig>(this._config);

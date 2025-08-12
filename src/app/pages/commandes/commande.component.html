@@ -22,7 +22,7 @@
                [rows]="10"
                [paginator]="true"
                [rowsPerPageOptions]="rowsPerPageOptions"
-               [globalFilterFields]="['numeroCommande','nomCommande','statut']"
+               [globalFilterFields]="['numeroCommande','modeleName']"
                [(selection)]="selected"
                selectionMode="multiple"
                dataKey="id">
@@ -42,11 +42,11 @@
               <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
             </th>
             <th pSortableColumn="numeroCommande">N° Commande <p-sortIcon field="numeroCommande"></p-sortIcon></th>
-            <th pSortableColumn="nomCommande">Nom commande <p-sortIcon field="nomCommande"></p-sortIcon></th>
+            <th pSortableColumn="modeleName">Modèle <p-sortIcon field="modeleName"></p-sortIcon></th>
             <th pSortableColumn="quantite">Quantité <p-sortIcon field="quantite"></p-sortIcon></th>
-            <th pSortableColumn="dateCommande">Date <p-sortIcon field="dateCommande"></p-sortIcon></th>
-            <th pSortableColumn="statut">Statut <p-sortIcon field="statut"></p-sortIcon></th>
-            <th>Image</th>
+            <th pSortableColumn="largeur">Largeur (mm) <p-sortIcon field="largeur"></p-sortIcon></th>
+            <th pSortableColumn="longueur">Longueur (mm) <p-sortIcon field="longueur"></p-sortIcon></th>
+            <th pSortableColumn="epaisseur">Épaisseur <p-sortIcon field="epaisseur"></p-sortIcon></th>
             <th>Actions</th>
           </tr>
         </ng-template>
@@ -55,19 +55,13 @@
           <tr>
             <td><p-tableCheckbox [value]="c"></p-tableCheckbox></td>
             <td>{{ c.numeroCommande }}</td>
-            <td>{{ c.nomCommande }}</td>
+            <td>{{ c.modeleName }}</td>
             <td>{{ c.quantite }}</td>
-            <td>{{ c.dateCommande | date:'dd/MM/yyyy' }}</td>
-            <td>
-              <p-tag [value]="c.statut "
-                     [severity]="getSeverity(c.statut )"></p-tag>
-            </td>
-            <td>
-              <p-image *ngIf="c.imageUrl" [src]="c.imageUrl" [preview]="true" alt="image"
-                       imageStyle="width:52px;height:52px;object-fit:cover;border-radius:8px;"></p-image>
-              <span *ngIf="!c.imageUrl" class="text-400">—</span>
-            </td>
+            <td>{{ c.largeur }}</td>
+            <td>{{ c.longueur }}</td>
+            <td>{{ c.epaisseur }}</td>
             <td class="flex align-items-center justify-content-center gap-2">
+              <!-- Garde le bouton Détails si tu as une page de détails -->
               <button pButton pRipple label="Détails" icon="pi pi-eye"
                       class="p-button-text p-button-sm text-primary"
                       [routerLink]="['/pages/detail-commande', c.id]"></button>
@@ -99,8 +93,8 @@
           </div>
 
           <div class="field col-12 md:col-6">
-            <label for="nomCommande">Nom commande</label>
-            <input pInputText id="nomCommande" [(ngModel)]="form.nomCommande" required />
+            <label for="modeleName">Modèle</label>
+            <input pInputText id="modeleName" [(ngModel)]="form.modeleName" />
           </div>
 
           <div class="field col-12 md:col-6">
@@ -109,49 +103,19 @@
           </div>
 
           <div class="field col-12 md:col-6">
-            <label for="dateCommande">Date</label>
-            <p-calendar inputId="dateCommande"
-                        [(ngModel)]="form.dateCommande"
-                        dateFormat="dd/mm/yy"
-                        [showButtonBar]="true"
-                        showIcon="true"
-                        appendTo="body"></p-calendar>
+            <label for="epaisseur">Épaisseur</label>
+            <p-inputNumber inputId="epaisseur" [(ngModel)]="form.epaisseur" [min]="0" [mode]="'decimal'" [minFractionDigits]="0" [maxFractionDigits]="3"></p-inputNumber>
           </div>
 
           <div class="field col-12 md:col-6">
-            <label for="statut">Statut</label>
-            <p-dropdown inputId="statut"
-                        [(ngModel)]="form.statut"
-                        [options]="statutOptions"
-                        optionLabel="label"
-                        optionValue="value"
-                        appendTo="body"
-                        [scrollHeight]="'240px'"
-                        [filter]="true"
-                        [showClear]="true"></p-dropdown>
+            <label for="largeur">Largeur (mm)</label>
+            <p-inputNumber inputId="largeur" [(ngModel)]="form.largeur" [min]="0"></p-inputNumber>
           </div>
 
-          <div class="field col-12">
-            <label>Image</label>
-            <div class="file-field">
-              <input #fileInput type="file" accept="image/*"
-                     (change)="onImageSelected($event)"
-                     class="file-input-hidden" />
-
-              <button pButton type="button" icon="pi pi-upload"
-                      label="Choisir une image"
-                      class="file-btn"
-                      (click)="fileInput.click()"></button>
-
-              <span class="file-name" *ngIf="selectedFileName as n">{{ n }}</span>
-
-              <img *ngIf="form.imageUrl"
-                   [src]="form.imageUrl"
-                   alt="preview"
-                   class="thumb" />
-            </div>
+          <div class="field col-12 md:col-6">
+            <label for="longueur">Longueur (mm)</label>
+            <p-inputNumber inputId="longueur" [(ngModel)]="form.longueur" [min]="0"></p-inputNumber>
           </div>
-
         </div>
       </ng-template>
 
