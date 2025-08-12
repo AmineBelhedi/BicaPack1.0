@@ -20,14 +20,13 @@ export class CommandeComponent implements OnInit {
   deleteDialog = false;
   deleteManyDialog = false;
 
-  // Form
+  // Form (sans "Brouillon" : défaut = "Confirmée")
   form: CommandeModel = {
     numeroCommande: '',
     nomCommande: '',
     quantite: 0,
-    client: '',
     dateCommande: new Date(),
-    statut: 'Brouillon',
+    statut: 'Confirmée',
     imageUrl: ''
   };
 
@@ -37,8 +36,8 @@ export class CommandeComponent implements OnInit {
   // Pour confirmation Delete 1
   current!: CommandeModel;
 
+  // ⚠️ "Brouillon" supprimé de la liste
   statutOptions = [
-    { label: 'Brouillon',     value: 'Brouillon'     as StatutCommande },
     { label: 'Confirmée',     value: 'Confirmée'     as StatutCommande },
     { label: 'En production', value: 'En production' as StatutCommande },
     { label: 'Livrée',        value: 'Livrée'        as StatutCommande },
@@ -67,9 +66,9 @@ export class CommandeComponent implements OnInit {
       numeroCommande: '',
       nomCommande: '',
       quantite: 0,
-      client: '',
       dateCommande: new Date(),
-      statut: 'Brouillon',
+      // défaut sans "Brouillon"
+      statut: 'Confirmée',
       imageUrl: ''
     };
     this.selectedFileName = null;
@@ -100,7 +99,7 @@ export class CommandeComponent implements OnInit {
 
   edit(item: CommandeModel) {
     this.form = { ...item, dateCommande: new Date(item.dateCommande) };
-    this.selectedFileName = null; // on ne connaît pas le nom d’origine
+    this.selectedFileName = null;
     this.dialogVisible = true;
   }
 
@@ -161,7 +160,8 @@ export class CommandeComponent implements OnInit {
     reader.readAsDataURL(file);
   }
 
-  getSeverity(statut: StatutCommande) {
+  // Accepte undefined et renvoie une sévérité neutre par défaut
+  getSeverity(statut?: StatutCommande) {
     switch (statut) {
       case 'Livrée':        return 'success';
       case 'Confirmée':     return 'info';

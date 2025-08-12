@@ -22,7 +22,7 @@
                [rows]="10"
                [paginator]="true"
                [rowsPerPageOptions]="rowsPerPageOptions"
-               [globalFilterFields]="['numeroCommande','nomCommande','client','statut']"
+               [globalFilterFields]="['numeroCommande','nomCommande','statut']"
                [(selection)]="selected"
                selectionMode="multiple"
                dataKey="id">
@@ -44,7 +44,6 @@
             <th pSortableColumn="numeroCommande">N° Commande <p-sortIcon field="numeroCommande"></p-sortIcon></th>
             <th pSortableColumn="nomCommande">Nom commande <p-sortIcon field="nomCommande"></p-sortIcon></th>
             <th pSortableColumn="quantite">Quantité <p-sortIcon field="quantite"></p-sortIcon></th>
-            <th pSortableColumn="client">Client <p-sortIcon field="client"></p-sortIcon></th>
             <th pSortableColumn="dateCommande">Date <p-sortIcon field="dateCommande"></p-sortIcon></th>
             <th pSortableColumn="statut">Statut <p-sortIcon field="statut"></p-sortIcon></th>
             <th>Image</th>
@@ -58,11 +57,10 @@
             <td>{{ c.numeroCommande }}</td>
             <td>{{ c.nomCommande }}</td>
             <td>{{ c.quantite }}</td>
-            <td>{{ c.client || '—' }}</td>
             <td>{{ c.dateCommande | date:'dd/MM/yyyy' }}</td>
             <td>
-              <p-tag [value]="c.statut || 'Brouillon'"
-                     [severity]="getSeverity(c.statut || 'Brouillon')"></p-tag>
+              <p-tag [value]="c.statut "
+                     [severity]="getSeverity(c.statut )"></p-tag>
             </td>
             <td>
               <p-image *ngIf="c.imageUrl" [src]="c.imageUrl" [preview]="true" alt="image"
@@ -72,7 +70,7 @@
             <td class="flex align-items-center justify-content-center gap-2">
               <button pButton pRipple label="Détails" icon="pi pi-eye"
                       class="p-button-text p-button-sm text-primary"
-                      [routerLink]="['/pages/commandes/details', c.id]"></button>
+                      [routerLink]="['/pages/detail-commande', c.id]"></button>
 
               <button pButton pRipple icon="pi pi-pencil"
                       class="p-button-rounded p-button-sm p-button-info"
@@ -86,7 +84,7 @@
         </ng-template>
 
         <ng-template pTemplate="emptymessage">
-          <tr><td colspan="9" class="text-center py-5">Aucune commande</td></tr>
+          <tr><td colspan="8" class="text-center py-5">Aucune commande</td></tr>
         </ng-template>
       </p-table>
     </div>
@@ -108,11 +106,6 @@
           <div class="field col-12 md:col-6">
             <label for="quantite">Quantité</label>
             <p-inputNumber inputId="quantite" [(ngModel)]="form.quantite" [min]="0"></p-inputNumber>
-          </div>
-
-          <div class="field col-12 md:col-6">
-            <label for="client">Client</label>
-            <input pInputText id="client" [(ngModel)]="form.client" />
           </div>
 
           <div class="field col-12 md:col-6">
