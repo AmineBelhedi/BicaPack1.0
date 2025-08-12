@@ -52,5 +52,9 @@ export class ImportService {
 updateImport(importData: ImportModel): Observable<ImportModel> {
   return this.http.post<ImportModel>(`${this.apiUrl}`, importData); // ou PUT si ton backend supporte update par PUT
 }
+listRouleaux(importId: number) {
+  return this.http.get<RouleauImport[]>(`${this.apiUrl}/${importId}/rouleaux`);
+}
+
 
 }

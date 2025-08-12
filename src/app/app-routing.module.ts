@@ -21,6 +21,8 @@ const routes: Routes = [
         data: { roles: ['OWNER'] }},
       { path: 'model', loadChildren: () => import('./pages/model/model.module').then(m => m.ModelModule),       canActivate: [authGuard],
         data: { roles: ['OWNER'] } },
+      { path: 'pages/commandes', loadChildren: () => import('./pages/commandes/commandes.module').then(m => m.CommandesModule) }
+
 
       // ajoute ici d'autres pages au besoin (clients, fournisseurs, produits...)
     ]

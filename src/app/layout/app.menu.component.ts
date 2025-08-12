@@ -24,6 +24,8 @@ export class AppMenuComponent implements OnInit {
                 label: 'Production',
                 items: [
                     { label: 'Models', icon: 'pi pi-box', routerLink: ['/model'], badge: 'NEW' },
+                    { label: 'Commandes', icon: 'pi pi-shopping-bag', routerLink: ['/pages/commandes'] }
+
                 ]
             },
             {

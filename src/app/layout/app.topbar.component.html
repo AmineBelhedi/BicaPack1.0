@@ -17,7 +17,7 @@
         <div class="user-avatar">
             <i class="pi pi-user"></i>
         </div>
-        <span class="username">{{ user?.firstname + ' ' + user?.lastname }}</span>
+        <span class="username">{{ user?.firstname?.toUpperCase() + ' ' + user?.lastname?.toUpperCase() }}</span>
         <button class="logout-btn" (click)="logout()">
             <i class="pi pi-sign-out"></i>
         </button>

@@ -11,7 +11,7 @@ export interface RouleauImport {
 export interface ImportModel {
   id?: number;
   numeroImport: string;
-  dateImport: Date;
+  dateImport: string | Date  ;
   fournisseur: string;
   nomProduit: string;
   totalMetrage?: number;

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { Table } from 'primeng/table';
-import { ImportModel } from '../../models/import'; // assure-toi que ce fichier existe
+import { ImportModel } from '../../models/import'; 
 import { ImportService } from 'src/app/services/import.service';
 
 @Component({
@@ -75,6 +75,7 @@ export class ImportComponent implements OnInit {
 
     editImport(importItem: ImportModel) {
         this.importData = { ...importItem };
+        this.importData.dateImport = new Date(this.importData.dateImport); 
         this.importDialog = true;
     }
 
