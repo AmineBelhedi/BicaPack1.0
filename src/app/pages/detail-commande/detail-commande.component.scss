@@ -140,3 +140,23 @@ h4 {
   color: #000 !important;
   font-weight: 700;
 }
+
+
+
+
+/* percer l’encapsulation du thème PrimeNG */
+:host ::ng-deep .btn-add.p-button {
+  background: #44cbda;        /* ta couleur */
+  
+  color: #fff;
+}
+:host ::ng-deep .btn-add.p-button:hover {
+  background: #02a8ba;
+  
+}
+
+/* ajuste encore la compacité si besoin */
+:host ::ng-deep .btn-add.p-button.p-button-sm {
+  margin-top: 1rem;
+  width: 10rem;
+}

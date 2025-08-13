@@ -50,4 +50,36 @@ export class CommandeService {
   getAllocations(commandeId: number): Observable<RouleauCommandeDTO[]> {
     return this.http.get<RouleauCommandeDTO[]>(`${this.baseUrl}/${commandeId}/allocations`);
   }
+
+
+
+
+
+
+
+  // models déjà présents:
+// export interface RouleauCommandeDTO { id:number; commandeId:number; rouleauId:number; poidsReserve:number; etat:'RESERVED'|'CONSUMED'|'CANCELED'; ... }
+
+addAllocation(commandeId: number, payload: { rouleauId: number; poidsReserve: number }) {
+  return this.http.post<RouleauCommandeDTO>(
+    `${this.baseUrl}/${commandeId}/allocations`,
+    payload
+  );
+}
+
+consumeAllocation(commandeId: number, allocationId: number) {
+  // marque une allocation comme CONSUMED
+  return this.http.post<RouleauCommandeDTO>(
+    `${this.baseUrl}/${commandeId}/allocations/${allocationId}/consommer`,
+    null
+  );
+}
+
+// (optionnel) supprimer une allocation
+deleteAllocation(commandeId: number, allocationId: number) {
+  return this.http.delete<void>(
+    `${this.baseUrl}/${commandeId}/allocations/${allocationId}`
+  );
+}
+
 }

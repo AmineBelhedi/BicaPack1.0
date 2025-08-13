@@ -10,13 +10,21 @@ export interface PieceJointe {
 export interface CommandeModel {
   id?: number;
   numeroCommande: string;
-  nomCommande: string;
   quantite: number;
-  dateCommande: Date | string;
-  statut: StatutCommande;
+
+  // mm
+  largeur?: number;
+  longueur?: number;
+  epaisseur?: number;
+
+  // champs qui n’existent pas dans CommandeDTO -> mettre en optionnels
+  nomCommande?: string;
+  statut?: StatutCommande;
+  dateCommande?: Date | string;
   imageUrl?: string;
 
-  // optionnel si tu utilises ces champs dans la page détail
+  // extras optionnels
+  modeleName?: string;
   rouleaux?: string[];
   piecesJointes?: PieceJointe[];
 }

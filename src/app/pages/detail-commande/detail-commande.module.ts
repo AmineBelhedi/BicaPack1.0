@@ -10,9 +10,9 @@ import { DropdownModule } from 'primeng/dropdown';
 import { FileUploadModule } from 'primeng/fileupload';
 import { ChipsModule } from 'primeng/chips';
 import { ChipModule } from 'primeng/chip';
-
+import { TableModule } from 'primeng/table';
 import { QRCodeModule } from 'angularx-qrcode';
-
+import { InputNumberModule } from 'primeng/inputnumber';
 import { DetailCommandeRoutingModule } from './detail-commande-routing.module';
 import { DetailCommandeComponent } from './detail-commande.component'; // adapte le chemin si besoin
 
@@ -22,7 +22,7 @@ import { DetailCommandeComponent } from './detail-commande.component'; // adapte
     CommonModule,
     FormsModule,
     RouterModule,
-
+    TableModule,
     TagModule,
     ButtonModule,
     ImageModule,
@@ -31,7 +31,7 @@ import { DetailCommandeComponent } from './detail-commande.component'; // adapte
     ChipsModule,
     ChipModule,
     QRCodeModule,
-
+    InputNumberModule,
     DetailCommandeRoutingModule
   ]
 })

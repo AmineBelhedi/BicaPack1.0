@@ -2,16 +2,28 @@
   <div class="flex justify-content-between align-items-center mb-4">
     <div>
       <h2 class="m-0">Commande {{ c.numeroCommande }}</h2>
-      <small class="text-600">Modèle : {{ c.modeleName || '—' }}</small>
+      <!-- (date & statut supprimés) -->
     </div>
-    <!-- plus de statut -->
   </div>
-  <p-toast></p-toast>
+
   <div class="grid">
-    <!-- Bloc infos -->
+    <!-- Image -->
+    <div class="col-12 md:col-4">
+      <div class="surface-card border-1 surface-border border-round p-3 flex align-items-center justify-content-center" style="min-height:220px">
+        <ng-container *ngIf="c.imageUrl; else noimg">
+          <p-image [src]="c.imageUrl" [preview]="true" alt="image commande"></p-image>
+        </ng-container>
+        <ng-template #noimg>
+          <span class="text-500">Pas d'image</span>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- Infos + Dimensions (intégrées ici) -->
     <div class="col-12 md:col-8">
       <div class="surface-card border-1 surface-border border-round p-3">
         <div class="grid formgrid p-fluid">
+          <!-- N° commande -->
           <div class="col-12 md:col-6">
             <label class="text-600 lbl">N° commande</label>
             <div class="flex align-items-center gap-2">
@@ -23,107 +35,197 @@
             </div>
           </div>
 
+          <!-- Modèle -->
           <div class="col-12 md:col-6">
             <label class="text-600 lbl">Modèle</label>
             <div class="font-semibold">{{ c.modeleName || '—' }}</div>
           </div>
 
-          <div class="col-12 md:col-4">
+          <!-- Quantité -->
+          <div class="col-12 md:col-6">
             <label class="text-600 lbl">Quantité</label>
             <div class="font-semibold">{{ c.quantite }}</div>
           </div>
+          <br><br><br>
+          <!-- Dimensions du sac -->
+          <div class="col-12">
+            <h4 class="m-0 mb-2">Dimensions du sac</h4>
 
-          <div class="col-12 md:col-4">
-            <label class="text-600 lbl">Largeur (mm)</label>
-            <div class="font-semibold">{{ c.largeur }}</div>
-          </div>
+            <div class="mb-2">
+              <label class="text-600">Prévisualisation</label>
+              <div class="font-semibold">{{ formatDimension(c) }}</div>
+            </div>
 
-          <div class="col-12 md:col-4">
-            <label class="text-600 lbl">Longueur (mm)</label>
-            <div class="font-semibold">{{ c.longueur }}</div>
-          </div>
+            <div class="grid formgrid p-fluid">
+              <div class="col-12 md:col-4">
+                <label for="dimL">Longueur</label>
+                <p-inputNumber inputId="dimL"
+                               [(ngModel)]="c.longueur"
+                               [min]="0"
+                               [suffix]="' mm'"></p-inputNumber>
+              </div>
 
-          <div class="col-12 md:col-4">
-            <label class="text-600 lbl">Épaisseur</label>
-            <div class="font-semibold">{{ c.epaisseur }}</div>
-          </div>
+              <div class="col-12 md:col-4">
+                <label for="diml">Largeur</label>
+                <p-inputNumber inputId="diml"
+                               [(ngModel)]="c.largeur"
+                               [min]="0"
+                               [suffix]="' mm'"></p-inputNumber>
+              </div>
 
-          <!-- Affichages poids si exposés par l’API -->
-          <div class="col-12 md:col-4" *ngIf="c.poidsNecessaire != null">
-            <label class="text-600 lbl">Poids nécessaire (kg)</label>
-            <div class="font-semibold">{{ n(c.poidsNecessaire) }}</div>
-          </div>
-          <div class="col-12 md:col-4" *ngIf="c.poidsReserve != null">
-            <label class="text-600 lbl">Réservé (kg)</label>
-            <div class="font-semibold">{{ n(c.poidsReserve) }}</div>
-          </div>
-          <div class="col-12 md:col-4" *ngIf="c.poidsConsomme != null">
-            <label class="text-600 lbl">Consommé (kg)</label>
-            <div class="font-semibold">{{ n(c.poidsConsomme) }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
+              <div class="col-12 md:col-4">
+                <label for="dime">Épaisseur</label>
+                <p-inputNumber inputId="dime"
+                               [(ngModel)]="c.epaisseur"
+                               [min]="0"
+                               [mode]="'decimal'"
+                               [minFractionDigits]="0"
+                               [maxFractionDigits]="3"
+                               [suffix]="' mm'"></p-inputNumber>
+              </div>
+            </div>
 
-    <!-- Bloc actions + QR -->
-    <div class="col-12 md:col-4">
-      <div class="surface-card border-1 surface-border border-round p-3">
-        <h4 class="m-0 mb-3">Actions</h4>
-
-        <div class="flex flex-column gap-2">
-          <div class="p-inputgroup">
-            <span class="p-inputgroup-addon">g/m²</span>
-            <input pInputText type="number" [(ngModel)]="grammage" min="1" />
-            <button pButton label="Calculer" icon="pi pi-calculator" (click)="calculerPoids()"></button>
+            <small class="text-600">Format : longueur × largeur × épaisseur</small>
           </div>
-
-          <div class="flex flex-wrap gap-2">
-            <button pButton label="Réserver" icon="pi pi-lock" class="p-button-info" (click)="reserver()"></button>
-            <button pButton label="Consommer" icon="pi pi-check-circle" class="p-button-success" (click)="consommer()"></button>
-            <button pButton label="Annuler réservations" icon="pi pi-times-circle" class="p-button-danger" (click)="annulerReservations()"></button>
-          </div>
-        </div>
-
-        <div class="mt-4">
-          <h5 class="m-0 mb-2">QR Code</h5>
-          <!-- Affichage simple de l’URL ; si tu as ngx-qrcode, décommente : -->
-          <!-- <qrcode [qrdata]="qrValue" [width]="180" [errorCorrectionLevel]="'M'"></qrcode> -->
-          <small class="text-600 mt-2 text-center break-all block">{{ qrValue }}</small>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Allocations (si endpoint disponible) -->
-  <div class="surface-card border-1 surface-border border-round p-3 mt-4">
-    <div class="flex justify-content-between align-items-center mb-3">
-      <h4 class="m-0">Allocations (Rouleaux réservés)</h4>
-    </div>
 
-    <p-table [value]="allocations" responsiveLayout="scroll" [rows]="5" [paginator]="true" [rowsPerPageOptions]="[5,10,20]">
-      <ng-template pTemplate="header">
-        <tr>
-          <th>ID</th>
-          <th>Rouleau</th>
-          <th>Poids réservé (kg)</th>
-          <th>État</th>
-          <th>Date allocation</th>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="body" let-a>
-        <tr>
-          <td>{{ a.id }}</td>
-          <td>{{ a.rouleauId }}</td>
-          <td>{{ a.poidsReserve }}</td>
-          <td>{{ a.etat }}</td>
-          <td>{{ a.dateAllocation | date:'dd/MM/yyyy HH:mm' }}</td>
-        </tr>
-      </ng-template>
-      <ng-template pTemplate="emptymessage">
-        <tr><td colspan="5" class="text-center py-4">Aucune allocation</td></tr>
-      </ng-template>
-    </p-table>
-  </div>
+    <!-- Rangée cartes alignées 4 / 3 / 5 -->
+      <div class="grid mt-4 equal-row">
+        <!-- Actions (4) -->
+        <div class="col-12 lg:col-4">
+          <div class="surface-card border-1 surface-border border-round p-3 h-full flex flex-column">
+            <h4 class="m-0 mb-3">Actions</h4>
+
+            <div class="flex flex-column gap-2">
+              <div class="p-inputgroup">
+                <span class="p-inputgroup-addon">g/m²</span>
+                <input pInputText type="number" [(ngModel)]="grammage" min="1" />
+                <button pButton label="Calculer" icon="pi pi-calculator" (click)="calculerPoids()"></button>
+              </div>
+
+              <div class="flex flex-wrap gap-2">
+                <button pButton label="Réserver" icon="pi pi-lock" class="p-button-info" (click)="reserver()"></button>
+                <button pButton label="Consommer" icon="pi pi-check-circle" class="p-button-success" (click)="consommer()"></button>
+                <button pButton label="Annuler réservations" icon="pi pi-times-circle" class="p-button-danger" (click)="annulerReservations()"></button>
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <h5 class="m-0 mb-2">QR Code</h5>
+              <small class="text-600 mt-2 text-center break-all block">{{ qrValue }}</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pièces jointes (3) -->
+        <div class="col-12 lg:col-3">
+          <div class="surface-card border-1 surface-border border-round p-3 h-full flex flex-column">
+            <h4 class="m-0 mb-3">Pièces jointes</h4>
+
+            <p-fileUpload
+              name="pieces"
+              mode="advanced"
+              chooseLabel="Ajouter des fichiers"
+              [customUpload]="true"
+              (uploadHandler)="onUploadPieces($event)"
+              [auto]="true"
+              [showUploadButton]="false"
+              [showCancelButton]="false"
+              [multiple]="true"
+              accept=".pdf,.png,.jpg,.jpeg">
+            </p-fileUpload>
+
+            <div class="flex-1 overflow-auto mt-3">
+              <ul class="list-none p-0 m-0" *ngIf="pieces.length; else nofiles">
+                <li *ngFor="let p of pieces; let i = index" class="flex align-items-center justify-content-between py-2 border-bottom-1 surface-border">
+                  <div class="flex align-items-center gap-2">
+                    <i class="pi pi-paperclip"></i>
+                    <a [href]="p.url" [download]="p.name">{{ p.name }}</a>
+                    <small class="text-600">({{ p.size | number }} o)</small>
+                  </div>
+                  <div class="flex gap-2">
+                    <button pButton icon="pi pi-download" class="p-button-rounded p-button-text p-button-sm" (click)="downloadPiece(p)"></button>
+                    <button pButton icon="pi pi-times" class="p-button-rounded p-button-text p-button-danger p-button-sm" (click)="removePiece(i)"></button>
+                  </div>
+                </li>
+              </ul>
+              <ng-template #nofiles>
+                <span class="text-500">Aucune pièce jointe</span>
+              </ng-template>
+            </div>
+          </div>
+        </div>
+
+        <!-- Rouleaux (5) -->
+        <div class="col-12 lg:col-5">
+          <div class="surface-card border-1 surface-border border-round p-3 h-full flex flex-column" style="overflow: visible;">
+            <h4 class="m-0 mb-3">Rouleaux</h4>
+
+            <!-- Formulaire d'ajout -->
+            <div class="grid formgrid p-fluid mb-3">
+              <div class="col-12 md:col-6">
+                <label for="rId">Rouleau</label>
+                <input pInputText id="rId" [(ngModel)]="formAlloc.rouleauId" placeholder="ex: R001 ou 101" />
+              </div>
+              <div class="col-12 md:col-6">
+                <label for="rPoids">Poids (kg)</label>
+                <p-inputNumber id="rPoids"
+                              [(ngModel)]="formAlloc.poids"
+                              [min]="0"
+                              [mode]="'decimal'"
+                              [minFractionDigits]="0"
+                              [maxFractionDigits]="3"></p-inputNumber>
+              </div>
+              <div class="col-12">
+                <button pButton
+        type="button"
+        icon="pi pi-plus"
+        label="Ajouter"
+        class="btn-add p-button-sm"
+        (click)="addRouleauUtilise()">
+</button>
+
+
+              </div>
+            </div>
+
+            <!-- Tableau -->
+            <div class="flex-1 overflow-auto">
+              <p-table [value]="displayedAllocations" responsiveLayout="scroll" [rows]="5" [paginator]="true" [rowsPerPageOptions]="[5,10,20]">
+                <ng-template pTemplate="header">
+                  <tr>
+                    <th style="width:80px">#</th>
+                    <th>Rouleau</th>
+                    <th>Poids (kg)</th>
+                    <th style="width:60px"></th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-a>
+                  <tr>
+                    <td>{{ a.id }}</td>
+                    <td>{{ a.rouleauId }}</td>
+                    <td>{{ a.poidsReserve }}</td>
+                    <td class="text-right">
+                      <button pButton icon="pi pi-trash"
+                              class="p-button-text p-button-danger p-button-rounded p-button-sm"
+                              (click)="removeAllocation(a)"
+                              pTooltip="Supprimer"></button>
+                    </td>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="emptymessage">
+                  <tr><td colspan="5" class="text-center py-4">Aucun rouleau</td></tr>
+                </ng-template>
+              </p-table>
+            </div>
+          </div>
+        </div>
+      </div>
+
 
   <div class="flex justify-content-end gap-2 mt-4">
     <button pButton type="button" icon="pi pi-arrow-left" label="Retour à la liste" (click)="backToList()"></button>
