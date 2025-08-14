@@ -1,0 +1,191 @@
+.home-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: #F5F5F5;
+  padding-left: 2rem;
+  padding-top: 2rem;
+  padding-right: 2rem;
+  box-sizing: border-box;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .logo {
+    height: 7rem;
+    border-radius: 100%;
+    transition: transform 0.3s;
+
+    &:hover {
+      transform: scale(1.05);
+      cursor: pointer;
+    }
+  }
+}
+
+.user-box {
+  display: flex;
+  align-items: center;
+  background-color: #f4f4f4;
+  padding: 0.75rem;
+  border-radius: 2rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  gap: 0.75rem;
+  transition: box-shadow 0.3s;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  }
+
+  .user-avatar {
+    background-color: #e0e0e0;
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .username {
+    font-weight: bold;
+    color: #1a1a1a;
+    white-space: nowrap;
+  }
+
+  .logout-btn {
+    background-color: #d32f2f;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    color: white;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: #bb2222;
+    }
+
+    i {
+      margin: 0;
+    }
+  }
+}
+
+.card-grid {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  flex-wrap: wrap;
+  gap: 2rem;
+  margin-top: 4rem;
+}
+
+.module-card {
+  background-color: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  width: 120px;
+  height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: scale(1.05);
+    cursor: pointer;
+  }
+
+  .circle-icon {
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 1rem auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    i {
+      color: white;
+      font-size: 1.5rem;
+    }
+  }
+
+  .module-label {
+    font-weight: 600;
+  }
+
+  // 💡 Couleurs spécifiques
+  &.import {
+    .circle-icon {
+      background-color: #3f51b5;
+    }
+    .module-label {
+      color: #3f51b5;
+    }
+  }
+
+  &.model {
+    .circle-icon {
+      background-color: #009688;
+    }
+    .module-label {
+      color: #009688;
+    }
+  }
+
+  &.commandes {
+    .circle-icon {
+      background-color: #ff9800;
+    }
+    .module-label {
+      color: #ff9800;
+    }
+  }
+
+  &.stocks {
+    .circle-icon {
+      background-color: #9c27b0;
+    }
+    .module-label {
+      color: #9c27b0;
+    }
+  }
+
+  &.livraison {
+    .circle-icon {
+      background-color: #2196f3;
+    }
+    .module-label {
+      color: #2196f3;
+    }
+  }
+}
+
+.footer {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #888;
+  padding: 0.8rem;
+  border-top: 1px solid #ccc;
+  margin-top: 4rem;
+
+  .footer-logo {
+    height: 2rem;
+    vertical-align: middle;
+    margin: 0 0.3rem;
+  }
+}

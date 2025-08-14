@@ -1,0 +1,26 @@
+<div class="layout-topbar">
+    <a class="layout-topbar-logo" routerLink="/home">
+        <img src="assets/layout/images/bicapack.webp" alt="logo">
+        <span>BicaPack</span>
+    </a>
+
+    <button #menubutton class="p-link layout-menu-button layout-topbar-button" (click)="layoutService.onMenuToggle()">
+        <i class="pi pi-bars"></i>
+    </button>
+
+    <button #topbarmenubutton class="p-link layout-topbar-menu-button layout-topbar-button" (click)="layoutService.showProfileSidebar()">
+        <i class="pi pi-ellipsis-v"></i>
+    </button>
+
+    <div #topbarmenu class="layout-topbar-menu" [ngClass]="{'layout-topbar-menu-mobile-active': layoutService.state.profileSidebarVisible}">
+        <div class="user-box">
+        <div class="user-avatar">
+            <i class="pi pi-user"></i>
+        </div>
+        <span class="username">{{ user?.firstname?.toUpperCase() + ' ' + user?.lastname?.toUpperCase() }}</span>
+        <button class="logout-btn" (click)="logout()">
+            <i class="pi pi-sign-out"></i>
+        </button>
+        </div>
+    </div>
+</div>

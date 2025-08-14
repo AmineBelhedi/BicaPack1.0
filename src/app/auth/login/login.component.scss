@@ -1,0 +1,138 @@
+.background-container {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.background-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  object-fit: cover;
+  z-index: 0;
+  filter: brightness(0.85);
+}
+
+.login-wrapper {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(253, 251, 242, 0.15);
+}
+.logo {
+  width: 5.7rem;
+  margin-bottom: 2rem;
+}
+
+.login-gradient-border {
+  border-radius: 56px;
+  padding: 0.3rem;
+  background: linear-gradient(180deg, #f8991d 10%, rgba(248, 153, 29, 0) 30%);
+}
+
+.login-card {
+  background-color: #ffffff;
+  padding: 3rem 2rem;
+  border-radius: 53px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+}
+
+.avatar-section {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #1f1f1f;
+}
+
+.avatar {
+  height: 50px;
+  margin-bottom: 1rem;
+}
+
+.welcome-text {
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.subtext {
+  font-size: 1rem;
+  color: #666666;
+}
+
+.label {
+  font-size: 1.1rem;
+  color: #1f1f1f;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.input,
+.password-input {
+  width: 100%;
+  padding: 1rem;
+  font-size: 1rem;
+  border-radius: 8px;
+}
+
+:host ::ng-deep .p-password {
+  width: 100%;
+}
+
+:host ::ng-deep .p-button {
+  background-color: #f8991d !important;
+  color: white !important;
+  font-weight: bold;
+  border: none;
+  padding: 1rem;
+  font-size: 1.25rem;
+}
+
+:host ::ng-deep .p-button:hover {
+  background-color: #e08714 !important;
+}
+
+.options {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  align-items: center;
+  font-size: 0.95rem;
+}
+
+.forgot-password {
+  color: #f8991d !important;
+  text-decoration: none;
+  cursor: pointer;
+}
+.input {
+  width: 100%;
+  max-width: 345px;  
+  padding: 0.75rem;
+  font-size: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+}
+
+.input:hover,
+.password-input:hover,
+:host ::ng-deep .p-password:hover input {
+  border: 1px solid #f8991d !important;     // couleur bordure orange au survol
+  box-shadow: 0 0 4px rgba(248, 153, 29, 0.3); // effet lumineux doux
+}
+.input:focus,
+.password-input:focus,
+:host ::ng-deep .p-password input:focus {
+  border: 1px solid #f8991d !important;
+  outline: none;
+  box-shadow: 0 0 6px rgba(248, 153, 29, 0.4);
+}
+
+

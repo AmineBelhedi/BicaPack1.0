@@ -1,0 +1,4 @@
+.sidebar-hover-layout:not(.sidebar-forced)
+  ::ng-deep .pi-chevron-down {
+  display: none !important;
+}

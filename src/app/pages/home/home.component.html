@@ -1,0 +1,67 @@
+<div class="home-container">
+  <div class="header">
+    <img src="assets/layout/images/bicapack.webp" alt="Logo Bicapack" class="logo" />
+    <div class="user-box">
+      <p-avatar icon="pi pi-user" shape="circle" styleClass="user-avatar"></p-avatar>
+      <span class="username">{{ user?.firstname + ' ' + user?.lastname }}</span>
+      <button class="logout-btn" (click)="logout()">
+        <i class="pi pi-sign-out"></i>
+      </button>
+    </div>
+  </div>
+
+  <div class="card-grid">
+
+    <div class="module-card commandes" (click)="navigateTo('pages/commandes')">
+      <div class="circle-icon">
+        <i class="pi pi-shopping-bag"></i>
+      </div>
+      <div class="module-label">Commandes</div>
+    </div>
+    <div class="module-card import" (click)="navigateTo('pages/import')">
+      <div class="circle-icon">
+        <i class="pi pi-cloud-download"></i>
+      </div>
+      <div class="module-label">Imports</div>
+    </div>
+
+    <div class="module-card model" (click)="navigateTo('pages/users')">
+      <div class="circle-icon">
+        <i class="pi pi-users"></i>
+      </div>
+      <div class="module-label">Users</div>
+    </div>
+
+    <!-- <div class="module-card model" (click)="navigateTo('model')">
+      <div class="circle-icon">
+        <i class="pi pi-box"></i>
+      </div>
+      <div class="module-label">Model</div>
+    </div> -->
+
+    
+  
+<!--
+    <div class="module-card stocks" (click)="navigateTo('stocks')">
+      <div class="circle-icon">
+        <i class="pi pi-database"></i>
+      </div>
+      <div class="module-label">Stocks</div>
+    </div>
+
+    <div class="module-card livraison" (click)="navigateTo('livraisons')">
+      <div class="circle-icon">
+        <i class="pi pi-send"></i>
+      </div>
+      <div class="module-label">Livraisons</div>
+    </div>
+    -->
+
+  </div>
+
+  <footer class="footer">
+    <span>
+      BICAPACK By <b><img src="assets/layout/images/bicapack.webp" class="footer-logo" /></b> © 2025.
+    </span>
+  </footer>
+</div>

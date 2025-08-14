@@ -1,0 +1,205 @@
+/* —— carte unique —— */
+.big-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, .06);
+  padding: 1rem 1.25rem;
+}
+
+/* sections internes */
+.section { background: transparent; border: 0; box-shadow: none; padding: 0; }
+
+/* === Palette Bicapack === */
+$bica-orange: #ff9f1c;
+$bica-orange-dark: #e88c12;
+$bica-green: #9fb60c;
+$bica-green-dark: #8d9c2e;
+
+/* ===== HEADER ===== */
+.hero { display: flex; justify-content: space-between; align-items: center; }
+.header-left { display: flex; flex-direction: column; gap: .4rem; }
+.header-top  { display: flex; align-items: center; gap: .6rem; }
+
+.hero h2 {
+  margin: 0;
+  font-weight: 800;
+  letter-spacing: .2px;
+  color: #111 !important; /* noir pour tout le h2 */
+}
+
+.accent {
+  color: #111 !important; /* noir aussi pour le numéro */
+}
+
+
+.meta-row { display: flex; align-items: center; gap: .5rem; color: var(--bp-muted, #6b7280); }
+.meta-row .sep { width: 6px; height: 6px; border-radius: 50%; background: var(--bp-primary, #ff9f1c); opacity: .6; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+
+/* p-tag "Modèle" — style identique au bouton copier */
+:host ::ng-deep .p-tag.p-tag-info {
+  background: rgba(255,159,28,.08) !important;  /* fond clair */
+  border: 1px solid rgba(255,159,28,.35) !important; /* contour */
+  color: #ff9f1c !important; /* texte orange */
+  border-radius: 8px;
+  font-weight: 600;
+}
+:host ::ng-deep .p-tag.p-tag-info:hover {
+  background: rgba(255,159,28,.15) !important; /* effet hover identique */
+}
+
+/* bouton copier (header) */
+.copy-btn {
+  border: 1px solid rgba(255,159,28,.35) !important;
+  background: rgba(255,159,28,.08) !important;
+  color: $bica-orange !important;
+  width: 2rem; height: 2rem; padding: 0 !important; border-radius: 8px;
+}
+.copy-btn .p-button-icon { color: $bica-orange !important; }
+.copy-btn:hover { background: rgba(255,159,28,.15) !important; }
+.header-copy { margin-left: .15rem; }
+.inline-copy { margin-left: .15rem; }
+
+/* ===== STATS ===== */
+.stats {
+  display: grid; gap: 1rem;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin: .9rem 0 1rem;
+}
+.stat { padding: .9rem 1rem; border-radius: 12px; }
+.chip {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, .04);
+}
+.stat-title { font-size: .82rem; color: #6b7280; }
+.stat-value { font-weight: 800; }
+
+/* ===== GRID PRINCIPALE ===== */
+.grid-3 {
+  display: grid; gap: 1.25rem;
+  grid-template-columns: 300px minmax(0, 1fr) 320px;
+}
+@media (max-width: 1200px) { .grid-3 { grid-template-columns: 1fr; } }
+
+.card-title { margin: 0 0 .75rem; font-weight: 700; }
+
+/* ===== APERÇU ===== */
+.image-box {
+  min-height: 220px; display: grid; place-items: center;
+  border: 1px dashed #e5e7eb; border-radius: 12px;
+}
+.noimg { color: #6b7280; }
+
+/* ===== DÉTAILS & DIMENSIONS ===== */
+.form.two { display: grid; gap: 1rem; grid-template-columns: 1fr 1fr; }
+.f label { font-size: .8rem; color: #6b7280; margin-bottom: .25rem; display: block; }
+.mono { font-family: ui-monospace, Menlo, Consolas, monospace; }
+.inline { display: flex; align-items: center; gap: .6rem; }
+
+.metrics { display: flex; flex-wrap: nowrap; gap: 1rem; align-items: flex-end; }
+.metric { display: flex; flex-direction: column; align-items: flex-start; }
+.metric > label { font-size: .82rem; margin-bottom: .25rem; color: #6b7280; }
+
+/* ===== SECTION ÉDITION (labels au-dessus des champs) ===== */
+.edit-identite-card .field {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  margin-bottom: .9rem;
+}
+.edit-identite-card .field > label {
+  font-size: .9rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* inputs pleine largeur (PrimeNG) */
+:host ::ng-deep .edit-identite-card .p-inputtext,
+:host ::ng-deep .edit-identite-card .p-inputnumber,
+:host ::ng-deep .edit-identite-card .p-inputnumber input {
+  width: 100% !important;
+  box-sizing: border-box;
+}
+
+.actions-line { display: flex; gap: .5rem; margin-top: .25rem; }
+
+/* ===== ROULEAUX ===== */
+.section-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; flex-wrap: wrap; }
+.add-inline { display: flex; align-items: center; gap: .5rem; flex-wrap: nowrap; }
+.add-inline .rouleau-id { width: 320px; max-width: 40vw; }
+.add-inline .poids-kg .p-inputnumber,
+.add-inline .poids-kg .p-inputnumber input { width: 90px !important; }
+.add-inline .p-button { white-space: nowrap; padding: .45rem .8rem; }
+
+@media (max-width: 900px){
+  .add-inline { flex-wrap: wrap; }
+  .add-inline .rouleau-id { flex: 1 1 220px; max-width: 100%; }
+  .add-inline .poids-kg .p-inputnumber,
+  .add-inline .poids-kg .p-inputnumber input { width: 100px !important; }
+}
+
+/* table */
+:host ::ng-deep .p-datatable-wrapper { max-width: 100%; overflow-x: auto; }
+
+/* états */
+.state { padding: 1rem; color: #6b7280; }
+
+/* Espace clair entre inputs et bouton "Enregistrer" (Dimensions du sac) */
+.details-card .metrics { gap: 1rem; margin-bottom: 0.75rem; }
+.details-card .dim-actions { margin-top: 0.5rem; padding-top: .25rem; }
+@media (min-width: 1024px) { .details-card .dim-actions { margin-top: 1.25rem; } }
+
+/* --- Boutons Bicapack --- */
+
+/* Bouton lien (texte) */
+.bica-link {
+  background: transparent !important;
+  border: none !important;
+  color: #063149 !important;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: .2s ease;
+  &:hover { background: rgba(8,66,100,.08) !important; }
+}
+
+/* Bouton “Ajouter” (orange plein) */
+.bica-add {
+  background: $bica-orange !important;
+  border: 1px solid $bica-orange !important;
+  color: #fff !important;
+  font-weight: 700;
+  border-radius: 10px;
+  transition: .2s ease;
+  &:hover {
+    background: $bica-orange-dark !important;
+    border-color: $bica-orange-dark !important;
+  }
+}
+
+/* Boutons “Enregistrer” (vert succès) */
+.bica-save {
+  background: $bica-green !important;
+  border: 1px solid $bica-green !important;
+  color: #fff !important;
+  font-weight: 700;
+  border-radius: 10px;
+  transition: .2s ease;
+  &:hover {
+    background: $bica-green-dark !important;
+    border-color: $bica-green-dark !important;
+  }
+}
+
+/* Bouton secondaire (fond blanc, contour orange) */
+.bica-secondary {
+  background: #fff !important;
+  border: 1px solid $bica-orange !important;
+  color: $bica-orange !important;
+  font-weight: 700;
+  border-radius: 10px;
+  transition: .2s ease;
+  &:hover { background: rgba(255,159,28,.08) !important; }
+}

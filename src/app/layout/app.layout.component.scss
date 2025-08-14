@@ -1,0 +1,93 @@
+/* === LAYOUT PRINCIPAL === */
+.sidebar-hover-layout {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+
+  /* === TOPBAR FIXE === */
+  ::ng-deep .layout-topbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4rem;
+    background: var(--surface-card);
+    z-index: 1100;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  }
+
+  /* === SIDEBAR WRAPPER === */
+  .sidebar-hover-wrapper {
+    position: fixed;
+    top: 6rem;       // Décale du haut (sous la topbar)
+    left: 1rem;      // Décale de la gauche (flottant)
+    height: calc(85% - 1rem); // Hauteur ajustée
+    width: 90px;     // Réduite par défaut
+    background: var(--surface-overlay);
+    border-radius: 1rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: width 0.3s ease;
+    z-index: 1001;
+
+    .sidebar-hover {
+      width: 250px; // Contenu réel
+      overflow: hidden;
+    }
+  }
+
+  /* === CONTENU PRINCIPAL === */
+  .layout-main-container {
+    margin-left: 80px; // Décalage par défaut (réduit)
+    transition: margin-left 0.3s ease;
+    
+    padding-top: 6rem; // Pour ne pas passer sous la topbar
+  }
+
+  /* === Sidebar élargie au hover === */
+  .sidebar-hover-wrapper:hover {
+    width: 250px;
+  }
+
+  .sidebar-hover-wrapper:hover ~ .layout-main-container {
+    margin-left: 250px;
+  }
+
+  /* === Sidebar élargie via bouton toggle === */
+  &.sidebar-forced .sidebar-hover-wrapper {
+    width: 250px;
+  }
+
+  &.sidebar-forced .layout-main-container {
+    margin-left: 250px;
+  }
+}
+
+/* === AFFICHAGE DU TEXTE DU MENU === */
+
+/* 1. Masqué par défaut */
+.sidebar-hover-wrapper ::ng-deep .layout-menuitem-text {
+  display: none;
+}
+
+/* 2. Affiché au hover */
+.sidebar-hover-wrapper:hover ::ng-deep .layout-menuitem-text {
+  display: inline-block;
+  margin-left: 0.5rem;
+}
+
+/* 3. Affiché en mode forcé (bouton) */
+.sidebar-hover-layout.sidebar-forced .sidebar-hover-wrapper ::ng-deep .layout-menuitem-text {
+  display: inline-block;
+  margin-left: 0.5rem;
+}
+
+
+/* Cacher la flèche de sous-menu (p-submenu-icon) si la sidebar est fermée */
+.sidebar-hover-layout.sidebar-collapsed ::ng-deep .p-submenu-icon {
+  display: none !important;
+}
+
+/* Cacher aussi le sous-menu si nécessaire */
+.sidebar-hover-layout.sidebar-collapsed ::ng-deep .p-submenu-list {
+  display: none !important;
+}

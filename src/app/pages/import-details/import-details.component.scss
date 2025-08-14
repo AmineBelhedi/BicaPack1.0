@@ -1,0 +1,227 @@
+.page-header {
+  margin-bottom: 1.5rem;
+
+  .breadcrumb {
+    font-size: 0.85rem;
+    color: #888;
+  }
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .title {
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      color: #888;
+    }
+  }
+}
+
+.section-card {
+  margin-bottom: 2rem;
+
+  h4 {
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: #333;
+  }
+}
+::ng-deep .custom-status {
+  background-color: #ffc107 !important; // jaune
+  color: #212529;
+  font-weight: 600;
+  border-radius: 4px;
+}
+
+::ng-deep .custom-dispo {
+  background-color: #198754 !important; // vert foncé
+  color: white;
+  font-weight: 600;
+  border-radius: 4px;
+}
+
+::ng-deep .p-button-sm {
+  font-size: 0.875rem;
+}
+
+.p-table .p-tag {
+  font-size: 0.75rem;
+  padding: 0.3em 0.6em;
+}
+.subtitle {
+  font-size: 0.9rem;
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+::ng-deep .pi.pi-briefcase {
+  color: #555;
+}
+
+
+
+
+
+
+/* ✅ Espacement des sections (cards) */
+.section-card {
+  margin-bottom: 2rem;
+  padding: 1.5rem;
+
+  h4 {
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+    color: #222;
+    font-size: 1.2rem;
+  }
+}
+
+/* ✅ Espacement et style des champs de formulaire */
+.field {
+  margin-bottom: 1rem;
+
+  label {
+    font-size: 0.85rem;
+    color: #555;
+    margin-bottom: 0.25rem;
+    display: inline-block;
+  }
+
+  input,
+  p-dropdown,
+  textarea {
+    font-size: 0.9rem;
+  }
+}
+
+/* ✅ Style de l'en-tête */
+.page-header {
+  margin-bottom: 2rem;
+
+  .breadcrumb {
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 0.25rem;
+  }
+
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .title {
+      font-size: 1.6rem;
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: #666;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  }
+}
+
+/* ✅ Espacement du tableau */
+::ng-deep .p-table .p-datatable-tbody > tr > td {
+  padding: 0.75rem 0.5rem;
+}
+
+/* ✅ Largeur minimale du MultiSelect */
+::ng-deep .p-multiselect {
+  min-width: 200px;
+}
+
+
+
+
+
+
+.bica-btn-orange-save {
+  background-color: #70e410 !important;
+  border: none;
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1.2rem;
+  border-radius: 0.5rem;
+}
+.bica-btn-orange-save:hover {
+  background-color: #60bb15 !important;
+}
+.bica-btn-orange {
+  background-color: #ff9c2c !important;
+  border: none;
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1.2rem;
+  border-radius: 0.5rem;
+}
+
+.bica-btn-orange:hover {
+  background-color: #e87c00 !important;
+}
+::ng-deep .custom-dispo {
+  background-color: #198754 !important; // vert foncé
+  color: white;
+  font-weight: 600;
+  border-radius: 4px;
+}
+
+::ng-deep .custom-non-dispo {
+  background-color: #dc3545 !important; // rouge
+  color: white;
+  font-weight: 600;
+  border-radius: 4px;
+}
+::ng-deep .custom-valide {
+  background-color: #0d6efd !important; // bleu
+  color: white;
+  font-weight: 600;
+  border-radius: 4px;
+}
+
+::ng-deep .custom-non-valide {
+  background-color: #ffc107 !important; // jaune
+  color: #212529;
+  font-weight: 600;
+  border-radius: 4px;
+}
+
+
+
+
+/* ✅ Adaptation des styles PrimeNG input sur hover et focus */
+::ng-deep .p-inputtext:focus,
+::ng-deep .p-inputtext:hover,
+::ng-deep .p-dropdown:not(.p-disabled):hover,
+::ng-deep .p-dropdown:not(.p-disabled).p-focus,
+::ng-deep .p-inputtextarea:focus,
+::ng-deep .p-inputtextarea:hover {
+  border-color: #ffa641 !important; // orange Bicapack
+  box-shadow: 0 0 0 0.15rem rgba(255, 156, 44, 0.3) !important;
+}
+
+/* Pour le p-fileUpload basic mode */
+::ng-deep .p-fileupload-choose {
+  background-color: #0bb190 !important;
+  border: none;
+  color: white;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+}
+
+::ng-deep .p-fileupload-choose:hover {
+  background-color: #01997a !important;
+}

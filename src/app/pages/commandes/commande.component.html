@@ -1,0 +1,212 @@
+<div class="grid">
+  <div class="col-12">
+    <div class="card px-6 py-6">
+      <p-toast></p-toast>
+
+      <p-toolbar styleClass="mb-4">
+        <ng-template pTemplate="left">
+          <div class="my-2">
+            <button pButton pRipple label="Nouveau" icon="pi pi-plus" class="p-button-success mr-2" (click)="openNew()"></button>
+            <button pButton pRipple label="Supprimer" icon="pi pi-trash" class="p-button-danger"
+                    (click)="deleteSelected()" [disabled]="!selected || !selected.length"></button>
+          </div>
+        </ng-template>
+        <!-- <ng-template pTemplate="right">
+          <button pButton pRipple label="Exporter" icon="pi pi-upload" class="p-button-help" (click)="dt.exportCSV()"></button>
+        </ng-template> -->
+      </p-toolbar>
+
+      <p-table #dt
+               [value]="rows"
+               responsiveLayout="scroll"
+               [rows]="10"
+               [paginator]="true"
+               [rowsPerPageOptions]="rowsPerPageOptions"
+               [globalFilterFields]="['numeroCommande','nomCommande']"
+               [(selection)]="selected"
+               selectionMode="multiple"
+               dataKey="id">
+        <ng-template pTemplate="caption">
+          <div class="flex justify-content-between align-items-center">
+            <h5 class="m-0">Liste des Commandes</h5>
+            <span class="p-input-icon-left">
+              <i class="pi pi-search"></i>
+              <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Rechercher..." class="w-full sm:w-auto" />
+            </span>
+          </div>
+        </ng-template>
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 3rem">
+              <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+            </th>
+            <th pSortableColumn="numeroCommande">N° Commande <p-sortIcon field="numeroCommande"></p-sortIcon></th>
+            <th pSortableColumn="nomCommande">Description <p-sortIcon field="nomCommande"></p-sortIcon></th>
+            <th pSortableColumn="quantite">Quantité <p-sortIcon field="quantite"></p-sortIcon></th>
+            <th>Dimensions</th>
+            <!-- Date & Statut supprimés -->
+            <th>Image</th>
+            <th>Actions</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-c>
+          <tr>
+            <td><p-tableCheckbox [value]="c"></p-tableCheckbox></td>
+            <td>{{ c.numeroCommande }}</td>
+            <td>{{ c.description }}</td>
+            <td>{{ c.quantite }}</td>
+            <td>{{ formatDimension(c) }}</td>
+            <!-- Date & Statut supprimés -->
+            <td>
+              <p-image *ngIf="c.imageSac" [src]="c.imageSac" [preview]="true" alt="image" width="50"
+              ></p-image>
+              <span *ngIf="!c.imageSac" class="text-400">—</span>
+            </td>
+            <td >
+              <button pButton pRipple label="Détails" icon="pi pi-eye"
+                      class="p-button-text p-button-sm text-primary mr-2"
+                      [routerLink]="['/pages/detail-commande', c.id]"></button>
+
+              <button pButton pRipple icon="pi pi-pencil"
+                      class="p-button-rounded p-button-sm p-button-info mr-2"
+                      (click)="edit(c)" title="Modifier"></button>
+
+              <button pButton pRipple icon="pi pi-trash"
+                      class="p-button-rounded p-button-sm p-button-danger mr-2"
+                      (click)="askDelete($event, c)" title="Supprimer"></button>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr><td colspan="7" class="text-center py-5">Aucune commande</td></tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <!-- Dialog CRUD -->
+    <p-dialog [(visible)]="dialogVisible" header="Détails Commande" [modal]="true" [style]="{ width: '520px' }" class="p-fluid">
+      <ng-template pTemplate="content">
+        <div class="grid">
+          <div class="field col-12 md:col-4">
+            <label for="numeroCommande">N° Commande</label>
+            <input pInputText id="numeroCommande" [(ngModel)]="form.numeroCommande" required />
+          </div>
+
+          <div class="field col-12 md:col-4">
+            <label for="description"> Description</label>
+            <input pInputText id="description" [(ngModel)]="form.description" />
+          </div>
+
+          <div class="field col-12 md:col-4">
+            <label for="quantite">Quantité</label>
+            <p-inputNumber inputId="quantite" [(ngModel)]="form.quantite" [min]="0"></p-inputNumber>
+          </div>
+
+          <!-- Champ Date supprimé -->
+
+          <div class="col-12">
+            <p-fieldset legend="Dimensions" class="dim-fieldset" [toggleable]="false">
+              <div class="grid dim-grid">
+                <div class="field col-12">
+                  <label for="largeur">Largeur (cm)</label>
+                  <p-inputNumber
+                    inputId="largeur"
+                    [(ngModel)]="form.largeur"
+                    name="largeur"
+                    [min]="0"
+                    [useGrouping]="false"
+                    suffix=" cm"
+                    [showButtons]="true"
+                  ></p-inputNumber>
+                </div>
+      
+                <div class="field col-12">
+                  <label for="longueur">Longueur (cm)</label>
+                  <p-inputNumber
+                    inputId="longueur"
+                    [(ngModel)]="form.longueur"
+                    name="longueur"
+                    [min]="0"
+                    [useGrouping]="false"
+                    suffix=" cm"
+                    [showButtons]="true"
+                  ></p-inputNumber>
+                </div>
+      
+                <div class="field col-12">
+                  <label for="grammage">Grammage (gr)</label>
+                  <p-inputNumber
+                    inputId="grammage"
+                    [(ngModel)]="form.grammage"
+                    name="grammage"
+                    [min]="0"
+                    [useGrouping]="false"
+                    suffix=" gr"
+                    [showButtons]="true"
+                    [step]="1"
+                  ></p-inputNumber>
+                </div>
+              </div>
+            </p-fieldset>
+          </div>
+
+          <!-- Champ Statut supprimé -->
+
+          <!-- <div class="field col-12">
+            <label>Image</label>
+            <div class="file-field">
+              <input #fileInput type="file" accept="image/*"
+                     (change)="onImageSelected($event)"
+                     class="file-input-hidden" />
+
+              <button pButton type="button" icon="pi pi-upload"
+                      label="Choisir une image"
+                      class="file-btn"
+                      (click)="fileInput.click()"></button>
+
+              <span class="file-name" *ngIf="selectedFileName as n">{{ n }}</span>
+
+              <img *ngIf="form.imageUrl"
+                   [src]="form.imageUrl"
+                   alt="preview"
+                   class="thumb" />
+            </div>
+          </div> -->
+
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="footer">
+        <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="dialogVisible=false"></button>
+        <button pButton label="Enregistrer" icon="pi pi-check" class="p-button-text" (click)="save()"></button>
+      </ng-template>
+    </p-dialog>
+
+    <!-- Dialog suppression simple -->
+    <p-dialog [(visible)]="deleteDialog" header="Confirmation" [modal]="true" [style]="{ width: '400px' }">
+      <div class="confirmation-content">
+        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+        <span>Confirmez-vous la suppression de cette commande ?</span>
+      </div>
+      <ng-template pTemplate="footer">
+        <button pButton label="Non" icon="pi pi-times" class="p-button-text" (click)="deleteDialog=false"></button>
+        <button pButton label="Oui" icon="pi pi-check" class="p-button-text" (click)="confirmDelete()"></button>
+      </ng-template>
+    </p-dialog>
+
+    <!-- Dialog suppression multiple -->
+    <p-dialog [(visible)]="deleteManyDialog" header="Confirmation" [modal]="true" [style]="{ width: '400px' }">
+      <div class="confirmation-content">
+        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+        <span>Confirmez-vous la suppression des commandes sélectionnées ?</span>
+      </div>
+      <ng-template pTemplate="footer">
+        <button pButton label="Non" icon="pi pi-times" class="p-button-text" (click)="deleteManyDialog=false"></button>
+        <button pButton label="Oui" icon="pi pi-check" class="p-button-text" (click)="confirmDeleteSelected()"></button>
+      </ng-template>
+    </p-dialog>
+  </div>
+</div>
