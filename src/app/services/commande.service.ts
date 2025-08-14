@@ -35,8 +35,8 @@ export class CommandeService {
     return this.http.post<void>(`${this.baseUrl}/${commandeId}/calcul-poids`, null, { params });
   }
 
-  reserver(commandeId: number): Observable<void> {
-    return this.http.post<void>(`${this.baseUrl}/${commandeId}/reserver`, null);
+  reserver(commandeId: number , rouleauId : number  , poids : number): Observable<void> {
+    return this.http.post<void>(`${this.baseUrl}/${commandeId}/${rouleauId}/${poids}/reserver`, null);
   }
 
   consommer(commandeId: number): Observable<void> {
@@ -51,7 +51,11 @@ export class CommandeService {
     return this.http.get<RouleauCommandeDTO[]>(`${this.baseUrl}/${commandeId}/allocations`);
   }
 
-
+  uploadImage(commandeId: number, file: File): Observable<void> {
+    const form = new FormData();
+    form.append('file', file, file.name); // le nom du champ DOIT être "file"
+    return this.http.post<void>(`${this.baseUrl}/${commandeId}/fichier/upload`, form);
+  }
 
 
 

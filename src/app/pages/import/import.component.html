@@ -6,13 +6,13 @@
                 <ng-template pTemplate="left">
                     <div class="my-2">
                         <button pButton pRipple label="Nouveau" icon="pi pi-plus" class="p-button-success mr-2" (click)="openNew()"></button>
-                        <button pButton pRipple label="Supprimer" icon="pi pi-trash" class="p-button-danger" (click)="deleteSelectedImports()" [disabled]="!selectedImports || !selectedImports.length"></button>
+                        <!-- <button pButton pRipple label="Supprimer" icon="pi pi-trash" class="p-button-danger" (click)="deleteSelectedImports()" [disabled]="!selectedImports || !selectedImports.length"></button>
+                         -->
                     </div>
                 </ng-template>
-                <ng-template pTemplate="right">
-                    <!--<p-fileUpload mode="basic" accept=".xlsx,.pdf" [maxFileSize]="2000000" chooseLabel="Importer" class="mr-2 inline-block"></p-fileUpload>-->
-                    <button pButton pRipple label="Exporter" icon="pi pi-upload" class="p-button-help" (click)="dt.exportCSV()"></button>
-                </ng-template>
+                <!-- <ng-template pTemplate="right">
+                   <button pButton pRipple label="Exporter" icon="pi pi-upload" class="p-button-help" (click)="dt.exportCSV()"></button>
+                </ng-template> -->
             </p-toolbar>
 
             <p-table #dt [value]="imports" responsiveLayout="scroll" [rows]="10" [paginator]="true"

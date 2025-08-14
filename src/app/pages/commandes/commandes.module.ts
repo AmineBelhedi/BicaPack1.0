@@ -20,7 +20,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmPopupModule } from 'primeng/confirmpopup';
 import { ImageModule } from 'primeng/image';
 import { TooltipModule } from 'primeng/tooltip';
-
+import { FieldsetModule } from 'primeng/fieldset';
 import { CommandesRoutingModule } from './commandes-routing.module';
 import { CommandeComponent } from './commande.component';
 import { MessageService, ConfirmationService } from 'primeng/api';
@@ -35,8 +35,10 @@ import { MessageService, ConfirmationService } from 'primeng/api';
     ButtonModule,
     RippleModule,
     ToastModule,
+    FieldsetModule,
     ToolbarModule,
     InputTextModule,
+    
     InputTextareaModule,
     DropdownModule,
     InputNumberModule,

@@ -23,7 +23,7 @@
       <input pInputText [(ngModel)]="importData.numeroImport" />
     </div>
     <div class="field col-12 md:col-4">
-      <label>Numéro d'import</label>
+      <label>Produit</label>
       <input pInputText [(ngModel)]="importData.nomProduit" />
     </div>
 
@@ -48,23 +48,23 @@
     </div>
 
     <div class="field col-12 md:col-4">
-      <label>Total Rouleaux</label>
-      <input pInputText [value]="importData?.rouleaux?.length" readonly />
+      <label>Poids Total</label>
+      <input pInputText [value]="calculPoidsTotal() + ' Kg'" readonly />
     </div>
 
     <div class="field col-12 md:col-4">
-      <label>Prix total import</label>
+      <label>Prix total import (€)</label>
       <input
         pInputText
         
-        [value]="prixTotalImport"
+        [value]="prixTotalImport + ' EUR'"
         readonly
        
       />
     </div>
     
     <div class="field col-12 md:col-4">
-      <label>Fichier d'import (PDF)</label>
+      <label>Facture d'import (PDF)</label>
       <p-fileUpload
       #uploader
       mode="basic"
@@ -75,23 +75,54 @@
       (uploadHandler)="onFileUpload($event, uploader)"
       class="w-full"
     />
+
+  </div>
+    <div class="field col-12">
+      <div *ngIf="importData.fichierImport !== null" class="flex align-items-center gap-2 flex-grow-1 overflow-hidden">
+        <i class="pi pi-download text-primary" style="font-size: 1.2rem;"></i>
+        <a
+          [href]="importData.fichierImport"
+          target="_blank"
+          [download]="importData.fichierImport"
+          class="text-primary underline text-ellipsis white-space-nowrap overflow-hidden max-w-full"
+          style="flex: 1;"
+        >
+          {{ importData.fichierImport }}
+        </a>
+      </div>
+      </div>
+   
+    <div class="field col-12 md:col-4">
+      <label>Fichier Packing List (PDF)</label>
+      <p-fileUpload
+      #uploader
+      mode="basic"
+      [customUpload]="true"
+      [auto]="true"
+      accept=".pdf"
+      chooseLabel="Choisir un PDF"
+      (uploadHandler)="onFileUploadPackingList($event, uploader)"
+      class="w-full"
+    />
   
    
     </div>
+
     <div class="field col-12">
-    <div *ngIf="importData.fichierImport !== null" class="flex align-items-center gap-2 flex-grow-1 overflow-hidden">
-      <i class="pi pi-download text-primary" style="font-size: 1.2rem;"></i>
-      <a
-        [href]="importData.fichierImport"
-        target="_blank"
-        [download]="importData.fichierImport"
-        class="text-primary underline text-ellipsis white-space-nowrap overflow-hidden max-w-full"
-        style="flex: 1;"
-      >
-        {{ importData.fichierImport }}
-      </a>
-    </div>
-    </div>
+      <div *ngIf="importData.packingList !== null" class="flex align-items-center gap-2 flex-grow-1 overflow-hidden">
+        <i class="pi pi-download text-primary" style="font-size: 1.2rem;"></i>
+        <a
+          [href]="importData.packingList"
+          target="_blank"
+          [download]="importData.fichierImport"
+          class="text-primary underline text-ellipsis white-space-nowrap overflow-hidden max-w-full"
+          style="flex: 1;"
+        >
+          {{ importData.packingList }}
+        </a>
+      </div>
+      </div>
+   
     <div class="field col-12">
       <label>Observations</label>
       <textarea pInputTextarea [(ngModel)]="importData.observations"></textarea>
@@ -202,36 +233,33 @@
 <p-card class="section-card">
   <div class="flex justify-content-between align-items-center mb-2">
     <h4>Rouleaux</h4>
+
     <div class="flex flex-wrap gap-2 justify-content-end">
-      <p-multiSelect 
-        [options]="colonnesOptions" 
-        [(ngModel)]="colonnesAffichees"
-        optionLabel="label"
-        display="chip"
-        placeholder="Colonnes"
-        class="w-full md:w-20rem"
-      ></p-multiSelect>
+      <span class="p-input-icon-left">
+        <i class="pi pi-search"></i>
+        <input pInputText type="text" placeholder="Search..." class="p-inputtext-sm" />
+      </span>
     </div>
   </div>
 
-  <div class="table-header flex justify-content-between align-items-center mb-2">
+  <!-- <div class="table-header flex justify-content-between align-items-center mb-2">
     <span></span>
     <span class="p-input-icon-left">
       <i class="pi pi-search"></i>
       <input pInputText type="text" placeholder="Search..." class="p-inputtext-sm" />
     </span>
-  </div>
+  </div> -->
 
   <p-table [value]="importData.rouleaux" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 20]" responsiveLayout="scroll">
     <ng-template pTemplate="header">
       <tr>
         <th>N° Rouleau</th>
-        <th>Métrage</th>
+        <th>Code</th>
         <th>Laize</th>
         <th>Grammage</th>
-        <th>Poids</th>
-        <th>Prix</th>
-        <th *ngIf="isColVisible('status')">Status</th>
+        <th>Poids (Kg)</th>
+        <th>Prix (€) </th>
+        <!-- <th *ngIf="isColVisible('status')">Status</th> -->
         <th *ngIf="isColVisible('dispo')">Disponibilité</th>
         <th>Actions</th>
       </tr>
@@ -240,18 +268,18 @@
     <ng-template pTemplate="body" let-r>
       <tr>
         <td>{{ r.numero }}</td>
-        <td>{{ r.metrage }}</td>
+        <td>{{ r.code }}</td>
         <td>{{ r.laize }}</td>
         <td>{{ r.grammage }}</td>
         <td>{{ r.poids }}</td>
         <td>{{ r.prix }}</td>
-        <td *ngIf="isColVisible('status')">
+        <!-- <td *ngIf="isColVisible('status')">
           <p-tag 
             [value]="r.valide ? 'Validé' : 'Non validé'" 
             [styleClass]="r.valide ? 'custom-valide' : 'custom-non-valide'">
           </p-tag>
 
-        </td>
+        </td> -->
         <td *ngIf="isColVisible('dispo')">
           <p-tag 
             [value]="r.disponible ? 'Disponible' : 'Indisponible'" 
@@ -276,31 +304,67 @@
         <input pInputText [(ngModel)]="rouleauData.numero" />
       </div>
       <div class="field">
-        <label>Métrage</label>
-        <input pInputText [(ngModel)]="rouleauData.metrage" />
+        <label for="code">Code</label>
+        <input id="code" pInputText [(ngModel)]="rouleauData.code" />
+      </div>
+      <div class="field">
+        <label for="grammage">Grammage (GR)</label>
+        <p-inputNumber
+          inputId="grammage"
+          [(ngModel)]="rouleauData.grammage"
+          [min]="0"
+          [useGrouping]="false"
+          [minFractionDigits]="0"
+          [maxFractionDigits]="2"
+          suffix=" gr">
+        </p-inputNumber>
+      </div>
+      <div class="field ">
+        <label for="description">Description</label>
+        <textarea
+          id="description"
+          pInputTextarea
+          [(ngModel)]="rouleauData.description"
+          [autoResize]="false"
+          rows="1"
+          cols="40"
+          style="width: 100%;">
+        </textarea>
       </div>
       <div class="field">
         <label>Laize</label>
         <input pInputText [(ngModel)]="rouleauData.laize" />
       </div>
       <div class="field">
-        <label>Poids</label>
-        <input pInputText [(ngModel)]="rouleauData.poids" />
+        <label for="poids">Poids (kg)</label>
+        <p-inputNumber
+          inputId="poids"
+          [(ngModel)]="rouleauData.poids"
+          mode="decimal"
+          locale="fr-FR"
+          [min]="0"
+          [minFractionDigits]="2"
+          [maxFractionDigits]="3"
+          suffix=" kg">
+        </p-inputNumber>
       </div>
-
-      <!-- ✅ Statut -->
       <div class="field">
-        <label>Statut</label>
-        <p-dropdown 
-          [options]="[{label: 'Validé', value: true}, {label: 'Non validé', value: false}]"
-          [(ngModel)]="rouleauData.valide"
-          placeholder="Sélectionner un statut"
-          appendTo="body">
-        </p-dropdown>
+        <label for="prix">Prix (EUR)</label>
+        <p-inputNumber
+          inputId="prix"
+          [(ngModel)]="rouleauData.prix"
+          mode="decimal"
+          locale="fr-FR"
+          [min]="0"
+          [minFractionDigits]="2"
+          [maxFractionDigits]="3"
+          suffix=" EUR">
+        </p-inputNumber>
       </div>
+     
 
       <!-- ✅ Disponibilité -->
-      <div class="field">
+      <!-- <div class="field">
         <label>Disponibilité</label>
         <p-dropdown 
           [options]="[{label: 'Disponible', value: true}, {label: 'Indisponible', value: false}]"
@@ -308,7 +372,7 @@
           placeholder="Sélectionner disponibilité"
           appendTo="body">
         </p-dropdown>
-      </div>
+      </div> -->
     </ng-template>
 
     <ng-template pTemplate="footer">

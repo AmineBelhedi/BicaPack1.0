@@ -15,6 +15,9 @@ import { QRCodeModule } from 'angularx-qrcode';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DetailCommandeRoutingModule } from './detail-commande-routing.module';
 import { DetailCommandeComponent } from './detail-commande.component'; // adapte le chemin si besoin
+import { ProgressBarModule } from 'primeng/progressbar';
+import { ToastModule } from 'primeng/toast';
+import { CheckboxModule } from 'primeng/checkbox';
 
 @NgModule({
   declarations: [DetailCommandeComponent],
@@ -25,9 +28,12 @@ import { DetailCommandeComponent } from './detail-commande.component'; // adapte
     TableModule,
     TagModule,
     ButtonModule,
+    CheckboxModule,
+    ToastModule, 
     ImageModule,
     DropdownModule,
     FileUploadModule,
+    ProgressBarModule, 
     ChipsModule,
     ChipModule,
     QRCodeModule,

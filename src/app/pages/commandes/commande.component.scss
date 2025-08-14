@@ -33,3 +33,11 @@
   border-radius: 8px;
   border: 1px solid var(--surface-border);
 }
+
+
+:host ::ng-deep .dim-fieldset .p-fieldset-legend {
+  font-weight: 600;
+}
+.dim-grid {
+  row-gap: .5rem;
+}

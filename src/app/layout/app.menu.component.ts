@@ -14,16 +14,16 @@ export class AppMenuComponent implements OnInit {
 
     ngOnInit() {
         this.model = [
-            {
-                label: 'Home',
-                items: [
-                    { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/'] }
-                ]
-            },
+            // {
+            //     label: 'Home',
+            //     items: [
+            //         { label: 'Dashboard', icon: 'pi pi-fw pi-home', routerLink: ['/'] }
+            //     ]
+            // },
             {
                 label: 'Production',
                 items: [
-                    { label: 'Models', icon: 'pi pi-box', routerLink: ['/model'], badge: 'NEW' },
+                    // { label: 'Models', icon: 'pi pi-box', routerLink: ['/model'], badge: 'NEW' },
                     { label: 'Commandes', icon: 'pi pi-shopping-bag', routerLink: ['/pages/commandes'] }
 
                 ]
@@ -32,24 +32,24 @@ export class AppMenuComponent implements OnInit {
                 label: 'STOCK',
                 items: [
                     {
-                        label: 'Import',
+                        label: 'Imports',
                         icon: 'pi pi-cloud-download',
                         routerLink: ['/pages/import']
                     },
                 ]
             },
-            {
-                label: 'Pages',
-                icon: 'pi pi-fw pi-briefcase',
-                items: [
+            // {
+            //     label: 'Pages',
+            //     icon: 'pi pi-fw pi-briefcase',
+            //     items: [
                     
-                    {
-                        label: 'Empty',
-                        icon: 'pi pi-fw pi-circle-off',
-                        routerLink: ['/pages/empty']
-                    },
-                ]
-            },
+            //         {
+            //             label: 'Empty',
+            //             icon: 'pi pi-fw pi-circle-off',
+            //             routerLink: ['/pages/empty']
+            //         },
+            //     ]
+            // },
         ];
     }
 }

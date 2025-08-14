@@ -8,10 +8,12 @@ export interface RouleauImport {
   code : string ; 
   prix : number ; 
   poids: number;
+  poidsReserve ?: number ; 
+  poidsRestant ?: number ; 
   laize: number;
   valide: boolean;
   disponible: boolean;
-
+  reference ?: string ; 
    partiel ?: boolean;
  status  ?: boolean;
   reserved  ?: boolean;
@@ -29,5 +31,6 @@ export interface ImportModel {
   prix?: number;
   observations?: string;
   fichierImport?: string; // nom du fichier PDF importé
+  packingList ?: string ; 
   rouleaux?: RouleauImport[]; // liste des rouleaux liés
 }

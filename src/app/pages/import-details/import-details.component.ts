@@ -75,7 +75,7 @@ export class ImportDetailsComponent implements OnInit {
     const list = this.importData?.rouleaux ?? [];
     this.prixTotalImport = list.reduce((sum, item) => {
       const prix = this.toNumber(item?.prix);
-      const poidsKg = this.toNumber(item?.poids) / 1000; // si poids est en grammes
+      const poidsKg = this.toNumber(item?.poids) ; // si poids est en grammes
       return sum + (prix * poidsKg);
     }, 0);
     // Optionnel: arrondir à 3 décimales
@@ -91,7 +91,7 @@ export class ImportDetailsComponent implements OnInit {
         const list = imp?.rouleaux ?? [];
     this.prixTotalImport = list.reduce((sum, item) => {
       const prix = this.toNumber(item?.prix);
-      const poidsKg = this.toNumber(item?.poids) / 1000; // si poids est en grammes
+      const poidsKg = this.toNumber(item?.poids) ; // si poids est en grammes
       return sum + (prix * poidsKg);
     }, 0);
     // Optionnel: arrondir à 3 décimales
@@ -129,6 +129,15 @@ export class ImportDetailsComponent implements OnInit {
     // });
   }
   
+  calculPoidsTotal() : number{
+   let  poids  = 0  ; 
+   if (this.importData.rouleaux){
+    this.importData.rouleaux.map(item=>{
+        poids +=item.poids; 
+    })
+  }
+    return poids; 
+  }
   onUploadFacture(evt: FileUploadHandlerEvent): void {
     const file = evt.files?.[0];
     if (!file) {
@@ -242,6 +251,30 @@ saveImportHeader(): void {
     });
   }
 
+  onFileUploadPackingList(evt: FileUploadHandlerEvent, uploader: FileUpload): void {
+    const file = evt.files?.[0];
+    if (!file) {
+      this.message.add({severity:'warn', summary:'Aucun fichier', detail:'Sélectionnez un PDF.'});
+      return;
+    }
+
+    this.uploading = true;
+    this.importService.uploadPackingList(this.importId, file).subscribe({
+      next: () => {
+        this.message.add({severity:'success', summary:'Téléversé', detail:'Packing List envoyée.'});
+        uploader.clear();      
+           // réinitialiser le bouton
+           this.loadAll();
+        this.uploading = false;
+        // éventuellement: this.reloadDocuments();
+      },
+      error: () => {
+        this.message.add({severity:'error', summary:'Erreur', detail:'Échec de l’upload.'});
+        this.uploading = false;
+      }
+    });
+  }
+
   // ====== ROULEAUX ======
   isColVisible(colKey: string): boolean {
     return this.colonnesAffichees.some(c => c.value === colKey);
@@ -315,11 +348,11 @@ saveImportHeader(): void {
       poids: Number(this.rouleauData.poids) || 0,
       valide: this.rouleauData.valide ?? false,
       disponible: this.rouleauData.disponible ?? true,
-      numeroInterne: String(this.newRouleau.numeroInterne),
-      description:String(this.newRouleau.description),
-      code: String(this.newRouleau.code),
-      prix: Number(this.newRouleau.prix), 
-      grammage : Number(this.newRouleau.grammage)
+      numeroInterne: String(this.rouleauData.numeroInterne),
+      description:String(this.rouleauData.description),
+      code: String(this.rouleauData.code),
+      prix: Number(this.rouleauData.prix), 
+      grammage : Number(this.rouleauData.grammage)
     };
 
     const obs = body.id

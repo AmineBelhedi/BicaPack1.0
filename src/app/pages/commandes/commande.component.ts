@@ -32,9 +32,11 @@ export class CommandeComponent implements OnInit {
     quantite: 0,
     largeur: 0,
     longueur: 0,
-    epaisseur: 0,
-    modeleName: '',
-    nomCommande: '',
+    poidsPoigner : 0 , 
+    soufflet : 0 , 
+    grammage: 0,
+    description: '',
+   
     imageUrl: ''
   };
 
@@ -55,7 +57,7 @@ export class CommandeComponent implements OnInit {
   private dtoToView(dto: CommandeDTO): RowView {
     return {
       ...dto,
-      nomCommande: (dto as any).nomCommande ?? dto.modeleName ?? '',
+      description: (dto as any).nomCommande ?? dto.description ?? '',
       imageUrl: (dto as any).imageUrl ?? ''
     };
   }
@@ -68,8 +70,10 @@ export class CommandeComponent implements OnInit {
       quantite: this.toNum(view.quantite, 0),
       largeur: this.toNum(view.largeur, 0),
       longueur: this.toNum(view.longueur, 0),
-      epaisseur: this.toNum(view.epaisseur, 0),
-      modeleName: (view.nomCommande ?? view.modeleName ?? '').trim(),
+      grammage: this.toNum(view.grammage, 0),
+      soufflet: this.toNum(view.soufflet, 0),
+      poidsPoigner: this.toNum(view.poidsPoigner, 0),
+      description: (view.nomCommande ?? view.description ?? '').trim(),
       // Si ton backend expose ces champs, ils restent transmis tels quels :
       poidsNecessaire: view.poidsNecessaire,
       poidsReserve: view.poidsReserve,
@@ -88,6 +92,9 @@ export class CommandeComponent implements OnInit {
     this.getAll();
   }
 
+    uploading = false;
+  cacheBust: number | null = null;
+
   getAll() {
     this.svc.getAll().subscribe({
       next: data => (this.rows = (data || []).map(d => this.dtoToView(d))),
@@ -103,8 +110,10 @@ export class CommandeComponent implements OnInit {
       quantite: 0,
       largeur: 0,
       longueur: 0,
-      epaisseur: 0,
-      modeleName: '',
+      grammage: 0,
+      description: '',
+      soufflet : 0 , 
+      poidsPoigner : 0 , 
       nomCommande: '',
       imageUrl: ''
     };
@@ -170,7 +179,7 @@ export class CommandeComponent implements OnInit {
     if ((this.form.quantite ?? 0) <= 0 ||
         (this.form.largeur ?? 0)  <= 0 ||
         (this.form.longueur ?? 0) <= 0 ||
-        (this.form.epaisseur ?? 0) <  0) {
+        (this.form.grammage ?? 0) <  0) {
       this.toast.add({ severity: 'warn', summary: 'Vérifier les valeurs', detail: 'Quantité et dimensions', life: 2500 });
       return;
     }
@@ -220,7 +229,7 @@ export class CommandeComponent implements OnInit {
   formatDimension(c: RowView): string {
     const L = c.longueur ?? '–';
     const l = c.largeur  ?? '–';
-    const p = c.epaisseur ?? '–';
+    const p = c.grammage ?? '–';
     return `${L}×${l}×${p}`;
   }
 }

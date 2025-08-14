@@ -32,6 +32,11 @@ export class ImportService {
   deleteImport(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+// ▶ Rechercher les rouleaux disponibles par laize et poids minimum
+searchRouleauxByLaizeAndPoidsMin(laize: number, poidsMin: number): Observable<RouleauImport[]> {
+  const url = `${this.apiUrl}/search?laize=${laize}&poidsMin=${poidsMin}`;
+  return this.http.get<RouleauImport[]>(url);
+}
 
   // ▶ Ajouter un rouleau à un import
   addRouleauToImport(importId: number, rouleau: RouleauImport): Observable<RouleauImport> {
@@ -41,6 +46,11 @@ export class ImportService {
     const form = new FormData();
     form.append('file', file, file.name); // le nom du champ DOIT être "file"
     return this.http.post<void>(`${this.apiUrl}/${importId}/fichier/upload`, form);
+  }
+  uploadPackingList(importId: number, file: File): Observable<void> {
+    const form = new FormData();
+    form.append('file', file, file.name); // le nom du champ DOIT être "file"
+    return this.http.post<void>(`${this.apiUrl}/${importId}/packing-list/upload`, form);
   }
 
   uploadFactureWithProgress(importId: number, file: File): Observable<number> {

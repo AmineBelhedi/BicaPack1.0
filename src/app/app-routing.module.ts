@@ -55,6 +55,14 @@ const routes: Routes = [
         canActivate: [authGuard],
         data: { roles: ['OWNER'] }
       },
+      {
+        path: 'pages/users',
+        loadChildren: () =>
+          import('./pages/list-users/list-users.module')
+            .then(m => m.ListUsersModule),
+        canActivate: [authGuard],
+        data: { roles: ['OWNER'] }
+      },
 
       // Liste commandes (si tu l’utilises toujours)
       {
