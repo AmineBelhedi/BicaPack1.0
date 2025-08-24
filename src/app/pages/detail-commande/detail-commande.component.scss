@@ -211,3 +211,250 @@ $bica-green-dark: #8d9c2e;
   font-weight: 500; /* facultatif : pour l’aligner avec les autres */
   font-size: .82rem; /* idem pour garder la même taille */
 }
+
+.formula-note { white-space: nowrap; }
+
+
+
+
+
+
+
+
+
+
+/* ===============================
+   PATCH RESPONSIVE — BICAPACK
+   (à coller en bas du fichier)
+   =============================== */
+
+/* Breakpoints */
+$bp-sm: 576px;
+$bp-md: 768px;
+$bp-lg: 992px;
+$bp-xl: 1200px;
+
+/* Helpers */
+@mixin up($bp)   { @media (min-width: $bp) { @content; } }
+@mixin down($bp) { @media (max-width: #{($bp - 1)}) { @content; } }
+
+/* Cartes & paddings fluides */
+.big-card {
+  padding: clamp(.75rem, 1.5vw, 1.25rem) clamp(1rem, 2.2vw, 1.25rem);
+  border-radius: clamp(14px, 1.2vw, 18px);
+}
+
+/* ===== HEADER ===== */
+.hero {
+  flex-wrap: wrap;
+  gap: .75rem 1rem;
+  align-items: flex-start;
+
+  .header-left { min-width: 240px; }
+  .header-top  { flex-wrap: wrap; gap: .5rem .6rem; }
+
+  /* Actions qui passent dessous en mobile */
+  .hero-actions {
+    margin-left: auto;
+    @include down($bp-md){
+      width: 100%;
+      justify-content: flex-start;
+      margin-left: 0;
+    }
+  }
+}
+
+.hero h2 {
+  font-size: clamp(1.1rem, .8rem + 1.6vw, 1.5rem);
+}
+
+.meta-row {
+  flex-wrap: wrap;
+  row-gap: .35rem;
+}
+
+/* ===== STATS =====
+   1 col (mobile) → 2 (sm) → 4 (lg) */
+.stats {
+  grid-template-columns: 1fr;
+  @include up($bp-sm){ grid-template-columns: repeat(2, 1fr); }
+  @include up($bp-lg){ grid-template-columns: repeat(4, 1fr); }
+  gap: clamp(.6rem, 1.8vw, 1rem);
+}
+
+.stat { padding: clamp(.7rem, 1.6vw, .9rem) clamp(.75rem, 1.8vw, 1rem); }
+.stat-title { font-size: clamp(.78rem, .7rem + .2vw, .85rem); }
+
+/* ===== GRID PRINCIPALE =====
+   1 col (mobile) → 2 col (lg) → 3 col (xl) */
+.grid-3 {
+  grid-template-columns: 1fr;
+  @include up($bp-lg){ grid-template-columns: 300px minmax(0, 1fr); }
+  @include up($bp-xl){ grid-template-columns: 300px minmax(0, 1fr) 320px; }
+  gap: clamp(.9rem, 1.8vw, 1.25rem);
+}
+
+/* ===== APERÇU ===== */
+.image-box {
+  min-height: clamp(160px, 24vw, 220px);
+  border-radius: clamp(10px, 1vw, 12px);
+}
+
+/* ===== DÉTAILS & DIMENSIONS ===== */
+.form.two {
+  grid-template-columns: 1fr;
+  @include up($bp-md){ grid-template-columns: 1fr 1fr; }
+  gap: clamp(.75rem, 1.8vw, 1rem);
+}
+
+.inline { flex-wrap: wrap; row-gap: .4rem; }
+
+/* Métriques: s’empile correctement en mobile */
+.metrics {
+  flex-wrap: wrap;
+  gap: clamp(.6rem, 1.8vw, 1rem);
+  align-items: stretch;
+}
+.metric {
+  flex: 1 1 200px;
+  min-width: 160px;
+  > label { font-size: clamp(.78rem, .72rem + .2vw, .82rem); }
+  /* champs pleine largeur */
+  :where(input, .p-inputtext, .p-inputnumber){ width: 100%; }
+}
+
+/* ===== SECTION ÉDITION ===== */
+.edit-identite-card .field {
+  gap: clamp(.25rem, .4vw, .35rem);
+  margin-bottom: clamp(.6rem, 1.4vw, .9rem);
+}
+.edit-identite-card .field > label {
+  font-size: clamp(.85rem, .8rem + .2vw, .9rem);
+}
+
+/* ===== ROULEAUX ===== */
+.section-head { gap: .5rem 1rem; }
+
+.add-inline {
+  gap: .5rem .6rem;
+  flex-wrap: nowrap;
+
+  .rouleau-id { width: 320px; max-width: 40vw; }
+
+  @include down($bp-md){
+    flex-wrap: wrap;
+    .rouleau-id { flex: 1 1 220px; max-width: 100%; }
+  }
+
+  /* p-inputNumber tailles adaptatives */
+  .poids-kg .p-inputnumber,
+  .poids-kg .p-inputnumber input {
+    width: clamp(90px, 18vw, 120px) !important;
+  }
+}
+
+/* Table scrollable (déjà OK) + largeur mini pour éviter la casse */
+:host ::ng-deep .p-datatable-wrapper {
+  max-width: 100%;
+  overflow-x: auto;
+}
+:host ::ng-deep .p-datatable {
+  min-width: 720px; /* évite les colonnes tassées sur petit écran */
+}
+
+/* États */
+.state { padding: clamp(.75rem, 1.6vw, 1rem); }
+
+/* ===== DIMS — espacement adapté ===== */
+.details-card .metrics { gap: clamp(.6rem, 1.8vw, 1rem); margin-bottom: clamp(.5rem, 1.2vw, .75rem); }
+.details-card .dim-actions { margin-top: clamp(.35rem, 1vw, .5rem); }
+@media (min-width: 1024px) { .details-card .dim-actions { margin-top: 1.25rem; } }
+
+/* ===== BOUTONS ===== */
+.copy-btn {
+  width: clamp(1.9rem, 3.5vw, 2rem);
+  height: clamp(1.9rem, 3.5vw, 2rem);
+}
+
+.bica-add, .bica-save, .bica-secondary, .bica-link {
+  padding: clamp(.4rem, 1.2vw, .55rem) clamp(.7rem, 1.6vw, .9rem) !important;
+  border-radius: clamp(8px, 1vw, 10px);
+}
+
+/* Rangées d’actions qui s’empilent joliment */
+.actions-line {
+  flex-wrap: wrap;
+  gap: .5rem .6rem;
+}
+
+/* ===== TYPO UTILE ===== */
+.card-title { font-size: clamp(1rem, .9rem + .5vw, 1.15rem); }
+
+/* ===== Petites finitions ===== */
+/* Empêcher les débordements sur mobile */
+* { min-width: 0; }
+img, svg, video { max-width: 100%; height: auto; }
+
+/* Autoriser la formule à aller à la ligne en mobile */
+.formula-note {
+  white-space: nowrap;
+  @include down($bp-md){ white-space: normal; }
+}
+
+/* Respecte l’accessibilité: réduit les anims si demandé */
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+
+/* ====== TABLE ROULEAUX — anti-scroll ====== */
+
+/* 0) Empêche un min-width global de PrimeNG de forcer le scroll */
+:host ::ng-deep .p-datatable.minimal { min-width: 0 !important; }
+
+/* 1) Wrap des valeurs longues (IDs, …) */
+.mono { overflow-wrap: anywhere; word-break: break-word; }
+
+/* 2) Colonnes compactes */
+:host ::ng-deep .p-datatable .col-idx    { width: 1%; white-space: nowrap; }
+:host ::ng-deep .p-datatable .col-num    { width: 1%; white-space: nowrap; text-align: right; }
+:host ::ng-deep .p-datatable .col-actions{ width: 1%; white-space: nowrap; text-align: right; }
+
+/* 3) Mode "stack" (mobile <= breakpoint) — lisible + zéro scroll */
+:host ::ng-deep .p-table.rouleaux-table.p-table-responsive .p-datatable-tbody > tr > td {
+  display: grid;
+  grid-template-columns: 130px 1fr;  /* label | valeur */
+  gap: .35rem .75rem;
+  align-items: start;
+  padding-block: .6rem;
+  white-space: normal;
+}
+:host ::ng-deep .p-table.rouleaux-table.p-table-responsive .p-datatable-tbody > tr > td::before {
+  content: attr(data-title);
+  font-size: .82rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+/* 4) Allège l’en-tête en mobile (PrimeNG le fait souvent, on renforce) */
+@media (max-width: 960px){
+  :host ::ng-deep .p-table.rouleaux-table .p-datatable-thead { display: none; }
+}
+
+/* 5) Si tu préfères garder l’en-tête visible en mobile, commente le bloc ci-dessus
+      et réduis plutôt la taille des entêtes:
+:host ::ng-deep .p-table.rouleaux-table .p-datatable-thead th{
+  font-size: .8rem;
+  padding-block: .35rem;
+}
+*/
+
+/* 6) Option: si tu manques vraiment de place en mobile, cache une colonne */
+@media (max-width: 576px){
+  /* Exemple: masquer la colonne # en tout petit écran */
+  :host ::ng-deep .p-datatable .col-idx { display: none; }
+}
+
+
+
+
+

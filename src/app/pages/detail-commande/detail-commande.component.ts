@@ -271,11 +271,7 @@ surfaceUnitaire(c: any): number {
   return (L + v / 2 + pli) * ((W + v) * 2);
 }
 
-// Surface totale de la commande (en cm²)
-surfaceCommande(c: any): number {
-  const qte = Number(c?.quantite ?? 0);
-  return this.surfaceUnitaire(c) * qte;
-}
+
 
 
   // =================== Rouleaux : recherche + réservation ===================
@@ -500,16 +496,18 @@ surfaceCommande(c: any): number {
     return Math.trunc(v * f) / f;
   }
 
-  // g si < 1 Kg, sinon Kg. Précis, sans séparateur de milliers.
-  formatWeightSmart(kg: number | null | undefined, decG = 6, decKg = 6): string {
+  
+  // g si < 1 Kg, sinon Kg. Précis, arrondi à 3 décimales max
+  formatWeightSmart(kg: number | null | undefined, decG = 3, decKg = 3): string {
     const v = kg ?? 0;
     if (v < 1) {
-      const g = this.trunc(v * 1000, decG);
+      const g = v * 1000;
       return g.toFixed(decG) + ' g';
     }
-    const k = this.trunc(v, decKg);
-    return k.toFixed(decKg) + ' Kg';
+    return v.toFixed(decKg) + ' Kg';
   }
+
+
   formatQtyNoGroup(value: number | null | undefined): string {
     const v = value ?? 0;
     return v.toLocaleString('en-US', {

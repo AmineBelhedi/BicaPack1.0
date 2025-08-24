@@ -148,6 +148,24 @@
 
         <small class="muted block mb-3">Format : longueur × largeur (cm) ; grammage (g/m²).</small>
 
+
+        <p-divider></p-divider>
+
+        <h5 class="muted mb-2">Surface</h5>
+        <div class="form two">
+          <div class="f">
+            <label>Surface (par unité)</label>
+            <input pInputText [readonly]="true"
+                  [value]="formatNoGroup(surfaceUnitaire(c), 'cm²')" />
+            <small class="muted block mt-1 formula-note">
+              S = (L + ½·v + pli) × 2 × (W + v) &nbsp;&nbsp; (v = soufflet)
+            </small>
+          </div>
+        </div>
+
+        <p-divider></p-divider>
+
+        <h5 class="muted mb-2">Poids</h5>
         <!-- 👉 lecture seule mais calcul avec valeurs temporaires -->
         <div class="form two">
           <div class="f">
@@ -161,29 +179,7 @@
               [value]="formatNoGroup(calculPoidsTotalCommande(c), 'Kg')" />-->
             <!-- Total commande (auto g↔Kg), 6 décimales tronquées -->
             <input pInputText [readonly]="true"
-                  [value]="formatWeightSmart(calculPoidsTotalCommande(c), 6, 6)" />
-          </div>
-        </div>
-        <p-divider></p-divider>
-
-        <h5 class="muted mb-2">Surface</h5>
-        <div class="form two">
-          <div class="f">
-            <label>Surface (par unité)</label>
-            <input pInputText [readonly]="true"
-                  [value]="formatNoGroup(surfaceUnitaire(c), 'cm²')" />
-            <small class="muted block mt-1">
-              S = (L + ½·v + pli) × 2 × (W + v) &nbsp;&nbsp; (v = soufflet)
-            </small>
-          </div>
-
-          <div class="f">
-            <label>Surface totale commande</label>
-            <input pInputText [readonly]="true"
-                  [value]="formatNoGroup(surfaceCommande(c), 'cm²')" />
-            <small class="muted block mt-1">
-              Multiplie la surface unitaire par la quantité.
-            </small>
+                  [value]="formatWeightSmart(calculPoidsTotalCommande(c), 3, 3)" />
           </div>
         </div>
 
@@ -287,27 +283,36 @@
         </div>
       </div>
 
-      <p-table [value]="displayedAllocations" [rows]="8" [paginator]="true" [rowsPerPageOptions]="[8,16,32]"
-               responsiveLayout="scroll" styleClass="minimal">
+      <p-table
+        [value]="displayedAllocations"
+        [rows]="8"
+        [paginator]="true"
+        [rowsPerPageOptions]="[8,16,32]"
+        responsiveLayout="stack"
+        breakpoint="960px"
+        styleClass="minimal rouleaux-table"
+      >
         <ng-template pTemplate="header">
           <tr>
-            <th style="width:90px">#</th>
+            <th class="col-idx">#</th>
             <th>Rouleau</th>
-            <th>Poids (kg)</th>
-            <th style="width:80px"></th>
+            <th class="col-num">Poids (kg)</th>
+            <th class="col-actions"></th>
           </tr>
         </ng-template>
+
         <ng-template pTemplate="body" let-a>
           <tr>
-            <td class="mono">{{ a.id }}</td>
-            <td class="mono">{{ a.rouleauId }}</td>
-            <td class="mono">{{ a.poidsReserve }}</td>
-            <td class="text-right">
+            <td class="mono col-idx" data-title="#"> {{ a.id }} </td>
+            <td class="mono" data-title="Rouleau"> {{ a.rouleauId }} </td>
+            <td class="mono col-num" data-title="Poids (kg)"> {{ a.poidsReserve }} </td>
+            <td class="text-right col-actions" data-title="Actions">
               <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-rounded p-button-sm"
                       (click)="removeAllocation(a)" pTooltip="Supprimer"></button>
             </td>
           </tr>
         </ng-template>
+
         <ng-template pTemplate="emptymessage">
           <tr><td colspan="4" class="muted text-center py-4">Aucun rouleau</td></tr>
         </ng-template>
