@@ -42,7 +42,8 @@ export class DetailCommandeComponent implements OnInit {
   // ces valeurs ne seront appliquées à `commande` que dans saveCommande()
   poidsPoignerTmp: number | null = 0;
   souffletTmp: number | null = 0;
-
+  largeurPliTmp: number = 2;//valeur par défaut
+  pliError: string | null = null;//message d'erreur pour le pli
   // Stats/Calculs
   grammage = 80; // g/m²
   pieces: PieceJointe[] = [];
@@ -125,36 +126,40 @@ export class DetailCommandeComponent implements OnInit {
   // =================== Options (Poignée / Soufflet) ===================
   // 👉 CHANGEMENT: ne plus toucher `commande` ici (pas de save, pas de mutation du modèle)
   togglePoigner(): void {
-    if (!this.hasPoigner) this.poidsPoignerTmp = 0; // reset visuel si on décoche (optionnel)
+ // reset visuel si on décoche (optionnel)
   }
   toggleSoufflet(): void {
-    if (!this.hasSoufflet) this.souffletTmp = 0; // reset visuel si on décoche (optionnel)
+ // reset visuel si on décoche (optionnel)
   }
   // Appelé à chaque changement du checkbox Poignée.
 // On reçoit la nouvelle valeur (true/false) de façon fiable.
 onPoignerChange(checked: boolean): void {
   this.hasPoigner = checked;
-  if (!checked) {
-    // optionnel: remettre à 0 quand on décoche
-    this.poidsPoignerTmp = 0;
-  } else {
-    // si tu veux ré-initialiser avec la valeur serveur existante:
-    if (this.commande) {
-      this.poidsPoignerTmp = Number(this.commande.poidsPoigner) || 0;
-    }
+  
+}
+validateLargeurPli(val: number | null | undefined, largeurCm?: number | null): void {
+  const v = val ?? 0;
+  const largeur = Number(largeurCm ?? 0);
+  this.pliError = null;
+
+  if (v < 0) {
+    this.largeurPliTmp = 0;
+    this.pliError = 'Le pli ne peut pas être négatif.';
+    return;
+  }
+  if (largeur > 0 && v > largeur / 2) {
+    const max = +(largeur / 2).toFixed(2);
+    this.largeurPliTmp = max;
+    this.pliError = `Le pli ne doit pas dépasser ${max.toFixed(2)} cm (½ de la largeur).`;
   }
 }
+
+
 
 // Idem pour Soufflet
 onSouffletChange(checked: boolean): void {
   this.hasSoufflet = checked;
-  if (!checked) {
-    this.souffletTmp = 0;
-  } else {
-    if (this.commande) {
-      this.souffletTmp = Number(this.commande.soufflet) || 0;
-    }
-  }
+  
 }
 
   // =================== Sauvegardes ===================
@@ -230,27 +235,22 @@ onSouffletChange(checked: boolean): void {
   // 👉 CHANGEMENT: l’aperçu de poids utilise les valeurs temporaires + switches
   calculPoidsTotal(c?: CommandeDTO): number {
     if (!c) return 0;
-    const longueur = Number(c.longueur) || 0;
-    const largeur  = Number(c.largeur)  || 0;
-    const grammage = Number(c.grammage) || 0;
+    const surfaceCm2 = this.surfaceUnitaire(c); // cm²
+    const grammage   = Number(c.grammage ?? 0);             // g/m²
+    const poidsPoigner = Math.max(Number(this.poidsPoignerTmp ?? c?.poidsPoigner ?? 0) || 0, 0);
 
-    let total = 0;
-    if (longueur > 0 && largeur > 0 && grammage > 0) {
-      total += longueur * largeur * grammage;
+    if (!(surfaceCm2 > 0) || !(grammage > 0)) return poidsPoigner;
+
+    const unitG = (surfaceCm2 * grammage) / 10_000;         // g
+    return unitG + poidsPoigner;  
     }
-
-    const poidsPoigner = this.hasPoigner ? (Number(this.poidsPoignerTmp) || 0) : 0;
-    total += poidsPoigner;
-
-    // (si un jour tu intègres le soufflet dans la formule, fais-le ici avec this.souffletTmp)
-    return total; // grammes
-  }
 
   calculPoidsTotalCommande(c?: CommandeDTO): number {
     if (!c) return 0;
-    const unitG = this.calculPoidsTotal(c);
-    const qty   = Number(c.quantite) || 0;
-    return (unitG * qty) / 1000; // Kg
+    const unitG = this.calculPoidsTotal(c);   // g
+    const qty   = Number(c.quantite ?? 0);
+    if (!(unitG >= 0) || !(qty > 0)) return 0;
+    return (unitG * qty) / 1000;              // Kg
   }
 
   formatDimension(c?: CommandeDTO): string {
@@ -259,6 +259,24 @@ onSouffletChange(checked: boolean): void {
     const g = c?.grammage ?? '—';
     return `${L}×${l}×${g}`;
   }
+  //======calcul de surface ==========
+  // Surface par unité (en cm²)
+surfaceUnitaire(c: any): number {
+  const L  = Number(c?.longueur ?? 0);
+  const W  = Number(c?.largeur ?? 0);
+  const v  = Math.max(Number(this.souffletTmp ?? c?.soufflet ?? 0), 0);   // soufflet actuel
+  const pli = Number(this.largeurPliTmp ?? 0);                        // pli (toujours visible)
+
+  // Formule : (L + v/2 + pli) * ( (W + v) * 2 )
+  return (L + v / 2 + pli) * ((W + v) * 2);
+}
+
+// Surface totale de la commande (en cm²)
+surfaceCommande(c: any): number {
+  const qte = Number(c?.quantite ?? 0);
+  return this.surfaceUnitaire(c) * qte;
+}
+
 
   // =================== Rouleaux : recherche + réservation ===================
   private getRouleaux(): void {
@@ -467,5 +485,39 @@ onSouffletChange(checked: boolean): void {
     error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Mise à jour échouée' })
   });
 }
+  // Affiche sans séparateur de milliers, avec 2 décimales et unité
+  formatNoGroup(value: number | null | undefined, unit: string): string {
+    const v = value ?? 0;
+    return v.toLocaleString('en-US', {
+      useGrouping: false,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 10
+    }) + ' ' + unit;
+  }
+    // tronque sans arrondir
+  private trunc(v: number, d: number) {
+    const f = Math.pow(10, d);
+    return Math.trunc(v * f) / f;
+  }
+
+  // g si < 1 Kg, sinon Kg. Précis, sans séparateur de milliers.
+  formatWeightSmart(kg: number | null | undefined, decG = 6, decKg = 6): string {
+    const v = kg ?? 0;
+    if (v < 1) {
+      const g = this.trunc(v * 1000, decG);
+      return g.toFixed(decG) + ' g';
+    }
+    const k = this.trunc(v, decKg);
+    return k.toFixed(decKg) + ' Kg';
+  }
+  formatQtyNoGroup(value: number | null | undefined): string {
+    const v = value ?? 0;
+    return v.toLocaleString('en-US', {
+      useGrouping: false,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    });
+  }
+
 
 }

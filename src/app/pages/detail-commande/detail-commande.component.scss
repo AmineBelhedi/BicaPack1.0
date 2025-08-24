@@ -203,3 +203,11 @@ $bica-green-dark: #8d9c2e;
   transition: .2s ease;
   &:hover { background: rgba(255,159,28,.08) !important; }
 }
+
+
+/* Forcer le label du champ Pli à utiliser le même gris que les autres */
+.edit-identite-card label[for="pli"] {
+  color: #6b7280 !important;
+  font-weight: 500; /* facultatif : pour l’aligner avec les autres */
+  font-size: .82rem; /* idem pour garder la même taille */
+}

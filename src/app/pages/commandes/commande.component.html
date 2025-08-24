@@ -22,7 +22,7 @@
                [rows]="10"
                [paginator]="true"
                [rowsPerPageOptions]="rowsPerPageOptions"
-               [globalFilterFields]="['numeroCommande','nomCommande']"
+               [globalFilterFields]="['numeroCommande','description']"
                [(selection)]="selected"
                selectionMode="multiple"
                dataKey="id">
@@ -42,7 +42,7 @@
               <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
             </th>
             <th pSortableColumn="numeroCommande">N° Commande <p-sortIcon field="numeroCommande"></p-sortIcon></th>
-            <th pSortableColumn="nomCommande">Description <p-sortIcon field="nomCommande"></p-sortIcon></th>
+            <th pSortableColumn="description">Description <p-sortIcon field="description"></p-sortIcon></th>
             <th pSortableColumn="quantite">Quantité <p-sortIcon field="quantite"></p-sortIcon></th>
             <th>Dimensions</th>
             <!-- Date & Statut supprimés -->

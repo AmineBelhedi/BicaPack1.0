@@ -6,7 +6,6 @@ import { CommandeService } from 'src/app/services/commande.service';
 
 /** Vue UI = DTO + champs non-API qu'on garde seulement côté front */
 type RowView = CommandeDTO & {
-  nomCommande?: string;
   imageUrl?: string;
 };
 
@@ -73,7 +72,7 @@ export class CommandeComponent implements OnInit {
       grammage: this.toNum(view.grammage, 0),
       soufflet: this.toNum(view.soufflet, 0),
       poidsPoigner: this.toNum(view.poidsPoigner, 0),
-      description: (view.nomCommande ?? view.description ?? '').trim(),
+      description: (view.description ?? '').trim(),
       // Si ton backend expose ces champs, ils restent transmis tels quels :
       poidsNecessaire: view.poidsNecessaire,
       poidsReserve: view.poidsReserve,
@@ -114,7 +113,6 @@ export class CommandeComponent implements OnInit {
       description: '',
       soufflet : 0 , 
       poidsPoigner : 0 , 
-      nomCommande: '',
       imageUrl: ''
     };
     this.selectedFileName = null;

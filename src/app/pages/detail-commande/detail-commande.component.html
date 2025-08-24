@@ -16,7 +16,8 @@
           <p-tag [value]="c.description || '—'" severity="info"></p-tag>
           <span class="sep"></span>
           <span class="muted">Quantité</span>
-          <span class="strong">{{ c.quantite | number }}</span>
+          <span class="strong">{{ formatQtyNoGroup(c.quantite) }}</span>
+
         </div>
       </div>
 
@@ -36,12 +37,12 @@
         <div class="stat-value">{{ formatDimension(c) }}</div>
       </div>
       <div class="stat chip">
-        <div class="stat-title">Longueur</div>
-        <div class="stat-value">{{ c.longueur || 0 }} mm</div>
+        <div class="stat-title">Longueur  ( L )</div>
+        <div class="stat-value">{{ c.longueur || 0 }} cm</div>
       </div>
       <div class="stat chip">
-        <div class="stat-title">Largeur</div>
-        <div class="stat-value">{{ c.largeur || 0 }} mm</div>
+        <div class="stat-title">Largeur  ( w )</div>
+        <div class="stat-value">{{ c.largeur || 0 }} cm</div>
       </div>
       <div class="stat chip">
         <div class="stat-title">Grammage</div>
@@ -94,20 +95,49 @@
         <h5 class="muted mb-2">Dimensions du sac</h5>
         <div class="metrics metrics-compact">
           <div class="metric">
-            <label for="dimL">Longueur</label>
-            <p-inputNumber inputId="dimL" [(ngModel)]="c.longueur" [min]="0" [suffix]="' mm'"
-                           [inputStyle]="{ width: '110px' }"></p-inputNumber>
+            <label for="dimL">Longueur  (L)</label>
+            <p-inputNumber
+              inputId="dimL"
+              [(ngModel)]="c.longueur"
+              [min]="0"
+              [mode]="'decimal'"
+              [minFractionDigits]="0"
+              [maxFractionDigits]="6"
+              [locale]="'en-US'"
+              [useGrouping]="false"
+              [suffix]="' cm'"
+              [inputStyle]="{ width: '110px' }">
+            </p-inputNumber>
           </div>
           <div class="metric">
-            <label for="dimW">Largeur</label>
-            <p-inputNumber inputId="dimW" [(ngModel)]="c.largeur" [min]="0" [suffix]="' mm'"
-                           [inputStyle]="{ width: '110px' }"></p-inputNumber>
+            <label for="dimW">Largeur  (w)</label>
+            <p-inputNumber
+              inputId="dimW"
+              [(ngModel)]="c.largeur"
+              [min]="0"
+              [mode]="'decimal'"
+              [minFractionDigits]="0"
+              [maxFractionDigits]="6"
+              [locale]="'en-US'"
+              [useGrouping]="false"
+              [suffix]="' cm'"
+              [inputStyle]="{ width: '110px' }">
+            </p-inputNumber>
           </div>
           <div class="metric">
             <label for="dimG">Grammage</label>
-            <p-inputNumber inputId="dimG" [(ngModel)]="c.grammage" [min]="0" [mode]="'decimal'"
-                           [minFractionDigits]="0" [maxFractionDigits]="3" [suffix]="' g/m²'"
-                           [inputStyle]="{ width: '120px' }"></p-inputNumber>
+            <p-inputNumber
+              inputId="dimG"
+              [(ngModel)]="c.grammage"
+              [min]="0"
+              [mode]="'decimal'"
+              [minFractionDigits]="0"
+              [maxFractionDigits]="6"
+              [locale]="'en-US'"
+              [useGrouping]="false"
+              [suffix]="' g/m²'"
+              [inputStyle]="{ width: '120px' }">
+            </p-inputNumber>
           </div>
         </div>
 
@@ -116,21 +146,47 @@
                   (click)="saveDimensions()"></button>-->
         </div>
 
-        <small class="muted block mb-3">Format : longueur × largeur (mm) ; grammage (g/m²).</small>
+        <small class="muted block mb-3">Format : longueur × largeur (cm) ; grammage (g/m²).</small>
 
         <!-- 👉 lecture seule mais calcul avec valeurs temporaires -->
         <div class="form two">
           <div class="f">
             <label>Poids total (par unité)</label>
             <input pInputText [readonly]="true"
-                   [value]="((calculPoidsTotal(c) ?? 0) | number:'1.2-2') + ' g'"/>
+                  [value]="formatNoGroup(calculPoidsTotal(c), 'g')" />
           </div>
           <div class="f">
             <label>Poids total commande</label>
+            <!--<input pInputText [readonly]="true"
+              [value]="formatNoGroup(calculPoidsTotalCommande(c), 'Kg')" />-->
+            <!-- Total commande (auto g↔Kg), 6 décimales tronquées -->
             <input pInputText [readonly]="true"
-                   [value]="((calculPoidsTotalCommande(c) ?? 0) | number:'1.2-2') + ' Kg'"/>
+                  [value]="formatWeightSmart(calculPoidsTotalCommande(c), 6, 6)" />
           </div>
         </div>
+        <p-divider></p-divider>
+
+        <h5 class="muted mb-2">Surface</h5>
+        <div class="form two">
+          <div class="f">
+            <label>Surface (par unité)</label>
+            <input pInputText [readonly]="true"
+                  [value]="formatNoGroup(surfaceUnitaire(c), 'cm²')" />
+            <small class="muted block mt-1">
+              S = (L + ½·v + pli) × 2 × (W + v) &nbsp;&nbsp; (v = soufflet)
+            </small>
+          </div>
+
+          <div class="f">
+            <label>Surface totale commande</label>
+            <input pInputText [readonly]="true"
+                  [value]="formatNoGroup(surfaceCommande(c), 'cm²')" />
+            <small class="muted block mt-1">
+              Multiplie la surface unitaire par la quantité.
+            </small>
+          </div>
+        </div>
+
       </section>
 
       <!-- COL 3 : Options -->
@@ -146,7 +202,18 @@
           <div class="mt-2" *ngIf="hasPoigner">
             <!-- 👉 bind sur la variable temporaire, pas sur c.poidsPoigner -->
             <label for="poidsPoigner">Poids poignée</label>
-            <p-inputNumber inputId="poidsPoigner" [(ngModel)]="poidsPoignerTmp" [min]="0" [suffix]="' g'"></p-inputNumber>
+                <p-inputNumber
+                  inputId="poidsPoigner"
+                  [(ngModel)]="poidsPoignerTmp"
+                  [min]="0"
+                  [mode]="'decimal'"
+                  [minFractionDigits]="0"
+                  [maxFractionDigits]="6"
+                  [step]="0.1"
+                  [locale]="'en-US'"
+                  [useGrouping]="false"
+                  [suffix]="' g'">
+                </p-inputNumber>
           </div>
         </div>
 
@@ -157,10 +224,44 @@
           </div>
           <div class="mt-2" *ngIf="hasSoufflet">
             <!-- 👉 bind sur la variable temporaire, pas sur c.soufflet -->
-            <label for="soufflet">Soufflet</label>
-            <p-inputNumber inputId="soufflet" [(ngModel)]="souffletTmp" [min]="0" [suffix]="' mm'"></p-inputNumber>
+            <label for="soufflet">Soufflet  ( v )</label>
+            <p-inputNumber
+              inputId="soufflet"
+              [(ngModel)]="souffletTmp"
+              [min]="0"
+              [mode]="'decimal'"
+              [minFractionDigits]="0"
+              [maxFractionDigits]="6"
+              [step]="0.1"
+              [locale]="'en-US'"
+              [useGrouping]="false"
+              [suffix]="' cm'">
+            </p-inputNumber>
           </div>
         </div>
+        <div class="field mt-3 ml-3">
+        <label for="pli">Pli (largeur du pli)</label>
+        <p-inputNumber
+          inputId="pli"
+          [(ngModel)]="largeurPliTmp"
+          [min]="0"
+          [mode]="'decimal'"
+          [minFractionDigits]="0"
+          [maxFractionDigits]="2"
+          [step]="0.1"
+          [locale]="'en-US'"
+          [useGrouping]="false"
+          [suffix]="' cm'"
+          (ngModelChange)="validateLargeurPli($event)"
+          class="w-7rem">
+        </p-inputNumber>
+
+        <!--<small class="p-error block mt-1" *ngIf="pliError">{{ pliError }}</small>
+        <small class="muted block" *ngIf="!pliError && c?.largeur">
+          (Max recommandé : {{ (c.largeur/2) | number:'1.0-2':'en-US' }} cm)
+        </small>-->
+      </div>
+
 
         <div class="actions-line">
           <!-- 👉 c’est ICI seulement qu’on applique has* + *Tmp au modèle -->
