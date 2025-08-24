@@ -214,6 +214,57 @@ $bica-green-dark: #8d9c2e;
 
 .formula-note { white-space: nowrap; }
 
+/* ====== Dimensions du sac — version compacte ====== */
+.details-card .metrics.metrics-compact{
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;                 /* s’empile si l’espace manque */
+  gap: .5rem .5rem;               /* << moins d’espacement entre champs */
+  margin-bottom: .5rem;            /* plus court */
+}
+
+.details-card .metrics.metrics-compact .metric{
+  display:flex; flex-direction:column; align-items:flex-start;
+  gap: .2rem;                       /* label + champ plus proche */
+  flex: 0 0 auto;                   /* ne pas s’étirer */
+}
+
+/* Labels plus petits */
+.details-card .metrics.metrics-compact .metric > label{
+  font-size: .78rem;                /* ↓ taille label */
+  color: #6b7280;
+  margin: 0;                        /* pas d’espace inutile */
+}
+
+/* Champs compacts (PrimeNG InputNumber) */
+:host ::ng-deep .details-card .metrics.metrics-compact .p-inputnumber .p-inputtext{
+  height: 36px;                     /* plus fin */
+  padding: .35rem .5rem;            /* padding serré */
+  font-size: .95rem;
+  width: 110px;                     /* largeur fixe propre */
+}
+
+/* Le 3e champ est un peu plus large (g/m²) */
+:host ::ng-deep #dimG, 
+:host ::ng-deep .details-card .metrics.metrics-compact #dimG + .p-inputnumber .p-inputtext{
+  width: 120px;
+}
+
+/* Desktop : reste sur une ligne si possible */
+@media (min-width: 992px){
+  .details-card .metrics.metrics-compact{
+    flex-wrap: nowrap;              /* 3 champs sur une seule ligne */
+    gap: .5rem;                     /* encore un peu plus serré */
+  }
+}
+
+/* Mobile : pleine largeur si besoin */
+@media (max-width: 575px){
+  :host ::ng-deep .details-card .metrics.metrics-compact .p-inputnumber .p-inputtext{
+    width: 100%;                    /* champs prennent la ligne */
+  }
+  .details-card .metrics.metrics-compact .metric{ flex:1 1 120px; }
+}
 
 
 
