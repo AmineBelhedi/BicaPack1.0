@@ -1,0 +1,68 @@
+/* —— carte unique (mêmes styles) —— */
+.big-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, .06);
+  padding: 1rem 1.25rem;
+}
+
+/* Palette */
+$bica-orange: #ff9f1c;
+$bica-orange-dark: #e88c12;
+$bica-green: #9fb60c;
+$bica-green-dark: #8d9c2e;
+
+/* Header (hérite de la page Commande) */
+.hero { display:flex; justify-content:space-between; align-items:center; }
+.header-left { display:flex; flex-direction:column; gap:.4rem; }
+.header-top { display:flex; align-items:center; gap:.6rem; }
+.hero h2 { margin:0; font-weight:800; letter-spacing:.2px; color:#111 !important; }
+.accent { color:#111 !important; }
+.meta-row { display:flex; align-items:center; gap:.5rem; color:#6b7280; }
+.meta-row .sep { width:6px; height:6px; border-radius:50%; background:#ff9f1c; opacity:.6; }
+.hero-actions { display:flex; flex-wrap:wrap; gap:.5rem; }
+
+/* Boutons Bicapack */
+.bica-add {
+  background:$bica-orange !important; border:1px solid $bica-orange !important; color:#fff !important; font-weight:700; border-radius:10px;
+  &:hover{ background:$bica-orange-dark !important; border-color:$bica-orange-dark !important; }
+}
+.bica-save {
+  background:$bica-green !important; border:1px solid $bica-green !important; color:#fff !important; font-weight:700; border-radius:10px;
+  &:hover{ background:$bica-green-dark !important; border-color:$bica-green-dark !important; }
+}
+
+/* Aperçu haut */
+.top-preview {
+  display:flex; gap:1.25rem; align-items:flex-start; margin:1rem 0 1.25rem;
+}
+.image-box {
+  min-width:130px; min-height:130px; display:grid; place-items:center; border:1px dashed #e5e7eb; border-radius:12px;
+}
+.noimg { color:#6b7280; }
+
+.metrics { display:flex; flex-wrap:wrap; gap:.6rem; align-items:flex-end; }
+.metric { display:flex; flex-direction:column; align-items:flex-start; gap:.25rem; }
+.metric > label { font-size:.82rem; color:#6b7280; }
+
+/* Version compacte (champs étroits) */
+.metrics-compact :host ::ng-deep .p-inputtext,
+.metrics-compact :host ::ng-deep .p-inputnumber .p-inputtext {
+  height:36px; padding:.35rem .5rem; font-size:.95rem; width:110px;
+}
+
+/* Table */
+.mono { font-family: ui-monospace, Menlo, Consolas, monospace; }
+.critique { color:#dc2626; font-weight:700; }
+
+/* File upload mini */
+.file-field { display:flex; align-items:center; gap:.5rem; flex-wrap:wrap; }
+.file-input-hidden { display:none; }
+.file-btn { }
+.thumb { width:48px; height:48px; border-radius:8px; object-fit:cover; border:1px solid #e5e7eb; }
+
+/* Responsive petits écrans */
+@media (max-width: 900px){
+  .top-preview { flex-direction:column; }
+}

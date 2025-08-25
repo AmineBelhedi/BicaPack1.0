@@ -75,7 +75,7 @@ export class DetailCommandeComponent implements OnInit {
         // 👉 on initialise les switches à partir des valeurs serveur
         this.hasPoigner = !!(cmd.poidsPoigner && cmd.poidsPoigner > 0);
         this.hasSoufflet = !!(cmd.soufflet && cmd.soufflet > 0);
-
+        this.largeurPliTmp = (cmd.pli ?? 2);
         // 👉 et on prend des copies temporaires (pour ne pas modifier `commande` tant que non sauvegardé)
         this.poidsPoignerTmp = Number(cmd.poidsPoigner) || 0;
         this.souffletTmp     = Number(cmd.soufflet)     || 0;
@@ -137,9 +137,8 @@ onPoignerChange(checked: boolean): void {
   this.hasPoigner = checked;
   
 }
-validateLargeurPli(val: number | null | undefined, largeurCm?: number | null): void {
+validateLargeurPli(val: number | null | undefined): void {
   const v = val ?? 0;
-  const largeur = Number(largeurCm ?? 0);
   this.pliError = null;
 
   if (v < 0) {
@@ -147,12 +146,15 @@ validateLargeurPli(val: number | null | undefined, largeurCm?: number | null): v
     this.pliError = 'Le pli ne peut pas être négatif.';
     return;
   }
-  if (largeur > 0 && v > largeur / 2) {
-    const max = +(largeur / 2).toFixed(2);
+
+  const max = 5;
+  if (v > max) {
     this.largeurPliTmp = max;
-    this.pliError = `Le pli ne doit pas dépasser ${max.toFixed(2)} cm (½ de la largeur).`;
+    this.pliError = `Le pli ne doit pas dépasser ${max.toFixed(2)} cm.`;
   }
 }
+
+
 
 
 
@@ -177,6 +179,7 @@ onSouffletChange(checked: boolean): void {
       longueur: this.toNum(view.longueur, 0),
       grammage: this.toNum(view.grammage, 0),
       soufflet: this.toNum(view.soufflet, 0),
+      pli: this.toNum(this.largeurPliTmp, 2),
       poidsPoigner: this.toNum(view.poidsPoigner, 0),
       description: (view.description ?? '').trim(),
       poidsNecessaire: view.poidsNecessaire,
@@ -410,7 +413,7 @@ surfaceUnitaire(c: any): number {
     this.svc.getById(this.commande.id).subscribe({
       next: (cmd) => {
         this.commande = cmd;
-
+        this.largeurPliTmp = (cmd.pli ?? 2);
         // 👉 on ré-aligne les temporaires avec ce qui vient du serveur
         this.poidsPoignerTmp = Number(cmd.poidsPoigner) || 0;
         this.souffletTmp     = Number(cmd.soufflet)     || 0;

@@ -35,7 +35,7 @@ export class CommandeComponent implements OnInit {
     soufflet : 0 , 
     grammage: 0,
     description: '',
-   
+    pli : 2 ,
     imageUrl: ''
   };
 
@@ -71,6 +71,7 @@ export class CommandeComponent implements OnInit {
       longueur: this.toNum(view.longueur, 0),
       grammage: this.toNum(view.grammage, 0),
       soufflet: this.toNum(view.soufflet, 0),
+      pli: this.toNum(view.pli, 2),
       poidsPoigner: this.toNum(view.poidsPoigner, 0),
       description: (view.description ?? '').trim(),
       // Si ton backend expose ces champs, ils restent transmis tels quels :
@@ -112,6 +113,7 @@ export class CommandeComponent implements OnInit {
       grammage: 0,
       description: '',
       soufflet : 0 , 
+      pli : 2 ,
       poidsPoigner : 0 , 
       imageUrl: ''
     };

@@ -1,0 +1,207 @@
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<div class="grid">
+  <div class="col-12">
+    <div class="card big-card px-6 py-6">
+      <!-- ===== TOP DETAILS (inspiré “Commande”) ===== -->
+      <header class="hero">
+        <div class="header-left">
+          <div class="header-top">
+            <h2>Stock — <span class="accent">Modèles</span></h2>
+          </div>
+
+          <div class="meta-row">
+            <p-tag [value]="current?.nom || 'Aucun modèle'" severity="info"></p-tag>
+            <span class="sep"></span>
+            <span class="muted">Dimensions</span>
+            <span class="strong">{{ formatDimension(current) }}</span>
+            <span class="sep"></span>
+            <span class="muted">Statut</span>
+            <span><p-tag *ngIf="current" [value]="current?.statut" [severity]="statutSeverity(current!.statut)"></p-tag></span>
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <button pButton pRipple label="Nouveau" icon="pi pi-plus" class="p-button-text bica-add" (click)="openNew()"></button>
+          <button pButton pRipple label="Supprimer sél." icon="pi pi-trash" class="p-button-text p-button-danger"
+                  (click)="deleteSelected()" [disabled]="!selected || !selected.length"></button>
+        </div>
+      </header>
+
+      <!-- Aperçu rapide de l'image du modèle sélectionné -->
+      <section class="top-preview" *ngIf="current">
+        <div class="image-box">
+          <ng-container *ngIf="current?.image; else noimg">
+            <p-image [src]="current!.image" [preview]="true" alt="image modèle" [style]="{width:'130px',height:'130px'}"></p-image>
+          </ng-container>
+          <ng-template #noimg><div class="noimg">Pas d’image</div></ng-template>
+        </div>
+
+        <div class="quick-dims">
+          <div class="metrics metrics-compact">
+            <div class="metric">
+              <label>Longueur (cm)</label>
+              <p-inputNumber [(ngModel)]="current!.longueur" [useGrouping]="false" [readonly]="true"></p-inputNumber>
+            </div>
+            <div class="metric">
+              <label>Largeur (cm)</label>
+              <p-inputNumber [(ngModel)]="current!.largeur" [useGrouping]="false" [readonly]="true"></p-inputNumber>
+            </div>
+            <div class="metric">
+              <label>Grammage (g/m²)</label>
+              <p-inputNumber [(ngModel)]="current!.grammage" [useGrouping]="false" [readonly]="true"></p-inputNumber>
+            </div>
+            <div class="metric">
+              <label>Stock</label>
+              <p-inputNumber [(ngModel)]="current!.stock" [useGrouping]="false" [readonly]="true"></p-inputNumber>
+            </div>
+            <div class="metric">
+              <label>Seuil crit.</label>
+              <p-inputNumber [(ngModel)]="current!.seuilCritique" [useGrouping]="false" [readonly]="true"></p-inputNumber>
+            </div>
+          </div>
+          <small class="muted block">Astuce : cliquer <i class="pi pi-pencil"></i> dans la ligne pour éditer.</small>
+        </div>
+      </section>
+
+      <!-- ===== TOOLBAR ===== -->
+      <p-toolbar styleClass="mb-4">
+        <ng-template pTemplate="left">
+          <div class="my-2">
+            <button pButton pRipple label="Nouveau" icon="pi pi-plus" class="p-button-success mr-2" (click)="openNew()"></button>
+            <button pButton pRipple label="Supprimer" icon="pi pi-trash" class="p-button-danger"
+                    (click)="deleteSelected()" [disabled]="!selected || !selected.length"></button>
+          </div>
+        </ng-template>
+        <ng-template pTemplate="right">
+          <span class="p-input-icon-left">
+            <i class="pi pi-search"></i>
+            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Rechercher..." class="w-full sm:w-auto" />
+          </span>
+        </ng-template>
+      </p-toolbar>
+
+      <!-- ===== TABLE ===== -->
+      <p-table #dt
+               [value]="modeles"
+               responsiveLayout="scroll"
+               [rows]="10"
+               [paginator]="true"
+               [rowsPerPageOptions]="rowsPerPageOptions"
+               [globalFilterFields]="['nom','statut']"
+               [(selection)]="selected"
+               selectionMode="multiple"
+               dataKey="id"
+               (onRowSelect)="onRowClick($event.data)"
+               (onRowUnselect)="onRowClick($event.data)">
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width:3rem"><p-tableHeaderCheckbox></p-tableHeaderCheckbox></th>
+            <th>Image</th>
+            <th pSortableColumn="nom">Modèle <p-sortIcon field="nom"></p-sortIcon></th>
+            <th>Dimensions</th>
+            <th pSortableColumn="statut">Statut <p-sortIcon field="statut"></p-sortIcon></th>
+            <th pSortableColumn="stock" style="width:120px">Stock <p-sortIcon field="stock"></p-sortIcon></th>
+            <th style="width:140px">Actions</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-m>
+          <tr (click)="onRowClick(m)">
+            <td><p-tableCheckbox [value]="m"></p-tableCheckbox></td>
+            <td>
+              <p-image *ngIf="m.image; else dash" [src]="m.image" [preview]="true" alt="image" width="50"></p-image>
+              <ng-template #dash><span class="text-400">—</span></ng-template>
+            </td>
+            <td>{{ m.nom }}</td>
+            <td class="mono">{{ formatDimension(m) }}</td>
+            <td><p-tag [value]="m.statut" [severity]="statutSeverity(m.statut)"></p-tag></td>
+            <td>
+              <span [class.critique]="isCritique(m)">{{ m.stock }}</span>
+              <small class="muted block" *ngIf="m.seuilCritique">Seuil: {{ m.seuilCritique }}</small>
+            </td>
+            <td>
+              <button pButton pRipple icon="pi pi-pencil"
+                      class="p-button-rounded p-button-sm p-button-info mr-2"
+                      (click)="edit(m)" title="Modifier"></button>
+              <button pButton pRipple icon="pi pi-trash"
+                      class="p-button-rounded p-button-sm p-button-danger"
+                      (click)="askDelete($event, m)" title="Supprimer"></button>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr><td colspan="7" class="text-center py-5">Aucun modèle</td></tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <!-- Dialog CRUD -->
+    <p-dialog [(visible)]="dialogVisible" header="{{ editing ? 'Modifier le modèle' : 'Nouveau modèle' }}" [modal]="true" [style]="{ width: '520px' }" class="p-fluid">
+      <ng-template pTemplate="content">
+        <div class="grid">
+          <div class="field col-12 md:col-6">
+            <label for="nom">Nom du modèle</label>
+            <input pInputText id="nom" [(ngModel)]="form.nom" required />
+          </div>
+
+          <div class="field col-12 md:col-6">
+            <label for="statut">Statut</label>
+            <p-dropdown inputId="statut" [options]="statutOptions" [(ngModel)]="form.statut" optionLabel="label" optionValue="value"></p-dropdown>
+          </div>
+
+          <div class="field col-12 md:col-4">
+            <label for="longueur">Longueur (cm)</label>
+            <p-inputNumber inputId="longueur" [(ngModel)]="form.longueur" [min]="0" [useGrouping]="false"></p-inputNumber>
+          </div>
+          <div class="field col-12 md:col-4">
+            <label for="largeur">Largeur (cm)</label>
+            <p-inputNumber inputId="largeur" [(ngModel)]="form.largeur" [min]="0" [useGrouping]="false"></p-inputNumber>
+          </div>
+          <div class="field col-12 md:col-4">
+            <label for="grammage">Grammage (g/m²)</label>
+            <p-inputNumber inputId="grammage" [(ngModel)]="form.grammage" [min]="0" [useGrouping]="false"></p-inputNumber>
+          </div>
+
+          <div class="field col-12 md:col-6">
+            <label for="stock">Stock</label>
+            <p-inputNumber inputId="stock" [(ngModel)]="form.stock" [min]="0" [useGrouping]="false"></p-inputNumber>
+          </div>
+          <div class="field col-12 md:col-6">
+            <label for="seuil">Seuil critique</label>
+            <p-inputNumber inputId="seuil" [(ngModel)]="form.seuilCritique" [min]="0" [useGrouping]="false"></p-inputNumber>
+          </div>
+
+          <div class="field col-12">
+            <label>Image</label>
+            <div class="file-field">
+              <input #fileInput type="file" accept="image/*" (change)="onImageSelected($event)" class="file-input-hidden" />
+              <button pButton type="button" icon="pi pi-upload" label="Choisir une image" class="file-btn" (click)="fileInput.click()" [disabled]="uploading"></button>
+              <p-progressSpinner *ngIf="uploading" style="width:22px;height:22px" strokeWidth="4"></p-progressSpinner>
+              <img *ngIf="form.image" [src]="form.image" alt="preview" class="thumb" />
+            </div>
+          </div>
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="footer">
+        <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="dialogVisible=false"></button>
+        <button pButton label="Enregistrer" icon="pi pi-check" class="p-button-text bica-save" (click)="save()"></button>
+      </ng-template>
+    </p-dialog>
+
+    <!-- Dialog suppression multiple -->
+    <p-dialog [(visible)]="deleteManyDialog" header="Confirmation" [modal]="true" [style]="{ width: '400px' }">
+      <div class="confirmation-content">
+        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+        <span>Confirmez-vous la suppression des modèles sélectionnés ?</span>
+      </div>
+      <ng-template pTemplate="footer">
+        <button pButton label="Non" icon="pi pi-times" class="p-button-text" (click)="deleteManyDialog=false"></button>
+        <button pButton label="Oui" icon="pi pi-check" class="p-button-text" (click)="confirmDeleteSelected()"></button>
+      </ng-template>
+    </p-dialog>
+  </div>
+</div>

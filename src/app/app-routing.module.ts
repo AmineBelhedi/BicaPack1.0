@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { AppLayoutComponent } from './layout/app.layout.component';
 import { NotfoundComponent } from './pages/notfound/notfound.component';
 import { authGuard } from './guard/auth.guard';
+import { StockComponent } from './pages/stock/stock.component';
 
 const routes: Routes = [
   {
@@ -71,7 +72,12 @@ const routes: Routes = [
           import('./pages/commandes/commandes.module').then(m => m.CommandesModule),
         canActivate: [authGuard],
         data: { roles: ['OWNER'] }
-      }
+      },
+        {
+    path: 'stock',
+    loadChildren: () =>
+      import('./pages/stock/stock.module').then(m => m.StockModule)
+  },
     ]
   },
 

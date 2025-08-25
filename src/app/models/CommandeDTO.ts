@@ -6,6 +6,7 @@ export interface CommandeDTO {
   longueur: number;  
   grammage: number; 
   soufflet : number ; 
+  pli : number ;
   poidsPoigner : number ; 
   description: string;
     imageSac ?: string ; 
