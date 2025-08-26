@@ -24,6 +24,7 @@ import { FieldsetModule } from 'primeng/fieldset';
 import { CommandesRoutingModule } from './commandes-routing.module';
 import { CommandeComponent } from './commande.component';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 @NgModule({
   imports: [
@@ -38,7 +39,7 @@ import { MessageService, ConfirmationService } from 'primeng/api';
     FieldsetModule,
     ToolbarModule,
     InputTextModule,
-    
+    ProgressSpinnerModule, 
     InputTextareaModule,
     DropdownModule,
     InputNumberModule,

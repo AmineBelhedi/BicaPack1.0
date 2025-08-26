@@ -17,6 +17,7 @@ import { MultiSelectModule } from 'primeng/multiselect';
 import { ToastModule } from 'primeng/toast';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { CalendarModule } from 'primeng/calendar';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 
 @NgModule({
@@ -37,6 +38,7 @@ import { CalendarModule } from 'primeng/calendar';
     CalendarModule, 
     InputTextModule,
     InputNumberModule, 
+    ProgressSpinnerModule, 
     DropdownModule,
     TagModule,
     InputTextareaModule,

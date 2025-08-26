@@ -1,5 +1,12 @@
 <p-toast></p-toast>
 
+<ng-container *ngIf="loading">
+  <div class="spinner-overlay">
+    <p-progressSpinner styleClass="w-6rem h-6rem" strokeWidth="2" fill="var(--surface-ground)"
+                       animationDuration=".5s"></p-progressSpinner>
+  </div>
+</ng-container>
+
 <div class="page-wrapper" *ngIf="!loading && !notFound && commande as c">
   <div class="big-card bp-card">
 
@@ -17,14 +24,12 @@
           <span class="sep"></span>
           <span class="muted">Quantité</span>
           <span class="strong">{{ formatQtyNoGroup(c.quantite) }}</span>
-
         </div>
       </div>
 
       <div class="hero-actions">
-            <button pButton icon="pi pi-save" label="Enregistrer" class="p-button-text bica-save"
-            (click)="saveAll()"></button>
-        <!--<button pButton icon="pi pi-print"   label="Imprimer" class="p-button-text bica-link"></button>-->
+        <button pButton icon="pi pi-save" label="Enregistrer" class="p-button-text bica-save"
+                (click)="saveCommande()"></button>
         <button pButton icon="pi pi-arrow-left" label="Retour" class="p-button-text bica-link"
                 (click)="backToList()"></button>
       </div>
@@ -33,15 +38,18 @@
     <!-- STATS -->
     <section class="stats">
       <div class="stat chip">
-        <div class="stat-title">Prévisualisation</div>
-        <div class="stat-value">{{ formatDimension(c) }}</div>
+        <div class="stat-title">Soufflet (v)</div>
+        <div class="stat-value">
+          <!-- REMPLACEMENT du '??' par un test compatible template -->
+          {{ (souffletTmp !== null && souffletTmp !== undefined) ? souffletTmp : (c.soufflet || 0) }} cm
+        </div>
       </div>
       <div class="stat chip">
         <div class="stat-title">Longueur  ( L )</div>
         <div class="stat-value">{{ c.longueur || 0 }} cm</div>
       </div>
       <div class="stat chip">
-        <div class="stat-title">Largeur  ( w )</div>
+        <div class="stat-title">Largeur  ( W )</div>
         <div class="stat-value">{{ c.largeur || 0 }} cm</div>
       </div>
       <div class="stat chip">
@@ -58,7 +66,7 @@
 
         <div class="image-box">
           <ng-container *ngIf="c.imageSac; else noimg">
-            <p-image [src]="c.imageSac + (cacheBust ? ('?t=' + cacheBust) : '')" [preview]="true" alt="image commande"></p-image>
+            <p-image [src]="c.imageSac + (cacheBust ? ('?t=' + cacheBust) : '')" width="100" [preview]="true" alt="image commande"></p-image>
           </ng-container>
           <ng-template #noimg><div class="noimg">Pas d’image</div></ng-template>
 
@@ -102,7 +110,7 @@
               [min]="0"
               [mode]="'decimal'"
               [minFractionDigits]="0"
-              [maxFractionDigits]="6"
+              [maxFractionDigits]="3"
               [locale]="'en-US'"
               [useGrouping]="false"
               [suffix]="' cm'"
@@ -110,14 +118,14 @@
             </p-inputNumber>
           </div>
           <div class="metric">
-            <label for="dimW">Largeur  (w)</label>
+            <label for="dimW">Largeur  (W)</label>
             <p-inputNumber
               inputId="dimW"
               [(ngModel)]="c.largeur"
               [min]="0"
               [mode]="'decimal'"
               [minFractionDigits]="0"
-              [maxFractionDigits]="6"
+              [maxFractionDigits]="3"
               [locale]="'en-US'"
               [useGrouping]="false"
               [suffix]="' cm'"
@@ -132,7 +140,7 @@
               [min]="0"
               [mode]="'decimal'"
               [minFractionDigits]="0"
-              [maxFractionDigits]="6"
+              [maxFractionDigits]="3"
               [locale]="'en-US'"
               [useGrouping]="false"
               [suffix]="' g/m²'"
@@ -141,13 +149,7 @@
           </div>
         </div>
 
-        <div class="dim-actions">
-          <!--<button pButton icon="pi pi-save" label="Enregistrer" class="p-button-sm bica-save"
-                  (click)="saveDimensions()"></button>-->
-        </div>
-
         <small class="muted block mb-3">Format : longueur × largeur (cm) ; grammage (g/m²).</small>
-
 
         <p-divider></p-divider>
 
@@ -156,30 +158,31 @@
           <div class="f">
             <label>Surface (par unité)</label>
             <input pInputText [readonly]="true"
-                  [value]="formatNoGroup(surfaceUnitaire(c), 'cm²')" />
+                   [value]="formatNoGroup(surfaceUnitaire(c), 'cm²')" />
+            <!-- Formule affichée en clair, sans condition sur le type -->
             <small class="muted block mt-1 formula-note">
-              S = (L + ½·v + pli) × 2 × (W + v) &nbsp;&nbsp; (v = soufflet)
+              S = (
+                <span class="nowrap">L + <span *ngIf="isFondCarre()">½·v + </span>pliL</span>
+              ) ×
+              (<span class="nowrap">(W + v) × 2 + pliW</span>)
             </small>
+
           </div>
         </div>
 
         <p-divider></p-divider>
 
         <h5 class="muted mb-2">Poids</h5>
-        <!-- 👉 lecture seule mais calcul avec valeurs temporaires -->
         <div class="form two">
           <div class="f">
             <label>Poids total (par unité)</label>
             <input pInputText [readonly]="true"
-                  [value]="formatNoGroup(calculPoidsTotal(c), 'g')" />
+                   [value]="formatNoGroup(calculPoidsTotal(c), 'g')" />
           </div>
           <div class="f">
             <label>Poids total commande</label>
-            <!--<input pInputText [readonly]="true"
-              [value]="formatNoGroup(calculPoidsTotalCommande(c), 'Kg')" />-->
-            <!-- Total commande (auto g↔Kg), 6 décimales tronquées -->
             <input pInputText [readonly]="true"
-                  [value]="formatWeightSmart(calculPoidsTotalCommande(c), 3, 3)" />
+                   [value]="formatWeightSmart(calculPoidsTotalCommande(c), 3, 3)" />
           </div>
         </div>
 
@@ -191,25 +194,23 @@
 
         <div class="field">
           <div class="inline-check">
-            <!-- 👉 ne touche pas commande : change uniquement le flag -->
-            <p-checkbox [(ngModel)]="hasPoigner" binary="true" inputId="chkPoigner" (onChange)="togglePoigner() " (ngModelChange)="onPoignerChange($event)"></p-checkbox>
+            <p-checkbox [(ngModel)]="hasPoigner" binary="true" inputId="chkPoigner" (onChange)="togglePoigner()" (ngModelChange)="onPoignerChange($event)"></p-checkbox>
             <label for="chkPoigner" class="m-2">Poignée</label>
           </div>
           <div class="mt-2" *ngIf="hasPoigner">
-            <!-- 👉 bind sur la variable temporaire, pas sur c.poidsPoigner -->
             <label for="poidsPoigner">Poids poignée</label>
-                <p-inputNumber
-                  inputId="poidsPoigner"
-                  [(ngModel)]="poidsPoignerTmp"
-                  [min]="0"
-                  [mode]="'decimal'"
-                  [minFractionDigits]="0"
-                  [maxFractionDigits]="6"
-                  [step]="0.1"
-                  [locale]="'en-US'"
-                  [useGrouping]="false"
-                  [suffix]="' g'">
-                </p-inputNumber>
+            <p-inputNumber
+              inputId="poidsPoigner"
+              [(ngModel)]="poidsPoignerTmp"
+              [min]="0"
+              [mode]="'decimal'"
+              [minFractionDigits]="0"
+              [maxFractionDigits]="6"
+              [step]="0.1"
+              [locale]="'en-US'"
+              [useGrouping]="false"
+              [suffix]="' g'">
+            </p-inputNumber>
           </div>
         </div>
 
@@ -219,7 +220,6 @@
             <label for="chkSoufflet" class="m-2">Soufflet</label>
           </div>
           <div class="mt-2" *ngIf="hasSoufflet">
-            <!-- 👉 bind sur la variable temporaire, pas sur c.soufflet -->
             <label for="soufflet">Soufflet  ( v )</label>
             <p-inputNumber
               inputId="soufflet"
@@ -235,39 +235,53 @@
             </p-inputNumber>
           </div>
         </div>
-        <div class="field mt-3 ">
-        <label for="pli">Pli (largeur du pli)</label>
-<p-inputNumber
-  inputId="pli"
-  [(ngModel)]="largeurPliTmp"
-  [min]="0"
-  [max]="5"                        
-  [mode]="'decimal'"
-  [minFractionDigits]="0"
-  [maxFractionDigits]="2"
-  [step]="0.1"
-  [locale]="'en-US'"
-  [useGrouping]="false"
-  [suffix]="' cm'"
-  (ngModelChange)="validateLargeurPli($event)"   
-  class="w-7rem">
-</p-inputNumber>
 
-<small class="p-error block mt-1" *ngIf="pliError">{{ pliError }}</small>
-<small class="muted block" *ngIf="!pliError">(Max autorisé : 5 cm)</small>
-
-      </div>
-
-
-        <div class="actions-line">
-          <!-- 👉 c’est ICI seulement qu’on applique has* + *Tmp au modèle -->
-          <!--<button pButton icon="pi pi-save" label="Enregistrer" class="p-button-sm bica-save"
-                  (click)="saveCommande()"></button>-->
+        <!-- TYPE (lecture seule) -->
+        <div class="field mb-3">
+          <label>Type du sac</label>
+          <p-tag
+            [value]="($any(commande)?.typeSac || 'FOND_V') === 'FOND_CARRE' ? 'Fond Carré' : 'Fond V'"
+            severity="info">
+          </p-tag>
         </div>
+
+        <!-- PLIS : toujours visibles -->
+        <div class="field">
+          <label for="pliL">Pli (longueur=pliL)</label>
+          <p-inputNumber
+            inputId="pliL"
+            [(ngModel)]="pliLTmp"
+            [min]="0"
+            [mode]="'decimal'"
+            [minFractionDigits]="0"
+            [maxFractionDigits]="2"
+            [locale]="'en-US'"
+            [useGrouping]="false"
+            [suffix]="' cm'">
+          </p-inputNumber>
+        </div>
+
+        <div class="field">
+          <label for="pliW">Pli (largeur=pliW)</label>
+          <p-inputNumber
+            inputId="pliW"
+            [(ngModel)]="pliWTmp"
+            [min]="0"
+            [mode]="'decimal'"
+            [minFractionDigits]="0"
+            [maxFractionDigits]="2"
+            [locale]="'en-US'"
+            [useGrouping]="false"
+            [suffix]="' cm'">
+          </p-inputNumber>
+        </div>
+
+        <div class="actions-line"></div>
       </section>
     </div>
 
     <!-- ROULEAUX -->
+    <!-- (inchangé) -->
     <section class="card section">
       <div class="section-head">
         <h4 class="card-title m-0">Rouleaux utilisés</h4>

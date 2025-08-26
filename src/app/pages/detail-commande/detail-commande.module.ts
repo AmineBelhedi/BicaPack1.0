@@ -18,6 +18,7 @@ import { DetailCommandeComponent } from './detail-commande.component'; // adapte
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ToastModule } from 'primeng/toast';
 import { CheckboxModule } from 'primeng/checkbox';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 @NgModule({
   declarations: [DetailCommandeComponent],
@@ -28,6 +29,7 @@ import { CheckboxModule } from 'primeng/checkbox';
     TableModule,
     TagModule,
     ButtonModule,
+    ProgressSpinnerModule , 
     CheckboxModule,
     ToastModule, 
     ImageModule,

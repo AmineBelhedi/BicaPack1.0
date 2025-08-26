@@ -11,6 +11,18 @@ $gutter: 1rem; //for primeflex grid system
 @import "assets/layout/styles/layout/badges.scss";
 
 
+.spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(99, 95, 95, 0.716);
+    z-index: 9999;
+  }
 
 
 /* Masquer la flèche d'expansion dans la sidebar quand elle est fermée */

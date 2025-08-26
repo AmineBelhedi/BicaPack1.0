@@ -14,7 +14,7 @@ const routes: Routes = [
       {
         path: '',
         loadChildren: () =>
-          import('./pages/dashboard/dashboard.module').then(m => m.DashboardModule),
+          import('./pages/commandes/commandes.module').then(m => m.CommandesModule),
         canActivate: [authGuard],
         data: { roles: ['OWNER'] }
       },
@@ -85,6 +85,12 @@ const routes: Routes = [
 
   {
     path: 'home',
+    loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent),
+    canActivate: [authGuard],
+    data: { roles: ['OWNER'] }
+  },
+   {
+    path: '',
     loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent),
     canActivate: [authGuard],
     data: { roles: ['OWNER'] }

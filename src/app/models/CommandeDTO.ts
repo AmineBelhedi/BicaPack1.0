@@ -6,7 +6,9 @@ export interface CommandeDTO {
   longueur: number;  
   grammage: number; 
   soufflet : number ; 
-  pli : number ;
+  plilongueur?: number;  // cm
+  plilargeur?: number;   // cm
+  typeSac?: 'FOND_V' | 'FOND_CARRE' | string;
   poidsPoigner : number ; 
   description: string;
     imageSac ?: string ; 

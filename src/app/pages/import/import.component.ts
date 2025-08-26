@@ -14,7 +14,7 @@ export class ImportComponent implements OnInit {
     importDialog: boolean = false;
     deleteImportDialog: boolean = false;
     deleteImportsDialog: boolean = false;
-
+    loading : boolean = false ;
     imports: ImportModel[] = [];
     selectedImports: ImportModel[] = [];
     importData: ImportModel = {
@@ -55,10 +55,10 @@ export class ImportComponent implements OnInit {
 
 
     getAllImports(){
-
+      this.loading = true ;
         this.importService.getAllImports().subscribe({
-            next: data => this.imports = data,
-            error: err => console.error('Erreur chargement imports:', err)
+            next: (data) => {this.imports = data ; this.loading = false ; },
+            error: (err) => {console.error('Erreur chargement imports:', err) ; this.loading = false ;}
           });
           
     }

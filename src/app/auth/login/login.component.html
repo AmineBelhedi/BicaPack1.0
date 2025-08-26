@@ -1,9 +1,21 @@
+
+
+
+<ng-container *ngIf="loading">
+    <div class="spinner-overlay">
+        <p-progressSpinner styleClass="w-6rem h-6rem" strokeWidth="2" fill="var(--surface-ground)"
+            animationDuration=".5s"></p-progressSpinner>
+    </div>
+</ng-container>
+
+
 <div class="background-container">
     <img src="assets/layout/images/background-img.webp" alt="Background" class="background-image" />
     <div class="login-wrapper">
         <div class="flex flex-column align-items-center justify-content-center login-container">
             <div class="login-gradient-border">
                 <div class="w-full surface-card login-card py-8 px-5 sm:px-8">
+<p-toast></p-toast>
 
                     <!-- Section logo / titre -->
                     <div class="text-center mb-5 avatar-section">

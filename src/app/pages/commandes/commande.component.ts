@@ -6,7 +6,10 @@ import { CommandeService } from 'src/app/services/commande.service';
 
 /** Vue UI = DTO + champs non-API qu'on garde seulement côté front */
 type RowView = CommandeDTO & {
-  imageUrl?: string;
+  imageUrl?: string;   // aperçu local éventuel
+  // Aliases UI pour confort de saisie
+  pliL?: number;       // alias UI de plilongueur
+  pliW?: number;       // alias UI de plilargeur
 };
 
 @Component({
@@ -19,23 +22,26 @@ export class CommandeComponent implements OnInit {
   rows: RowView[] = [];
   selected: RowView[] = [];
   rowsPerPageOptions = [10, 20, 30];
+  loading = false;
 
   // Dialogs
   dialogVisible = false;
   deleteDialog = false;
   deleteManyDialog = false;
 
-  // Form (UI) — sans date ni statut
+  // Form (UI)
   form: RowView = {
     numeroCommande: '',
+    description: '',
     quantite: 0,
     largeur: 0,
     longueur: 0,
-    poidsPoigner : 0 , 
-    soufflet : 0 , 
     grammage: 0,
-    description: '',
-    pli : 2 ,
+    soufflet: 0,
+    typeSac: 'FOND_V', // ✅ unifié
+    pliL: 0,           // toujours saisis tels quels
+    pliW: 0,
+    poidsPoigner: 0,
     imageUrl: ''
   };
 
@@ -52,33 +58,59 @@ export class CommandeComponent implements OnInit {
 
   /* ===================== Mapping API ⇄ Vue ===================== */
 
-  /** API -> UI : nomCommande = modeleName (pour l'affichage) */
+  /** API -> UI : mapping direct, sans defaults conditionnels */
   private dtoToView(dto: CommandeDTO): RowView {
     return {
       ...dto,
-      description: (dto as any).nomCommande ?? dto.description ?? '',
+      typeSac: dto.typeSac ?? 'FOND_V',
+      pliL: dto.plilongueur ?? 0,
+      pliW: dto.plilargeur  ?? 0,
+      description: dto.description ?? '',
       imageUrl: (dto as any).imageUrl ?? ''
     };
   }
 
-  /** UI -> payload strict API (sans date/statut/image/nomCommande) */
+  /** UI -> payload strict API : toujours envoyer les deux plis tels quels */
   private viewToApiPayload(view: RowView): CommandeDTO {
+    // normalisation simple (cosmétique) de l'info type pour le back
+    let typeSac = ((view.typeSac as any) ?? 'FOND_V').toString().trim().toUpperCase();
+    if (typeSac === 'FOND V' || typeSac === 'V') typeSac = 'FOND_V';
+    if (typeSac.includes('CARR')) typeSac = 'FOND_CARRE';
+
+    // conversions numériques + garde-fous basiques
+    const quantite     = this.toNum(view.quantite, 0);
+    const largeur      = this.toNum(view.largeur, 0);
+    const longueur     = this.toNum(view.longueur, 0);
+    const grammage     = this.toNum(view.grammage, 0);
+    const soufflet     = Math.max(this.toNum(view.soufflet, 0), 0);
+    const poidsPoigner = Math.max(this.toNum(view.poidsPoigner, 0), 0);
+
+    // ⬇️ plus AUCUN défaut conditionnel sur le type
+    const plilongueur  = this.toNum(view.pliL, 0);
+    const plilargeur   = this.toNum(view.pliW, 0);
+
     return {
       id: view.id,
       numeroCommande: (view.numeroCommande || '').trim(),
-      quantite: this.toNum(view.quantite, 0),
-      largeur: this.toNum(view.largeur, 0),
-      longueur: this.toNum(view.longueur, 0),
-      grammage: this.toNum(view.grammage, 0),
-      soufflet: this.toNum(view.soufflet, 0),
-      pli: this.toNum(view.pli, 2),
-      poidsPoigner: this.toNum(view.poidsPoigner, 0),
       description: (view.description ?? '').trim(),
-      // Si ton backend expose ces champs, ils restent transmis tels quels :
+      quantite,
+      largeur,
+      longueur,
+      grammage,
+      soufflet,
+
+      // noms attendus par le backend
+      typeSac,
+      plilongueur,
+      plilargeur,
+
+      poidsPoigner,
+
+      // champs éventuels renvoyés par l’API : on les laisse passer si présents
       poidsNecessaire: view.poidsNecessaire,
       poidsReserve: view.poidsReserve,
       poidsConsomme: view.poidsConsomme
-    };
+    } as any;
   }
 
   private toNum(v: any, fallback = 0): number {
@@ -92,13 +124,14 @@ export class CommandeComponent implements OnInit {
     this.getAll();
   }
 
-    uploading = false;
+  uploading = false;
   cacheBust: number | null = null;
 
   getAll() {
+    this.loading = true;
     this.svc.getAll().subscribe({
-      next: data => (this.rows = (data || []).map(d => this.dtoToView(d))),
-      error: err => console.error('Erreur chargement commandes:', err)
+      next: data => { this.rows = (data || []).map(d => this.dtoToView(d)); this.loading = false; },
+      error: err => { console.error('Erreur chargement commandes:', err); this.loading = false; }
     });
   }
 
@@ -107,14 +140,16 @@ export class CommandeComponent implements OnInit {
   openNew() {
     this.form = {
       numeroCommande: '',
+      description: '',
       quantite: 0,
       largeur: 0,
       longueur: 0,
       grammage: 0,
-      description: '',
-      soufflet : 0 , 
-      pli : 2 ,
-      poidsPoigner : 0 , 
+      soufflet: 0,
+      typeSac: 'FOND_V', // info seulement
+      pliL: 0,
+      pliW: 0,
+      poidsPoigner: 0,
       imageUrl: ''
     };
     this.selectedFileName = null;
@@ -226,10 +261,46 @@ export class CommandeComponent implements OnInit {
 
   /* ============================ Helpers ============================ */
 
-  formatDimension(c: RowView): string {
-    const L = c.longueur ?? '–';
-    const l = c.largeur  ?? '–';
-    const p = c.grammage ?? '–';
-    return `${L}×${l}×${p}`;
+  // Surface en cm² : toujours prendre pliL & pliW (aucune condition sur le type)
+  // Surface en cm²
+  private surfaceUnitaireFromRow(c: RowView): number {
+    const L  = Number(c.longueur ?? 0);
+    const W  = Number(c.largeur ?? 0);
+    const v  = Math.max(Number(c.soufflet ?? 0), 0);
+
+    const typeSac = (c.typeSac as any) || 'FOND_V';
+    const isCarre = typeSac === 'FOND_CARRE';
+
+    const pliL = Number(c.pliL ?? 0);
+    const pliW = Number(c.pliW ?? 0);
+
+    const L_eff = isCarre ? (L + v / 2 + pliL) : (L + pliL);
+    const W_eff = (W + v) * 2 + pliW;
+
+    return L_eff * W_eff;
+  }
+
+
+
+  // Poids d’un sac en grammes (g)
+  calculPoidsUnitaireFromRow(c: RowView): number {
+    const surfaceCm2   = this.surfaceUnitaireFromRow(c);
+    const grammageGm2  = Number(c.grammage ?? 0);
+    const poidsPoigner = Math.max(Number(c.poidsPoigner ?? 0), 0); // g
+
+    if (!(surfaceCm2 > 0) || !(grammageGm2 > 0)) return poidsPoigner;
+
+    const poidsFeuilleG = (surfaceCm2 * grammageGm2) / 10_000; // g
+    return poidsFeuilleG + poidsPoigner;
+  }
+
+  // Formatage simple en grammes avec 2–3 décimales
+  formatGrams(v: number | null | undefined, digits: number = 2): string {
+    const x = Number(v ?? 0);
+    return x.toLocaleString('en-US', {
+      useGrouping: false,
+      minimumFractionDigits: digits,
+      maximumFractionDigits: 3
+    }) + ' g';
   }
 }

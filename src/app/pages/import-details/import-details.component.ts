@@ -4,6 +4,7 @@ import { MessageService } from 'primeng/api';
 import { ImportService } from 'src/app/services/import.service';
 import { ImportModel, RouleauImport } from 'src/app/models/import';
 import { FileUpload, FileUploadHandlerEvent } from 'primeng/fileupload';
+import { Table } from 'primeng/table';
 
 @Component({
   selector: 'app-import-details',
@@ -110,9 +111,9 @@ export class ImportDetailsComponent implements OnInit {
 
        
       }
-      
+        this.loading = false;
       },
-      error: () => this.message.add({ severity: 'error', summary: 'Erreur', detail: 'Chargement entête' })
+      error: () => {this.message.add({ severity: 'error', summary: 'Erreur', detail: 'Chargement entête' }) ; this.loading = false ; }  
     });
 
     // 2) Charger les rouleaux
@@ -407,4 +408,11 @@ saveImportHeader(): void {
     this.newRouleau = {};
     this.rouleauEnCours = null;
   }
+
+
+
+  onGlobalFilter(event: Event, table: Table) {
+  const input = event.target as HTMLInputElement;
+  table.filterGlobal(input.value, 'contains');
+}
 }

@@ -1,6 +1,11 @@
 <!-- HEADER -->
 
-
+<ng-container *ngIf="loading">
+    <div class="spinner-overlay">
+        <p-progressSpinner styleClass="w-6rem h-6rem" strokeWidth="2" fill="var(--surface-ground)"
+            animationDuration=".5s"></p-progressSpinner>
+    </div>
+</ng-container>
 
 <p-toast></p-toast>
 <div class="page-header">
@@ -237,7 +242,13 @@
     <div class="flex flex-wrap gap-2 justify-content-end">
       <span class="p-input-icon-left">
         <i class="pi pi-search"></i>
-        <input pInputText type="text" placeholder="Search..." class="p-inputtext-sm" />
+      <input
+        pInputText
+        type="search"
+        placeholder="Rechercher..."
+        class="p-inputtext-sm"
+        (input)="onGlobalFilter($event, dt)" />
+
       </span>
     </div>
   </div>
@@ -250,11 +261,27 @@
     </span>
   </div> -->
 
-  <p-table [value]="importData.rouleaux" [paginator]="true" [rows]="10" [rowsPerPageOptions]="[5, 10, 20]" responsiveLayout="scroll">
+    <p-table
+      #dt
+      [value]="importData?.rouleaux || []"          
+      [paginator]="true"
+      [rows]="10"
+      [rowsPerPageOptions]="[5,10,20]"
+      responsiveLayout="scroll"
+      [globalFilterFields]="[
+        'numero',
+        'code',
+        'description',
+        'laize',
+        'grammage',
+        'poids',
+        'prix'
+      ]"> 
     <ng-template pTemplate="header">
       <tr>
         <th>N° Rouleau</th>
         <th>Code</th>
+        <th>Description</th>
         <th>Laize</th>
         <th>Grammage</th>
         <th>Poids (Kg)</th>
@@ -269,6 +296,9 @@
       <tr>
         <td>{{ r.numero }}</td>
         <td>{{ r.code }}</td>
+        <td class="text-ellipsis white-space-nowrap overflow-hidden" style="max-width: 240px;">
+          {{ r.description || '—' }}
+        </td>
         <td>{{ r.laize }}</td>
         <td>{{ r.grammage }}</td>
         <td>{{ r.poids }}</td>

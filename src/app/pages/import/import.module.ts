@@ -17,6 +17,7 @@ import { RadioButtonModule } from 'primeng/radiobutton';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DialogModule } from 'primeng/dialog';
 import { CalendarModule } from 'primeng/calendar';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 @NgModule({
     imports: [
@@ -32,6 +33,7 @@ import { CalendarModule } from 'primeng/calendar';
         RatingModule,
         InputTextModule,
         InputTextareaModule,
+        ProgressSpinnerModule,
         DropdownModule,
         RadioButtonModule,
         InputNumberModule,

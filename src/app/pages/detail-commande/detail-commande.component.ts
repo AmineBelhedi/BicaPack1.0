@@ -34,17 +34,17 @@ export class DetailCommandeComponent implements OnInit {
   uploading = false;
   cacheBust: number | null = null;
 
-  // Flags UI (ne touchent pas l'objet commande directement)
+  // Flags UI
   hasPoigner = false;
   hasSoufflet = false;
 
-  // 👉 NEW: variables temporaires pour l’édition “sans sauvegarder”
-  // ces valeurs ne seront appliquées à `commande` que dans saveCommande()
+  // Vars temporaires (édition sans sauvegarder)
   poidsPoignerTmp: number | null = 0;
   souffletTmp: number | null = 0;
-  largeurPliTmp: number = 2;//valeur par défaut
-  pliError: string | null = null;//message d'erreur pour le pli
-  // Stats/Calculs
+  pliLTmp: number = 1;
+  pliWTmp: number = 0;
+  pliError: string | null = null;
+
   grammage = 80; // g/m²
   pieces: PieceJointe[] = [];
 
@@ -63,6 +63,14 @@ export class DetailCommandeComponent implements OnInit {
     private toast: MessageService
   ) {}
 
+  /** Normalise tout ce que le back peut renvoyer en 'FOND_V' | 'FOND_CARRE' */
+  private normalizeTypeSac(t: any): 'FOND_V' | 'FOND_CARRE' {
+    const v = (t ?? '').toString().trim().toUpperCase();
+    if (v === 'FOND_CARRE' || v.includes('CARR')) return 'FOND_CARRE';
+    if (v === 'FOND V' || v === 'V') return 'FOND_V';
+    return v === 'FOND_V' ? 'FOND_V' : 'FOND_V'; // défaut
+  }
+
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (!id) { this.notFound = true; this.loading = false; return; }
@@ -70,13 +78,21 @@ export class DetailCommandeComponent implements OnInit {
     this.svc.getById(id).subscribe({
       next: (cmd) => {
         this.commande = cmd;
+
+        // ⬇️ normaliser le type venant du back
+        (this.commande as any).typeSac = this.normalizeTypeSac((cmd as any).typeSac);
+
         this.qrValue = `${location.origin}/pages/detail-commande/${id}`;
 
-        // 👉 on initialise les switches à partir des valeurs serveur
+        // init switches
         this.hasPoigner = !!(cmd.poidsPoigner && cmd.poidsPoigner > 0);
         this.hasSoufflet = !!(cmd.soufflet && cmd.soufflet > 0);
-        this.largeurPliTmp = (cmd.pli ?? 2);
-        // 👉 et on prend des copies temporaires (pour ne pas modifier `commande` tant que non sauvegardé)
+
+        // init plis (on lit directement les champs du back)
+        this.pliLTmp = (cmd as any).plilongueur ?? 1;
+        this.pliWTmp = (cmd as any).plilargeur  ?? 0;
+
+        // copies temporaires
         this.poidsPoignerTmp = Number(cmd.poidsPoigner) || 0;
         this.souffletTmp     = Number(cmd.soufflet)     || 0;
 
@@ -112,7 +128,7 @@ export class DetailCommandeComponent implements OnInit {
         this.toast.add({ severity: 'success', summary: 'Image', detail: 'Image téléversée' });
         this.cacheBust = Date.now();
         this.uploading = false;
-        this.reload(); // récupérer l’URL si mise à jour
+        this.reload();
         input.value = '';
       },
       error: () => {
@@ -124,45 +140,20 @@ export class DetailCommandeComponent implements OnInit {
   }
 
   // =================== Options (Poignée / Soufflet) ===================
-  // 👉 CHANGEMENT: ne plus toucher `commande` ici (pas de save, pas de mutation du modèle)
-  togglePoigner(): void {
- // reset visuel si on décoche (optionnel)
-  }
-  toggleSoufflet(): void {
- // reset visuel si on décoche (optionnel)
-  }
-  // Appelé à chaque changement du checkbox Poignée.
-// On reçoit la nouvelle valeur (true/false) de façon fiable.
-onPoignerChange(checked: boolean): void {
-  this.hasPoigner = checked;
-  
-}
-validateLargeurPli(val: number | null | undefined): void {
-  const v = val ?? 0;
-  this.pliError = null;
+  togglePoigner(): void {}
+  toggleSoufflet(): void {}
 
-  if (v < 0) {
-    this.largeurPliTmp = 0;
-    this.pliError = 'Le pli ne peut pas être négatif.';
-    return;
+  onPoignerChange(checked: boolean): void { this.hasPoigner = checked; }
+
+  validateLargeurPli(val: number | null | undefined): void {
+    const v = val ?? 0;
+    this.pliError = null;
+    if (v < 0) { this.pliLTmp = 0; this.pliError = 'Le pli ne peut pas être négatif.'; return; }
+    const max = 5;
+    if (v > max) { this.pliLTmp = max; this.pliError = `Le pli ne doit pas dépasser ${max.toFixed(2)} cm.`; }
   }
 
-  const max = 5;
-  if (v > max) {
-    this.largeurPliTmp = max;
-    this.pliError = `Le pli ne doit pas dépasser ${max.toFixed(2)} cm.`;
-  }
-}
-
-
-
-
-
-// Idem pour Soufflet
-onSouffletChange(checked: boolean): void {
-  this.hasSoufflet = checked;
-  
-}
+  onSouffletChange(checked: boolean): void { this.hasSoufflet = checked; }
 
   // =================== Sauvegardes ===================
   private toNum(v: any, fallback = 0): number {
@@ -171,6 +162,9 @@ onSouffletChange(checked: boolean): void {
   }
 
   private viewToApiPayload(view: CommandeDTO): CommandeDTO {
+    // priorité à ce qu’on a en vue/état local
+    const typeSac = this.normalizeTypeSac(((view as any)?.typeSac) || ((this.commande as any)?.typeSac));
+
     return {
       id: view.id,
       numeroCommande: (view.numeroCommande || '').trim(),
@@ -179,7 +173,12 @@ onSouffletChange(checked: boolean): void {
       longueur: this.toNum(view.longueur, 0),
       grammage: this.toNum(view.grammage, 0),
       soufflet: this.toNum(view.soufflet, 0),
-      pli: this.toNum(this.largeurPliTmp, 2),
+
+      // champs attendus par le back
+      typeSac,
+      plilongueur: this.toNum(this.pliLTmp, 0),
+      plilargeur : this.toNum(this.pliWTmp, 0),
+
       poidsPoigner: this.toNum(view.poidsPoigner, 0),
       description: (view.description ?? '').trim(),
       poidsNecessaire: view.poidsNecessaire,
@@ -198,7 +197,6 @@ onSouffletChange(checked: boolean): void {
     });
   }
 
-  // 👉 CHANGEMENT PRINCIPAL: “Enregistrer” applique les flags + temporaires au modèle avant d’appeler l’API
   saveCommande(): void {
     if (!this.commande?.id) return;
 
@@ -214,7 +212,6 @@ onSouffletChange(checked: boolean): void {
       return;
     }
 
-    // 👉 appliquer les saisies UI au modèle
     const commandeAEnvoyer: CommandeDTO = {
       ...this.commande,
       poidsPoigner: this.hasPoigner ? this.toNum(this.poidsPoignerTmp, 0) : 0,
@@ -226,54 +223,63 @@ onSouffletChange(checked: boolean): void {
     this.svc.update(payload).subscribe({
       next: () => {
         this.toast.add({ severity: 'success', summary: 'Mis à jour', detail: 'Commande modifiée' });
-        // 👉 si succès, on synchronise l’état local pour que l’UI affiche la valeur réellement sauvegardée
-        this.commande.poidsPoigner = commandeAEnvoyer.poidsPoigner;
-        this.commande.soufflet     = commandeAEnvoyer.soufflet;
+        this.commande = {
+          ...this.commande!,
+          poidsPoigner: payload.poidsPoigner,
+          soufflet: payload.soufflet,
+          typeSac: payload.typeSac
+        } as CommandeDTO;
+
+        (this.commande as any).plilongueur = payload.plilongueur;
+        (this.commande as any).plilargeur  = payload.plilargeur;
+
+        this.pliLTmp = payload.plilongueur ?? 0;
+        this.pliWTmp = payload.plilargeur  ?? 0;
+
+        this.getRouleaux();
       },
       error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Mise à jour échouée' })
     });
   }
 
-  // =================== Calculs poids ===================
-  // 👉 CHANGEMENT: l’aperçu de poids utilise les valeurs temporaires + switches
+  // =================== Calculs poids / surface ===================
   calculPoidsTotal(c?: CommandeDTO): number {
     if (!c) return 0;
-    const surfaceCm2 = this.surfaceUnitaire(c); // cm²
-    const grammage   = Number(c.grammage ?? 0);             // g/m²
+    const surfaceCm2 = this.surfaceUnitaire(c);
+    const grammage   = Number(c.grammage ?? 0);
     const poidsPoigner = Math.max(Number(this.poidsPoignerTmp ?? c?.poidsPoigner ?? 0) || 0, 0);
-
     if (!(surfaceCm2 > 0) || !(grammage > 0)) return poidsPoigner;
-
-    const unitG = (surfaceCm2 * grammage) / 10_000;         // g
-    return unitG + poidsPoigner;  
-    }
+    const unitG = (surfaceCm2 * grammage) / 10_000;
+    return unitG + poidsPoigner;
+  }
 
   calculPoidsTotalCommande(c?: CommandeDTO): number {
     if (!c) return 0;
-    const unitG = this.calculPoidsTotal(c);   // g
+    const unitG = this.calculPoidsTotal(c);
     const qty   = Number(c.quantite ?? 0);
     if (!(unitG >= 0) || !(qty > 0)) return 0;
-    return (unitG * qty) / 1000;              // Kg
+    return (unitG * qty) / 1000;
   }
 
-  formatDimension(c?: CommandeDTO): string {
-    const L = c?.longueur ?? '—';
-    const l = c?.largeur  ?? '—';
-    const g = c?.grammage ?? '—';
-    return `${L}×${l}×${g}`;
-  }
-  //======calcul de surface ==========
   // Surface par unité (en cm²)
-surfaceUnitaire(c: any): number {
-  const L  = Number(c?.longueur ?? 0);
-  const W  = Number(c?.largeur ?? 0);
-  const v  = Math.max(Number(this.souffletTmp ?? c?.soufflet ?? 0), 0);   // soufflet actuel
-  const pli = Number(this.largeurPliTmp ?? 0);                        // pli (toujours visible)
+  surfaceUnitaire(c: any): number {
+    const L = Number(c?.longueur ?? 0);
+    const W = Number(c?.largeur ?? 0);
+    const v = Math.max(Number(this.souffletTmp ?? c?.soufflet ?? 0), 0);
 
-  // Formule : (L + v/2 + pli) * ( (W + v) * 2 )
-  return (L + v / 2 + pli) * ((W + v) * 2);
-}
+    const typeSac = ((this.commande as any)?.typeSac) || 'FOND_V';
+    const isCarre = typeSac === 'FOND_CARRE';
 
+    const pliL = Number(this.pliLTmp ?? 0);
+    const pliW = Number(this.pliWTmp ?? 0);
+
+    // ⬇️ L_eff selon le type
+    const L_eff = isCarre ? (L + v / 2 + pliL) : (L + pliL);
+    // ⬇️ largeur effective (nouvelle formule, identique pour les deux types)
+    const W_eff = (W + v) * 2 + pliW;
+
+    return L_eff * W_eff;
+  }
 
 
 
@@ -413,8 +419,14 @@ surfaceUnitaire(c: any): number {
     this.svc.getById(this.commande.id).subscribe({
       next: (cmd) => {
         this.commande = cmd;
-        this.largeurPliTmp = (cmd.pli ?? 2);
-        // 👉 on ré-aligne les temporaires avec ce qui vient du serveur
+
+        // ⬇️ normaliser le type à chaque reload
+        (this.commande as any).typeSac = this.normalizeTypeSac((cmd as any).typeSac);
+
+        // lire les bons noms de champs depuis le back
+        this.pliLTmp = (cmd as any).plilongueur ?? 1;
+        this.pliWTmp = (cmd as any).plilargeur  ?? 0;
+
         this.poidsPoignerTmp = Number(cmd.poidsPoigner) || 0;
         this.souffletTmp     = Number(cmd.soufflet)     || 0;
         this.hasPoigner = !!(cmd.poidsPoigner && cmd.poidsPoigner > 0);
@@ -444,81 +456,28 @@ surfaceUnitaire(c: any): number {
     try { localStorage.setItem(this.localKey(id), JSON.stringify(this.localAllocs)); } catch {}
   }
 
-
-
-
-
-  saveAll(): void {
-  if (!this.commande?.id) return;
-
-  // validations simples
-  if (!this.commande.numeroCommande?.trim()) {
-    this.toast.add({ severity: 'warn', summary: 'Champs requis', detail: 'N° commande obligatoire' });
-    return;
-  }
-  if ((this.commande.quantite ?? 0) <= 0 ||
-      (this.commande.largeur  ?? 0) <= 0 ||
-      (this.commande.longueur ?? 0) <= 0 ||
-      (this.commande.grammage ?? 0) <= 0) {
-    this.toast.add({ severity: 'warn', summary: 'Vérifier', detail: 'Quantité et dimensions' });
-    return;
-  }
-
-  // 👉 appliquer les valeurs UI (switches + temporaires) au modèle avant envoi
-  const commandeAEnvoyer: CommandeDTO = {
-    ...this.commande,
-    poidsPoigner: this.hasPoigner ? this.toNum(this.poidsPoignerTmp, 0) : 0,
-    soufflet:     this.hasSoufflet ? this.toNum(this.souffletTmp, 0)     : 0,
-  };
-
-  const payload = this.viewToApiPayload(commandeAEnvoyer);
-
-  this.svc.update(payload).subscribe({
-    next: () => {
-      this.toast.add({ severity: 'success', summary: 'Enregistré', detail: 'Commande mise à jour' });
-      // synchroniser l’UI : refléter ce qui a été sauvegardé
-      this.commande = { ...commandeAEnvoyer };
-      // (optionnel) relancer une recherche de rouleaux si les dimensions ont changé
-      this.getRouleaux();
-    },
-    error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Mise à jour échouée' })
-  });
-}
-  // Affiche sans séparateur de milliers, avec 2 décimales et unité
   formatNoGroup(value: number | null | undefined, unit: string): string {
     const v = value ?? 0;
-    return v.toLocaleString('en-US', {
-      useGrouping: false,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 10
-    }) + ' ' + unit;
+    return v.toLocaleString('en-US', { useGrouping: false, minimumFractionDigits: 2, maximumFractionDigits: 3 }) + ' ' + unit;
   }
-    // tronque sans arrondir
+
   private trunc(v: number, d: number) {
     const f = Math.pow(10, d);
     return Math.trunc(v * f) / f;
   }
 
-  
-  // g si < 1 Kg, sinon Kg. Précis, arrondi à 3 décimales max
   formatWeightSmart(kg: number | null | undefined, decG = 3, decKg = 3): string {
     const v = kg ?? 0;
-    if (v < 1) {
-      const g = v * 1000;
-      return g.toFixed(decG) + ' g';
-    }
+    if (v < 1) return (v * 1000).toFixed(decG) + ' g';
     return v.toFixed(decKg) + ' Kg';
   }
 
-
   formatQtyNoGroup(value: number | null | undefined): string {
     const v = value ?? 0;
-    return v.toLocaleString('en-US', {
-      useGrouping: false,
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
-    });
+    return v.toLocaleString('en-US', { useGrouping: false, minimumFractionDigits: 0, maximumFractionDigits: 0 });
   }
 
-
+  isFondCarre(): boolean {
+    return (((this.commande as any)?.typeSac) || 'FOND_V') === 'FOND_CARRE';
+  }
 }

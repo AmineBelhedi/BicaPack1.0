@@ -42,6 +42,7 @@ export class LoginComponent {
           response => {
         
             this.message = 'Login successful';
+            this.loading=false;
             this.router.navigateByUrl('/home');            // Redirect to home or another route
           },
           error => {
