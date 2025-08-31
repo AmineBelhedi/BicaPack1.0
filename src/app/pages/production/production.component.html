@@ -1,0 +1,95 @@
+<div class="card p-3 bp-card">
+  <!-- HEADER -->
+  <div class="flex align-items-center justify-content-between mb-3">
+    <h2 class="m-0">Production — #{{ commandeId }}</h2>
+    <button pButton icon="pi pi-arrow-left" label="Retour"
+            class="p-button-text" (click)="back()"></button>
+  </div>
+
+  <!-- KPIs -->
+  <div class="grid stats">
+    <div class="col-12 md:col-4">
+      <div class="kpi">
+        <span class="kpi-title">Total produit</span>
+        <p-tag severity="success" [value]="(total | number:'1.0-0') + ''"></p-tag>
+      </div>
+    </div>
+    <div class="col-12 md:col-4">
+      <div class="kpi">
+        <span class="kpi-title">Cible (local)</span>
+        <p-inputNumber [(ngModel)]="target" [min]="0" [useGrouping]="false"
+                       [showButtons]="true" (onBlur)="saveTarget()" inputId="target"></p-inputNumber>
+      </div>
+    </div>
+    <div class="col-12 md:col-4">
+      <div class="kpi">
+        <span class="kpi-title">Restant</span>
+        <p-tag severity="warning" [value]="(remaining | number:'1.0-0') + ''"></p-tag>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress-line">
+    <p-progressBar [value]="progress"></p-progressBar>
+    <span class="progress-label">{{ progress }}%</span>
+  </div>
+
+  <p-divider></p-divider>
+
+  <!-- FORMULAIRE D’AJOUT / FIX -->
+  <div class="flex align-items-end gap-2 flex-wrap mb-3">
+    <div>
+      <label class="lbl">Jour</label>
+      <p-calendar [(ngModel)]="formDate" dateFormat="yy-mm-dd" [showIcon]="true" inputId="date"></p-calendar>
+    </div>
+    <div>
+      <label class="lbl">Quantité</label>
+      <p-inputNumber [(ngModel)]="formQty" [min]="0" [useGrouping]="false" [showButtons]="true" inputId="qty"></p-inputNumber>
+    </div>
+
+    <button pButton icon="pi pi-plus" label="Ajouter au jour"
+            class="p-button-sm" (click)="addToDay(formQty)"></button>
+    <button pButton icon="pi pi-pencil" label="Fixer le jour"
+            class="p-button-sm p-button-secondary" (click)="setDay(formQty)"></button>
+
+    <span class="sep"></span>
+
+    <button pButton icon="pi pi-plus" label="+100 aujourd'hui"
+            class="p-button-text" (click)="addToday(100)"></button>
+    <button pButton icon="pi pi-plus-circle" label="+500 aujourd'hui"
+            class="p-button-text" (click)="addToday(500)"></button>
+    <button pButton icon="pi pi-pencil" label="Fixer aujourd'hui"
+            class="p-button-text" (click)="setToday(formQty)"></button>
+  </div>
+
+  <!-- TABLEAU JOURNALIER (AGRÉGÉ PAR JOUR) -->
+  <p-table [value]="daily" [paginator]="true" [rows]="10" [loading]="loading" responsiveLayout="scroll">
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Date</th>
+        <th>Quantité (total du jour)</th>
+        <th class="text-right">Actions</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-r>
+      <tr>
+        <td class="mono">{{ r.dateProduction }}</td>
+        <td style="max-width:160px">
+          <p-inputNumber [(ngModel)]="r.quantite" [min]="0" [useGrouping]="false"
+                         (onBlur)="onEditRow(r)"></p-inputNumber>
+        </td>
+        <td class="text-right">
+          <button pButton icon="pi pi-refresh" class="p-button-text p-button-sm"
+                  (click)="onEditRow(r)" pTooltip="Enregistrer"></button>
+          <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-sm"
+                  (click)="zeroDay(r)" pTooltip="Remettre ce jour à 0"></button>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr><td colspan="3" class="text-center py-4">Aucune donnée</td></tr>
+    </ng-template>
+  </p-table>
+</div>

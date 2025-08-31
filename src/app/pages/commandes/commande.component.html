@@ -27,7 +27,7 @@
                [rows]="10"
                [paginator]="true"
                [rowsPerPageOptions]="rowsPerPageOptions"
-               [globalFilterFields]="['numeroCommande','description', 'quantite']"
+               [globalFilterFields]="['numeroCommande', 'quantite']"
                [(selection)]="selected"
                selectionMode="multiple"
                dataKey="id">
@@ -47,7 +47,7 @@
               <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
             </th>
             <th pSortableColumn="numeroCommande">N° Commande <p-sortIcon field="numeroCommande"></p-sortIcon></th>
-            <th pSortableColumn="description">Description <p-sortIcon field="description"></p-sortIcon></th>
+            <!--<th pSortableColumn="description">Description <p-sortIcon field="description"></p-sortIcon></th>-->
             <th pSortableColumn="quantite">Quantité <p-sortIcon field="quantite"></p-sortIcon></th>
             <th>Poids (unité)</th>
             <th>Image</th>
@@ -59,7 +59,7 @@
           <tr>
             <td><p-tableCheckbox [value]="c"></p-tableCheckbox></td>
             <td>{{ c.numeroCommande }}</td>
-            <td>{{ c.description }}</td>
+            <!--<td>{{ c.description }}</td>-->
             <td>{{ c.quantite }}</td>
             <td>{{ formatGrams(calculPoidsUnitaireFromRow(c)) }}</td>
             <td>
@@ -70,6 +70,11 @@
               <button pButton pRipple label="Détails" icon="pi pi-eye"
                       class="p-button-text p-button-sm text-primary mr-2"
                       [routerLink]="['/pages/detail-commande', c.id]"></button>
+
+                <button pButton pRipple label="Production" icon="pi pi-chart-line"
+                    class="p-button-text p-button-sm text-primary mr-2"
+                    [routerLink]="['/pages/detail-commande', c.id]"
+                    [queryParams]="{ view: 'production' }"></button>
 
               <button pButton pRipple icon="pi pi-pencil"
                       class="p-button-rounded p-button-sm p-button-info mr-2"
@@ -83,7 +88,7 @@
         </ng-template>
 
         <ng-template pTemplate="emptymessage">
-          <tr><td colspan="7" class="text-center py-5">Aucune commande</td></tr>
+          <tr><td colspan="8" class="text-center py-5">Aucune commande</td></tr>
         </ng-template>
       </p-table>
     </div>

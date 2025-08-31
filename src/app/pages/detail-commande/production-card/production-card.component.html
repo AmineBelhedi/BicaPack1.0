@@ -1,0 +1,218 @@
+<div class="card prod-card bica-surface">
+  <!-- En-tête -->
+  <div class="section-head">
+    <h4 class="card-title m-0">Production</h4>
+    <div class="head-actions">
+
+      <!-- Bouton Ajouter désactivé si cible atteinte -->
+      <button
+        pButton
+        class="bica-btn"
+        icon="pi pi-plus"
+        label="Ajouter"
+        (click)="openAdd()"
+        [disabled]="isCompleted"
+        pTooltip="La cible est atteinte"
+        tooltipPosition="left">
+      </button>
+    </div>
+  </div>
+
+  <!-- Progression + KPIs -->
+  <div class="progress-wrap">
+    <p-progressBar
+        [value]="progress"
+        styleClass="bica-progress bica-progress--green"
+        [ngClass]="{ 'is-complete': isCompleted }">
+    </p-progressBar>
+
+
+    <div class="kpis-row">
+      <div class="kpi kpi-total">
+        <i class="pi pi-database"></i>
+        <span class="kpi-label">Total</span>
+        <span class="kpi-value mono">{{ total | number:'1.0-0' }}</span>
+      </div>
+      <div class="kpi kpi-today">
+        <i class="pi pi-calendar"></i>
+        <span class="kpi-label">Aujourd’hui</span>
+        <span class="kpi-value mono">{{ today | number:'1.0-0' }}</span>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="kpi kpi-cible">
+        <span class="kpi-label">Cible</span>
+        <span class="kpi-value mono">{{ cible | number:'1.0-0' }}</span>
+      </div>
+      <div class="kpi kpi-restant">
+        <span class="kpi-label">Restant</span>
+        <span class="kpi-value mono">{{ remain | number:'1.0-0' }}</span>
+      </div>
+    </div>
+  </div>
+
+  <p-divider class="bica-divider"></p-divider>
+
+  <!-- Filtres -->
+  <div class="filters-line">
+    <div class="dates">
+      <div class="field">
+        <label class="block mb-1 muted">Du</label>
+        <p-calendar
+          [(ngModel)]="filterFrom"
+          [showIcon]="true"
+          [showButtonBar]="true"
+          dateFormat="yy-mm-dd"
+          (ngModelChange)="onPeriodChange()"
+          styleClass="w-full bica-input">
+        </p-calendar>
+      </div>
+      <div class="field">
+        <label class="block mb-1 muted">Au</label>
+        <p-calendar
+          [(ngModel)]="filterTo"
+          [showIcon]="true"
+          [showButtonBar]="true"
+          dateFormat="yy-mm-dd"
+          (ngModelChange)="onPeriodChange()"
+          styleClass="w-full bica-input">
+        </p-calendar>
+      </div>
+
+      <div class="presets-inline">
+        <div class="seg">
+          <button pButton class="seg-btn" label="7j"  (click)="quickRange('7')"></button>
+          <button pButton class="seg-btn" label="30j" (click)="quickRange('30')"></button>
+          <button pButton class="seg-btn" label="90j" (click)="quickRange('90')"></button>
+          <button pButton class="seg-btn" label="YTD" (click)="quickRange('YTD')"></button>
+        </div>
+        <button pButton class="bica-link reset" icon="pi pi-filter-slash" label="Réinitialiser" (click)="resetPeriod()"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Historique -->
+  <section class="history-section">
+    <h5 class="muted mb-2">Historique</h5>
+
+    <div class="table-wrap">
+      <p-table
+        [value]="displayedDays"
+        responsiveLayout="stack"
+        [breakpoint]="'768px'"
+        styleClass="bica-table">
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Date</th>
+            <th class="text-right">Quantité</th>
+            <th class="text-right" style="width:120px;">Actions</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-r>
+          <tr>
+            <td class="mono" data-title="Date">{{ r.date }}</td>
+            <td class="mono text-right" data-title="Quantité">{{ r.quantite | number:'1.0-0' }}</td>
+            <td class="text-right" data-title="Actions">
+              <button pButton
+                      class="bica-edit p-button-sm"
+                      icon="pi pi-pencil"
+                      (click)="editDay(r.date)"
+                      pTooltip="Éditer"></button>
+              <button pButton
+                      class="bica-link--danger p-button-sm"
+                      icon="pi pi-trash"
+                      (click)="removeDay(r.date)"
+                      pTooltip="Supprimer"></button>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="emptymessage">
+          <tr><td colspan="3" class="text-center py-4 muted">Aucune donnée</td></tr>
+        </ng-template>
+      </p-table>
+    </div>
+  </section>
+</div>
+
+<!-- Dialog d’ajout -->
+<p-dialog
+  header="Nouvelle saisie"
+  [(visible)]="addVisible"
+  [modal]="true"
+  [closable]="true"
+  [dismissableMask]="true"
+  [style]="{ width: '380px' }"
+  styleClass="add-dialog"
+  (onHide)="resetAdd()">
+
+  <div class="grid">
+    <div class="col-12">
+      <label class="muted block mb-2">Jour</label>
+      <p-calendar
+        [(ngModel)]="addModel.date"
+        [showIcon]="true"
+        [showButtonBar]="true"
+        dateFormat="yy-mm-dd"
+        styleClass="w-full bica-input">
+      </p-calendar>
+    </div>
+
+    <div class="col-12">
+      <label class="muted block mb-2">Quantité</label>
+      <p-inputNumber
+        [(ngModel)]="addModel.qty"
+        [min]="0"
+        [showButtons]="true"
+        [step]="50"
+        styleClass="w-full bica-input">
+      </p-inputNumber>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton class="bica-link" label="Annuler" icon="pi pi-times" (click)="cancelAdd()"></button>
+    <button pButton class="bica-btn"  label="Ajouter" icon="pi pi-check" (click)="confirmAdd()" [disabled]="!canConfirmAdd()"></button>
+  </ng-template>
+</p-dialog>
+
+<!-- ConfirmDialog pour la suppression -->
+<p-confirmDialog></p-confirmDialog>
+
+<!-- Dialog d’édition -->
+<p-dialog
+  header="Modifier la quantité"
+  [(visible)]="editVisible"
+  [modal]="true"
+  [closable]="true"
+  [dismissableMask]="true"
+  [style]="{ width: '380px' }"
+  styleClass="add-dialog"
+  (onHide)="resetEdit()">
+
+  <div class="grid">
+    <div class="col-12">
+      <label class="muted block mb-2">Jour</label>
+      <input pInputText [readonly]="true" [value]="editModel.dateISO" class="w-full bica-input" />
+    </div>
+
+    <div class="col-12">
+      <label class="muted block mb-2">Quantité</label>
+      <p-inputNumber
+        [(ngModel)]="editModel.qty"
+        [min]="0"
+        [showButtons]="true"
+        [step]="50"
+        styleClass="w-full bica-input">
+      </p-inputNumber>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton class="bica-link" label="Annuler" icon="pi pi-times" (click)="cancelEdit()"></button>
+    <button pButton class="bica-btn"  label="Enregistrer" icon="pi pi-check" (click)="confirmEdit()" [disabled]="!canConfirmEdit()"></button>
+  </ng-template>
+</p-dialog>

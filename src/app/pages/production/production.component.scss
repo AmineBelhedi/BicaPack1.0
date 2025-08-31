@@ -1,0 +1,23 @@
+.bp-card { border-radius: 1rem; }
+
+.lbl { display:block; font-size:.8rem; color:#6b7280; margin-bottom:.25rem; }
+
+.mono {
+  font-variant-numeric: tabular-nums;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+}
+
+.stats .kpi {
+  display:flex; align-items:center; gap:.5rem;
+}
+.kpi-title { color:#6b7280; font-size:.9rem; }
+
+.progress-line {
+  position: relative; margin:.5rem 0 1rem;
+}
+.progress-line .progress-label {
+  position:absolute; right:.5rem; top:50%; transform:translateY(-50%);
+  font-size:.85rem; color:#374151;
+}
+
+.sep { width:1px; height:28px; background:#e5e7eb; display:inline-block; margin:0 .25rem; }

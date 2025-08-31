@@ -32,306 +32,347 @@
                 (click)="saveCommande()"></button>
         <button pButton icon="pi pi-arrow-left" label="Retour" class="p-button-text bica-link"
                 (click)="backToList()"></button>
+
+        <!-- SWITCH Détails / Production -->
+        <div class="view-toggle" style="display:flex; gap:.5rem; margin-left:.5rem;">
+          <button pButton class="bica-switch" [ngClass]="{ 'is-active': viewMode==='details' }" [class.p-button-outlined]="viewMode!=='details'"
+                  icon="pi pi-list" label="Détails"
+                  (click)="switch('details')"></button>
+
+          <button pButton class="bica-switch" [ngClass]="{ 'is-active': viewMode==='production' }" [class.p-button-outlined]="viewMode!=='production'"
+                  icon="pi pi-chart-line" label="Production"
+                  (click)="switch('production')"></button>
+        </div>
       </div>
     </header>
 
-    <!-- STATS -->
-    <section class="stats">
-      <div class="stat chip">
-        <div class="stat-title">Soufflet (v)</div>
-        <div class="stat-value">
-          <!-- REMPLACEMENT du '??' par un test compatible template -->
-          {{ (souffletTmp !== null && souffletTmp !== undefined) ? souffletTmp : (c.soufflet || 0) }} cm
+    <!-- ==================== VUE DÉTAILS ==================== -->
+    <!-- ⬇️ OUVERTURE DU CONTAINER DÉTAILS -->
+    <ng-container *ngIf="viewMode === 'details'">
+
+      <!-- STATS -->
+      <section class="stats">
+        <div class="stat chip">
+          <div class="stat-title">Soufflet (v)</div>
+          <div class="stat-value">
+            {{ (souffletTmp !== null && souffletTmp !== undefined) ? souffletTmp : (c.soufflet || 0) }} cm
+          </div>
         </div>
-      </div>
-      <div class="stat chip">
-        <div class="stat-title">Longueur  ( L )</div>
-        <div class="stat-value">{{ c.longueur || 0 }} cm</div>
-      </div>
-      <div class="stat chip">
-        <div class="stat-title">Largeur  ( W )</div>
-        <div class="stat-value">{{ c.largeur || 0 }} cm</div>
-      </div>
-      <div class="stat chip">
-        <div class="stat-title">Grammage</div>
-        <div class="stat-value">{{ c.grammage || 0 }} g/m²</div>
-      </div>
-    </section>
-
-    <!-- GRID 3 COLONNES -->
-    <div class="grid-3">
-      <!-- COL 1 : Aperçu + upload -->
-      <section class="card section">
-        <h4 class="card-title">Aperçu</h4>
-
-        <div class="image-box">
-          <ng-container *ngIf="c.imageSac; else noimg">
-            <p-image [src]="c.imageSac + (cacheBust ? ('?t=' + cacheBust) : '')" width="100" [preview]="true" alt="image commande"></p-image>
-          </ng-container>
-          <ng-template #noimg><div class="noimg">Pas d’image</div></ng-template>
-
-          <input #fileInput type="file" accept="image/*" class="hidden" (change)="onPickImage($event, c.id!)" />
-          <button pButton type="button" icon="pi pi-upload"
-                  class="p-button-rounded p-button-sm p-button-outlined upload-fab"
-                  [disabled]="uploading" (click)="fileInput.click()" pTooltip="Changer l'image"></button>
-
-          <p-progressSpinner *ngIf="uploading" [style]="{width:'28px',height:'28px'}" strokeWidth="3" class="upload-spinner">
-          </p-progressSpinner>
+        <div class="stat chip">
+          <div class="stat-title">Longueur  ( L )</div>
+          <div class="stat-value">{{ c.longueur || 0 }} cm</div>
+        </div>
+        <div class="stat chip">
+          <div class="stat-title">Largeur  ( W )</div>
+          <div class="stat-value">{{ c.largeur || 0 }} cm</div>
+        </div>
+        <div class="stat chip">
+          <div class="stat-title">Grammage</div>
+          <div class="stat-value">{{ c.grammage || 0 }} g/m²</div>
         </div>
       </section>
 
-      <!-- COL 2 : Détails & dimensions -->
-      <section class="card section details-card">
-        <h4 class="card-title">Détails & dimensions</h4>
+      <!-- GRID 3 COLONNES -->
+      <div class="grid-3">
+        <!-- COL 1 : Aperçu + upload -->
+        <section class="card section">
+          <h4 class="card-title">Aperçu</h4>
 
-        <div class="form two">
-          <div class="f">
-            <label>N° commande</label>
-            <div class="inline">
-              <span class="mono">{{ c.numeroCommande }}</span>
-              <button pButton icon="pi pi-copy" class="btn-icon copy-btn inline-copy" (click)="copyNumero()"></button>
+          <div class="image-box">
+            <ng-container *ngIf="c.imageSac; else noimg">
+              <p-image [src]="c.imageSac + (cacheBust ? ('?t=' + cacheBust) : '')" width="100" [preview]="true" alt="image commande"></p-image>
+            </ng-container>
+            <ng-template #noimg><div class="noimg">Pas d’image</div></ng-template>
+
+            <input #fileInput type="file" accept="image/*" class="hidden" (change)="onPickImage($event, c.id!)" />
+            <button pButton type="button" icon="pi pi-upload"
+                    class="p-button-rounded p-button-sm p-button-outlined upload-fab"
+                    [disabled]="uploading" (click)="fileInput.click()" pTooltip="Changer l'image"></button>
+
+            <p-progressSpinner *ngIf="uploading" [style]="{width:'28px',height:'28px'}" strokeWidth="3" class="upload-spinner">
+            </p-progressSpinner>
+          </div>
+        </section>
+
+        <!-- COL 2 : Détails & dimensions -->
+        <section class="card section details-card">
+          <h4 class="card-title">Détails & dimensions</h4>
+
+          <div class="form two">
+            <div class="f">
+              <label>N° commande</label>
+              <div class="inline">
+                <span class="mono">{{ c.numeroCommande }}</span>
+                <button pButton icon="pi pi-copy" class="btn-icon copy-btn inline-copy" (click)="copyNumero()"></button>
+              </div>
+            </div>
+            <div class="f">
+              <label>Description</label>
+              <span class="mono">{{ c.description || '—' }}</span>
             </div>
           </div>
-          <div class="f">
-            <label>Description</label>
-            <span class="mono">{{ c.description || '—' }}</span>
+
+          <p-divider></p-divider>
+
+          <h5 class="muted mb-2">Dimensions du sac</h5>
+          <div style="display:flex; gap:.75rem; align-items:flex-end; flex-wrap:wrap;">
+            <div>
+              <label for="dimL" style="font-size:.82rem; color:#6b7280; display:block; margin-bottom:.2rem;">Longueur (L)</label>
+              <p-inputNumber
+                inputId="dimL"
+                [(ngModel)]="c.longueur"
+                [min]="0" [mode]="'decimal'"
+                [minFractionDigits]="0" [maxFractionDigits]="3"
+                [locale]="'en-US'" [useGrouping]="false"
+                [suffix]="' cm'"
+                [inputStyle]="{ width: '90px' }">
+              </p-inputNumber>
+            </div>
+
+            <div>
+              <label for="dimW" style="font-size:.82rem; color:#6b7280; display:block; margin-bottom:.2rem;">Largeur (W)</label>
+              <p-inputNumber
+                inputId="dimW"
+                [(ngModel)]="c.largeur"
+                [min]="0" [mode]="'decimal'"
+                [minFractionDigits]="0" [maxFractionDigits]="3"
+                [locale]="'en-US'" [useGrouping]="false"
+                [suffix]="' cm'"
+                [inputStyle]="{ width: '90px' }">
+              </p-inputNumber>
+            </div>
+
+            <div>
+              <label for="dimG" style="font-size:.82rem; color:#6b7280; display:block; margin-bottom:.2rem;">Grammage</label>
+              <p-inputNumber
+                inputId="dimG"
+                [(ngModel)]="c.grammage"
+                [min]="0" [mode]="'decimal'"
+                [minFractionDigits]="0" [maxFractionDigits]="3"
+                [locale]="'en-US'" [useGrouping]="false"
+                [suffix]="' g/m²'"
+                [inputStyle]="{ width: '100px' }">
+              </p-inputNumber>
+            </div>
           </div>
-        </div>
 
-        <p-divider></p-divider>
+          <small class="muted block mt-1">Format : longueur × largeur (cm) ; grammage (g/m²).</small>
 
-        <h5 class="muted mb-2">Dimensions du sac</h5>
-        <div class="metrics metrics-compact">
-          <div class="metric">
-            <label for="dimL">Longueur  (L)</label>
-            <p-inputNumber
-              inputId="dimL"
-              [(ngModel)]="c.longueur"
-              [min]="0"
-              [mode]="'decimal'"
-              [minFractionDigits]="0"
-              [maxFractionDigits]="3"
-              [locale]="'en-US'"
-              [useGrouping]="false"
-              [suffix]="' cm'"
-              [inputStyle]="{ width: '110px' }">
-            </p-inputNumber>
+          <p-divider></p-divider>
+
+          <h5 class="muted mb-2">Surface</h5>
+          <div class="form two">
+            <div class="f">
+              <label>Surface (par unité)</label>
+              <input pInputText [readonly]="true"
+                     [value]="formatNoGroup(surfaceUnitaire(c), 'cm²')" />
+              <small class="muted block mt-1 formula-note">
+                S = (
+                  <span class="nowrap">L + <span *ngIf="isFondCarre()">½·v + </span>pliL</span>
+                ) ×
+                (<span class="nowrap">(W + v) × 2 + pliW</span>)
+              </small>
+            </div>
           </div>
-          <div class="metric">
-            <label for="dimW">Largeur  (W)</label>
-            <p-inputNumber
-              inputId="dimW"
-              [(ngModel)]="c.largeur"
-              [min]="0"
-              [mode]="'decimal'"
-              [minFractionDigits]="0"
-              [maxFractionDigits]="3"
-              [locale]="'en-US'"
-              [useGrouping]="false"
-              [suffix]="' cm'"
-              [inputStyle]="{ width: '110px' }">
-            </p-inputNumber>
+
+          <p-divider></p-divider>
+
+          <h5 class="muted mb-2">Poids</h5>
+          <div style="display:flex; gap:.75rem; align-items:flex-end; flex-wrap:wrap;">
+            <div>
+              <label style="font-size:.82rem; color:#6b7280; display:block; margin-bottom:.2rem;">
+                Par unité
+              </label>
+              <input pInputText class="compact-text" [readonly]="true"
+                    [value]="formatNoGroup(calculPoidsTotal(c), 'g')"
+                    [style]="{ width: '110px' }"/>
+            </div>
+            <div>
+              <label style="font-size:.82rem; color:#6b7280; display:block; margin-bottom:.2rem;">
+                Total Commande
+              </label>
+              <input pInputText class="compact-text" [readonly]="true"
+                    [value]="formatWeightSmart(calculPoidsTotalCommande(c), 3, 3)"
+                    [style]="{ width: '110px' }"/>
+            </div>
           </div>
-          <div class="metric">
-            <label for="dimG">Grammage</label>
-            <p-inputNumber
-              inputId="dimG"
-              [(ngModel)]="c.grammage"
-              [min]="0"
-              [mode]="'decimal'"
-              [minFractionDigits]="0"
-              [maxFractionDigits]="3"
-              [locale]="'en-US'"
-              [useGrouping]="false"
-              [suffix]="' g/m²'"
-              [inputStyle]="{ width: '120px' }">
-            </p-inputNumber>
+        </section>
+
+        <!-- COL 3 : Options -->
+        <section class="card section edit-identite-card">
+          <h4 class="card-title">Options & compléments</h4>
+
+          <div class="field">
+            <div class="inline-check">
+              <p-checkbox [(ngModel)]="hasPoigner" binary="true" inputId="chkPoigner" (onChange)="togglePoigner()" (ngModelChange)="onPoignerChange($event)"></p-checkbox>
+              <label for="chkPoigner" class="m-2">Poignée</label>
+            </div>
+            <div class="mt-2" *ngIf="hasPoigner">
+              <label for="poidsPoigner">Poids poignée</label>
+              <p-inputNumber
+                inputId="poidsPoigner"
+                [(ngModel)]="poidsPoignerTmp"
+                [min]="0"
+                [mode]="'decimal'"
+                [minFractionDigits]="0"
+                [maxFractionDigits]="6"
+                [step]="0.1"
+                [locale]="'en-US'"
+                [useGrouping]="false"
+                [suffix]="' g'">
+              </p-inputNumber>
+            </div>
           </div>
-        </div>
 
-        <small class="muted block mb-3">Format : longueur × largeur (cm) ; grammage (g/m²).</small>
-
-        <p-divider></p-divider>
-
-        <h5 class="muted mb-2">Surface</h5>
-        <div class="form two">
-          <div class="f">
-            <label>Surface (par unité)</label>
-            <input pInputText [readonly]="true"
-                   [value]="formatNoGroup(surfaceUnitaire(c), 'cm²')" />
-            <!-- Formule affichée en clair, sans condition sur le type -->
-            <small class="muted block mt-1 formula-note">
-              S = (
-                <span class="nowrap">L + <span *ngIf="isFondCarre()">½·v + </span>pliL</span>
-              ) ×
-              (<span class="nowrap">(W + v) × 2 + pliW</span>)
-            </small>
-
+          <div class="field">
+            <div class="inline-check">
+              <p-checkbox [(ngModel)]="hasSoufflet" binary="true" inputId="chkSoufflet" (onChange)="toggleSoufflet()" (ngModelChange)="onSouffletChange($event)"></p-checkbox>
+              <label for="chkSoufflet" class="m-2">Soufflet</label>
+            </div>
+            <div class="mt-2" *ngIf="hasSoufflet">
+              <label for="soufflet">Soufflet  ( v )</label>
+              <p-inputNumber
+                inputId="soufflet"
+                [(ngModel)]="souffletTmp"
+                [min]="0"
+                [mode]="'decimal'"
+                [minFractionDigits]="0"
+                [maxFractionDigits]="6"
+                [step]="0.1"
+                [locale]="'en-US'"
+                [useGrouping]="false"
+                [suffix]="' cm'">
+              </p-inputNumber>
+            </div>
           </div>
-        </div>
 
-        <p-divider></p-divider>
-
-        <h5 class="muted mb-2">Poids</h5>
-        <div class="form two">
-          <div class="f">
-            <label>Poids total (par unité)</label>
-            <input pInputText [readonly]="true"
-                   [value]="formatNoGroup(calculPoidsTotal(c), 'g')" />
+          <!-- TYPE (lecture seule) -->
+          <div class="field mb-3">
+            <label>Type du sac</label>
+            <p-tag
+              [value]="($any(commande)?.typeSac || 'FOND_V') === 'FOND_CARRE' ? 'Fond Carré' : 'Fond V'"
+              severity="info">
+            </p-tag>
           </div>
-          <div class="f">
-            <label>Poids total commande</label>
-            <input pInputText [readonly]="true"
-                   [value]="formatWeightSmart(calculPoidsTotalCommande(c), 3, 3)" />
+
+          <!-- PLIS : même ligne + compacts -->
+          <div class="field" style="margin-bottom:.5rem;">
+            <label style="margin-bottom:.35rem;">Plis</label>
+
+            <div style="display:flex; gap:.5rem; align-items:flex-end; flex-wrap:wrap;">
+              <div>
+                <label for="pliL" style="font-size:.82rem; color:#6b7280; display:block; margin-bottom:.2rem;">Pli L</label>
+                <p-inputNumber
+                  styleClass="pli-compact"
+                  inputId="pliL"
+                  [(ngModel)]="pliLTmp"
+                  [min]="0" [mode]="'decimal'"
+                  [minFractionDigits]="0" [maxFractionDigits]="2"
+                  [locale]="'en-US'" [useGrouping]="false" [showButtons]="false"
+                  [suffix]="' cm'"
+                  [style]="{ width: '110px' }"
+                  [inputStyle]="{ width: '90px', padding: '.32rem .5rem' }">
+                </p-inputNumber>
+              </div>
+
+              <div>
+                <label for="pliW" style="font-size:.82rem; color:#6b7280; display:block; margin-bottom:.2rem;">Pli W</label>
+                <p-inputNumber
+                  styleClass="pli-compact"
+                  inputId="pliW"
+                  [(ngModel)]="pliWTmp"
+                  [min]="0" [mode]="'decimal'"
+                  [minFractionDigits]="0" [maxFractionDigits]="2"
+                  [locale]="'en-US'" [useGrouping]="false" [showButtons]="false"
+                  [suffix]="' cm'"
+                  [style]="{ width: '110px' }"
+                  [inputStyle]="{ width: '90px', padding: '.32rem .5rem' }">
+                </p-inputNumber>
+              </div>
+            </div>
           </div>
-        </div>
 
-      </section>
-
-      <!-- COL 3 : Options -->
-      <section class="card section edit-identite-card">
-        <h4 class="card-title">Options & compléments</h4>
-
-        <div class="field">
-          <div class="inline-check">
-            <p-checkbox [(ngModel)]="hasPoigner" binary="true" inputId="chkPoigner" (onChange)="togglePoigner()" (ngModelChange)="onPoignerChange($event)"></p-checkbox>
-            <label for="chkPoigner" class="m-2">Poignée</label>
+          <!-- LAIZE : sous les plis, calculée -->
+          <div class="field">
+            <label for="laize">Laize </label>
+            <input pInputText
+                  [readonly]="true"
+                  [value]="formatNoGroup(laizeEffective(commande), 'cm')"
+                  [style]="{ width: '110px' }" />
           </div>
-          <div class="mt-2" *ngIf="hasPoigner">
-            <label for="poidsPoigner">Poids poignée</label>
-            <p-inputNumber
-              inputId="poidsPoigner"
-              [(ngModel)]="poidsPoignerTmp"
-              [min]="0"
-              [mode]="'decimal'"
-              [minFractionDigits]="0"
-              [maxFractionDigits]="6"
-              [step]="0.1"
-              [locale]="'en-US'"
-              [useGrouping]="false"
-              [suffix]="' g'">
-            </p-inputNumber>
-          </div>
-        </div>
 
-        <div class="field">
-          <div class="inline-check">
-            <p-checkbox [(ngModel)]="hasSoufflet" binary="true" inputId="chkSoufflet" (onChange)="toggleSoufflet()" (ngModelChange)="onSouffletChange($event)"></p-checkbox>
-            <label for="chkSoufflet" class="m-2">Soufflet</label>
-          </div>
-          <div class="mt-2" *ngIf="hasSoufflet">
-            <label for="soufflet">Soufflet  ( v )</label>
-            <p-inputNumber
-              inputId="soufflet"
-              [(ngModel)]="souffletTmp"
-              [min]="0"
-              [mode]="'decimal'"
-              [minFractionDigits]="0"
-              [maxFractionDigits]="6"
-              [step]="0.1"
-              [locale]="'en-US'"
-              [useGrouping]="false"
-              [suffix]="' cm'">
-            </p-inputNumber>
-          </div>
-        </div>
-
-        <!-- TYPE (lecture seule) -->
-        <div class="field mb-3">
-          <label>Type du sac</label>
-          <p-tag
-            [value]="($any(commande)?.typeSac || 'FOND_V') === 'FOND_CARRE' ? 'Fond Carré' : 'Fond V'"
-            severity="info">
-          </p-tag>
-        </div>
-
-        <!-- PLIS : toujours visibles -->
-        <div class="field">
-          <label for="pliL">Pli (longueur=pliL)</label>
-          <p-inputNumber
-            inputId="pliL"
-            [(ngModel)]="pliLTmp"
-            [min]="0"
-            [mode]="'decimal'"
-            [minFractionDigits]="0"
-            [maxFractionDigits]="2"
-            [locale]="'en-US'"
-            [useGrouping]="false"
-            [suffix]="' cm'">
-          </p-inputNumber>
-        </div>
-
-        <div class="field">
-          <label for="pliW">Pli (largeur=pliW)</label>
-          <p-inputNumber
-            inputId="pliW"
-            [(ngModel)]="pliWTmp"
-            [min]="0"
-            [mode]="'decimal'"
-            [minFractionDigits]="0"
-            [maxFractionDigits]="2"
-            [locale]="'en-US'"
-            [useGrouping]="false"
-            [suffix]="' cm'">
-          </p-inputNumber>
-        </div>
-
-        <div class="actions-line"></div>
-      </section>
-    </div>
-
-    <!-- ROULEAUX -->
-    <!-- (inchangé) -->
-    <section class="card section">
-      <div class="section-head">
-        <h4 class="card-title m-0">Rouleaux utilisés</h4>
-        <div class="add-inline">
-          <p-dropdown styleClass="rouleau-id" [options]="rouleaux" [(ngModel)]="formAlloc.rouleauId"
-                      optionLabel="reference" optionValue="id" [filter]="true" placeholder="Rouleau (R001, 101…)"
-                      [showClear]="true"></p-dropdown>
-          <p-inputNumber styleClass="poids-kg" [(ngModel)]="formAlloc.poids" [min]="0" [mode]="'decimal'"
-                         [maxFractionDigits]="3" [inputStyle]="{ width: '90px' }" inputId="rPoids"
-                         placeholder="Poids (kg)"></p-inputNumber>
-          <button pButton icon="pi pi-plus" label="Réserver" class="p-button-sm bica-add"
-                  (click)="reserver(formAlloc.rouleauId, formAlloc.poids)"></button>
-        </div>
+          <div class="actions-line"></div>
+        </section>
       </div>
 
-      <p-table
-        [value]="displayedAllocations"
-        [rows]="8"
-        [paginator]="true"
-        [rowsPerPageOptions]="[8,16,32]"
-        responsiveLayout="stack"
-        breakpoint="960px"
-        styleClass="minimal rouleaux-table"
-      >
-        <ng-template pTemplate="header">
-          <tr>
-            <th class="col-idx">#</th>
-            <th>Rouleau</th>
-            <th class="col-num">Poids (kg)</th>
-            <th class="col-actions"></th>
-          </tr>
-        </ng-template>
+      <!-- ROULEAUX -->
+      <!-- (inchangé) -->
+      <section class="card section">
+        <div class="section-head">
+          <h4 class="card-title m-0">Rouleaux utilisés</h4>
+          <div class="add-inline">
+            <p-dropdown styleClass="rouleau-id" [options]="rouleaux" [(ngModel)]="formAlloc.rouleauId"
+                        optionLabel="reference" optionValue="id" [filter]="true" placeholder="Rouleau (R001, 101…)"
+                        [showClear]="true"></p-dropdown>
+            <p-inputNumber styleClass="poids-kg" [(ngModel)]="formAlloc.poids" [min]="0" [mode]="'decimal'"
+                           [maxFractionDigits]="3" [inputStyle]="{ width: '90px' }" inputId="rPoids"
+                           placeholder="Poids (kg)"></p-inputNumber>
+            <button pButton icon="pi pi-plus" label="Réserver" class="p-button-sm bica-add"
+                    (click)="reserver(formAlloc.rouleauId, formAlloc.poids)"></button>
+          </div>
+        </div>
 
-        <ng-template pTemplate="body" let-a>
-          <tr>
-            <td class="mono col-idx" data-title="#"> {{ a.id }} </td>
-            <td class="mono" data-title="Rouleau"> {{ a.rouleauId }} </td>
-            <td class="mono col-num" data-title="Poids (kg)"> {{ a.poidsReserve }} </td>
-            <td class="text-right col-actions" data-title="Actions">
-              <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-rounded p-button-sm"
-                      (click)="removeAllocation(a)" pTooltip="Supprimer"></button>
-            </td>
-          </tr>
-        </ng-template>
+        <p-table
+          [value]="displayedAllocations"
+          [rows]="8"
+          [paginator]="true"
+          [rowsPerPageOptions]="[8,16,32]"
+          responsiveLayout="stack"
+          breakpoint="960px"
+          styleClass="minimal rouleaux-table"
+        >
+          <ng-template pTemplate="header">
+            <tr>
+              <th class="col-idx">#</th>
+              <th>Rouleau</th>
+              <th class="col-num">Poids (kg)</th>
+              <th class="col-actions"></th>
+            </tr>
+          </ng-template>
 
-        <ng-template pTemplate="emptymessage">
-          <tr><td colspan="4" class="muted text-center py-4">Aucun rouleau</td></tr>
-        </ng-template>
-      </p-table>
-    </section>
+          <ng-template pTemplate="body" let-a>
+            <tr>
+              <td class="mono col-idx" data-title="#"> {{ a.id }} </td>
+              <td class="mono" data-title="Rouleau"> {{ a.rouleauId }} </td>
+              <td class="mono col-num" data-title="Poids (kg)"> {{ a.poidsReserve }} </td>
+              <td class="text-right col-actions" data-title="Actions">
+                <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-rounded p-button-sm"
+                        (click)="removeAllocation(a)" pTooltip="Supprimer"></button>
+              </td>
+            </tr>
+          </ng-template>
+
+          <ng-template pTemplate="emptymessage">
+            <tr><td colspan="4" class="muted text-center py-4">Aucun rouleau</td></tr>
+          </ng-template>
+        </p-table>
+      </section>
+
+    </ng-container>
+    <!-- ⬆️ FERMETURE DU CONTAINER DÉTAILS -->
+
+    <!-- ==================== VUE PRODUCTION ==================== -->
+    <!-- ⬇️ OUVERTURE DU CONTAINER PRODUCTION -->
+    <!-- ==================== VUE PRODUCTION ==================== -->
+    <ng-container *ngIf="viewMode === 'production' && commande as c">
+      <div id="productionTop"></div>
+      <app-production-card
+        [commandeId]="c.id!"
+        [cible]="c.quantite || 0">
+      </app-production-card>
+    </ng-container>
+
+    <!-- ⬆️ FERMETURE DU CONTAINER PRODUCTION -->
 
   </div>
 </div>

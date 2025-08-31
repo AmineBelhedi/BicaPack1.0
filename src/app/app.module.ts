@@ -10,6 +10,7 @@ import { TableModule } from 'primeng/table';
 import { AuthService } from './services/auth.service';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AuthInterceptor } from './services/auth.interceptor';
+import { HttpClientModule } from '@angular/common/http';
 @NgModule({
     declarations: [
         AppComponent
@@ -20,7 +21,8 @@ import { AuthInterceptor } from './services/auth.interceptor';
         AppLayoutModule,
         RouterModule,
         NotfoundModule,
-        TableModule // Importation de TableModule pour l'utilisation dans l'application
+        TableModule ,
+        HttpClientModule// Importation de TableModule pour l'utilisation dans l'application
     ],
     providers: [
         AuthService,

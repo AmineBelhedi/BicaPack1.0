@@ -3,6 +3,7 @@ import { MessageService } from 'primeng/api';
 import { Table } from 'primeng/table';
 import { CommandeDTO } from 'src/app/models/CommandeDTO';
 import { CommandeService } from 'src/app/services/commande.service';
+import { ProductionStoreService } from 'src/app/services/production-store.service';
 
 /** Vue UI = DTO + champs non-API qu'on garde seulement côté front */
 type RowView = CommandeDTO & {
@@ -23,6 +24,8 @@ export class CommandeComponent implements OnInit {
   selected: RowView[] = [];
   rowsPerPageOptions = [10, 20, 30];
   loading = false;
+  prodTotalCache = new Map<number, number>();
+prodTodayCache = new Map<number, number>();
 
   // Dialogs
   dialogVisible = false;
@@ -53,7 +56,8 @@ export class CommandeComponent implements OnInit {
 
   constructor(
     private svc: CommandeService,
-    private toast: MessageService
+    private toast: MessageService,
+    private prodStore: ProductionStoreService 
   ) {}
 
   /* ===================== Mapping API ⇄ Vue ===================== */
@@ -130,7 +134,7 @@ export class CommandeComponent implements OnInit {
   getAll() {
     this.loading = true;
     this.svc.getAll().subscribe({
-      next: data => { this.rows = (data || []).map(d => this.dtoToView(d)); this.loading = false; },
+      next: data => { this.rows = (data || []).map(d => this.dtoToView(d)); this.loading = false;this.refreshProdStatsForVisibleRows(); },
       error: err => { console.error('Erreur chargement commandes:', err); this.loading = false; }
     });
   }
@@ -170,6 +174,7 @@ export class CommandeComponent implements OnInit {
         this.selected = [];
         this.toast.add({ severity: 'success', summary: 'Supprimées', detail: 'Commandes supprimées', life: 3000 });
         this.deleteManyDialog = false;
+        this.refreshProdStatsForVisibleRows(); // ⬅️ AJOUT
       },
       error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Suppression multiple échouée', life: 3000 })
     });
@@ -199,6 +204,7 @@ export class CommandeComponent implements OnInit {
         this.rows = this.rows.filter(r => r.id !== this.current.id);
         this.toast.add({ severity: 'success', summary: 'Supprimée', detail: 'Commande supprimée', life: 3000 });
         this.deleteDialog = false;
+        this.refreshProdStatsForVisibleRows(); // ⬅️ AJOUT
       },
       error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Suppression échouée', life: 3000 })
     });
@@ -228,6 +234,7 @@ export class CommandeComponent implements OnInit {
           const idx = this.rows.findIndex(r => r.id === v.id);
           if (idx >= 0) this.rows[idx] = v;
           this.rows = [...this.rows];
+          this.refreshProdStatsForVisibleRows(); // ⬅️ AJOUT
           this.toast.add({ severity: 'success', summary: 'Mis à jour', detail: 'Commande modifiée', life: 2500 });
           this.dialogVisible = false;
         },
@@ -237,6 +244,7 @@ export class CommandeComponent implements OnInit {
       this.svc.create(payload).subscribe({
         next: created => {
           this.rows = [this.dtoToView(created), ...this.rows];
+          this.refreshProdStatsForVisibleRows(); // ⬅️ AJOUT
           this.toast.add({ severity: 'success', summary: 'Créée', detail: 'Nouvelle commande ajoutée', life: 2500 });
           this.dialogVisible = false;
         },
@@ -303,4 +311,40 @@ export class CommandeComponent implements OnInit {
       maximumFractionDigits: 3
     }) + ' g';
   }
+  private todayISO(): string {
+  const d = new Date();
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate()).toLocaleDateString('en-CA'); // YYYY-MM-DD
+}
+
+getProdTotal(c: RowView): number {
+  if (!c?.id) return 0;
+  if (!this.prodTotalCache.has(c.id!)) {
+    this.prodTotalCache.set(c.id!, this.prodStore.total(c.id!));
+  }
+  return this.prodTotalCache.get(c.id!) || 0;
+}
+
+getProdToday(c: RowView): number {
+  if (!c?.id) return 0;
+  if (!this.prodTodayCache.has(c.id!)) {
+    const iso = this.todayISO();
+    const qty = this.prodStore
+      .list(c.id!)
+      .filter(r => r.dateProduction === iso)
+      .reduce((s, r) => s + (r.quantite || 0), 0);
+    this.prodTodayCache.set(c.id!, qty);
+  }
+  return this.prodTodayCache.get(c.id!) || 0;
+}
+
+/** À rappeler quand la liste change (après load, create, update, delete) */
+refreshProdStatsForVisibleRows() {
+  this.prodTotalCache.clear();
+  this.prodTodayCache.clear();
+  for (const c of this.rows || []) {
+    this.getProdTotal(c);
+    this.getProdToday(c);
+  }
+}
+
 }

@@ -37,6 +37,8 @@ export class DetailCommandeComponent implements OnInit {
   // Flags UI
   hasPoigner = false;
   hasSoufflet = false;
+  viewMode: 'details' | 'production' = 'details';
+  switch(mode: 'details' | 'production') { this.viewMode = mode; }
 
   // Vars temporaires (édition sans sauvegarder)
   poidsPoignerTmp: number | null = 0;
@@ -75,6 +77,9 @@ export class DetailCommandeComponent implements OnInit {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (!id) { this.notFound = true; this.loading = false; return; }
 
+    const initialView = this.route.snapshot.queryParamMap.get('view');
+    if (initialView === 'production') this.viewMode = 'production';
+      
     this.svc.getById(id).subscribe({
       next: (cmd) => {
         this.commande = cmd;
@@ -104,7 +109,13 @@ export class DetailCommandeComponent implements OnInit {
         this.reloadAllocations();
 
         this.loading = false;
-      },
+        if (this.viewMode === 'production') {
+          setTimeout(() => {
+            document.getElementById('productionTop')
+              ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
+        }
+        },
       error: () => { this.notFound = true; this.loading = false; }
     });
   }
@@ -279,6 +290,15 @@ export class DetailCommandeComponent implements OnInit {
     const W_eff = (W + v) * 2 + pliW;
 
     return L_eff * W_eff;
+  }
+  // Laize effective (W_eff) en cm
+  laizeEffective(c: any): number {
+    const W = Number(c?.largeur ?? 0);
+    const v = Math.max(Number(this.souffletTmp ?? c?.soufflet ?? 0), 0);
+    const pliW = Number(this.pliWTmp ?? 0);
+    // même formule que dans surfaceUnitaire()
+    const W_eff = (W + v) * 2 + pliW;
+    return W_eff; // cm
   }
 
 

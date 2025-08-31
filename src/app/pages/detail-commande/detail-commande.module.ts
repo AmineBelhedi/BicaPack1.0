@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-
+import { CalendarModule } from 'primeng/calendar';
 import { TagModule } from 'primeng/tag';
 import { ButtonModule } from 'primeng/button';
 import { ImageModule } from 'primeng/image';
@@ -19,9 +19,13 @@ import { ProgressBarModule } from 'primeng/progressbar';
 import { ToastModule } from 'primeng/toast';
 import { CheckboxModule } from 'primeng/checkbox';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
-
+import { ProductionCardComponent } from './production-card/production-card.component';
+import { DividerModule } from 'primeng/divider';
+import { DialogModule } from 'primeng/dialog';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ConfirmationService } from 'primeng/api';
 @NgModule({
-  declarations: [DetailCommandeComponent],
+  declarations: [DetailCommandeComponent,ProductionCardComponent],
   imports: [
     CommonModule,
     FormsModule,
@@ -40,7 +44,12 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
     ChipModule,
     QRCodeModule,
     InputNumberModule,
-    DetailCommandeRoutingModule
-  ]
+    DetailCommandeRoutingModule,
+    DividerModule,
+    CalendarModule,
+    DialogModule,
+    ConfirmDialogModule
+  ],
+  providers:[ConfirmationService]
 })
 export class DetailCommandeModule {}

@@ -1,0 +1,258 @@
+/* =================== Palette locale =================== */
+:host {
+  --bica-primary:#ff7a00;     /* orange = bouton Ajouter */
+
+  /* Calendrier & inputs SOFT proches du bouton Retour (teinte sombre adoucie) */
+  --cal-soft-bg:#f3f4f6;      /* fond très clair gris neutre */
+  --cal-soft-border:#9ca3af;  /* bordure gris moyen */
+  --cal-soft-text:#374151;    /* gris foncé (texte/icône) */
+  --cal-soft-strong:#26303f;  /* accent sombre Retour */
+  --cal-soft-focus:rgba(38,48,63,.25);
+
+  --bica-ink:#1f2937;
+  --bica-muted:#6b7280;
+  --bica-border:#e5e7eb;
+  --bica-surface:#fff;
+  --bica-danger:#ef4444;
+}
+
+/* ======= Carte & header ======= */
+.bica-surface{background:var(--bica-surface);border:1px solid var(--bica-border);border-radius:14px}
+.section-head{display:flex;align-items:center;justify-content:space-between;gap:.75rem}
+.card-title{color:var(--bica-ink);font-weight:700}
+.head-actions{display:inline-flex;gap:.5rem;align-items:center}
+
+/* % compact */
+.pct-badge{font-size:.8rem;line-height:1;padding:.3rem .6rem;border-radius:999px;background:#f3f4f6;color:var(--bica-ink)}
+
+/* ======= Progress + KPIs ======= */
+.progress-wrap{display:grid;gap:.6rem}
+.bica-progress-slim .p-progressbar{height:8px;border-radius:999px;background:#f3f4f6}
+.bica-progress-slim .p-progressbar-value{background:#d1d5db} /* neutre */
+
+.kpis-row{
+  display:grid;
+  grid-template-columns:repeat(2,max-content) 1fr repeat(2,max-content);
+  gap:.6rem 1rem;align-items:center
+}
+.kpi{
+  display:inline-flex;align-items:center;gap:.45rem;
+  padding:.35rem .75rem;border-radius:12px;font-weight:700;font-size:.82rem
+}
+.kpi i{font-size:.95em}
+
+/* Total = vert soft */
+.kpi-total{background:#f0fdf4;border:1px solid #86efac;color:#166534}
+/* Aujourd’hui = bleu soft */
+.kpi-today{background:#eff6ff;border:1px solid #93c5fd;color:#1e3a8a}
+/* Cible = violet soft */
+.kpi-cible{background:#f5f3ff;border:1px solid #c4b5fd;color:#4c1d95}
+/* Restant = rouge soft */
+.kpi-restant{background:#fef2f2;border:1px solid #fca5a5;color:#991b1b}
+
+.kpi-label{font-size:.78rem;opacity:.9}
+.kpi-value{font-weight:800}
+.spacer{width:100%}
+
+/* ======= Filtres ======= */
+.filters-line{display:grid;grid-template-columns:1fr;gap:1rem;align-items:end;margin:.25rem 0 1rem}
+.dates{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(220px,280px));
+  gap:.75rem 1rem;
+}
+/* Presets désormais SOUS les dates */
+.presets-inline{
+  grid-column:1 / -1;
+  display:flex; align-items:center; gap:.75rem; margin-top:.25rem;
+}
+.seg{display:inline-flex;border:1px solid var(--bica-border);border-radius:999px;overflow:hidden;background:#fff}
+.seg-btn.p-button{background:transparent;border:0;color:var(--bica-ink);padding:.35rem .75rem;border-right:1px solid var(--bica-border);font-weight:600;font-size:.82rem}
+.seg-btn.p-button:last-child{border-right:0}
+.seg-btn.p-button:enabled:hover{background:#f9fafb}
+.bica-link.p-button{color:var(--bica-ink);background:transparent;border:none}
+.bica-link.p-button:hover{background:#f3f4f6}
+.bica-link.reset .p-button-icon{margin-right:.25rem}
+
+/* Inputs arrondis */
+.field label{font-size:.8rem;color:var(--bica-muted)}
+.bica-input .p-inputtext,
+.bica-input.p-inputnumber .p-inputtext{border-radius:10px}
+
+/* ======= Bouton primaire ======= */
+.bica-btn.p-button{background:var(--bica-primary);border:1px solid var(--bica-primary);color:#fff;border-radius:999px;padding:.45rem 1rem;font-weight:700}
+.bica-btn.p-button:enabled:hover{filter:brightness(.96)}
+
+/* ======= Table ======= */
+.bica-table{--row-hover:#fafafa}
+.bica-table .p-datatable-thead > tr > th{background:transparent;border:0;border-bottom:1px solid var(--bica-border);color:var(--bica-muted);font-weight:600}
+.bica-table .p-datatable-tbody > tr > td{border:0;border-bottom:1px dashed var(--bica-border)}
+.bica-table .p-datatable-tbody > tr:hover > td{background:var(--row-hover)}
+.bica-link--danger.p-button{color:var(--bica-danger);background:transparent;border:none}
+
+/* ======= Bouton Edit (vert comme Enregistrer) ======= */
+.bica-edit.p-button{
+  background:#fff;
+  border:none;
+  color:#8BC34A;
+  border-radius:6px;
+}
+.bica-edit.p-button:enabled:hover{filter:brightness(.95)}
+
+/* ======= Calendrier SOFT (proche bouton Retour) ======= */
+:host ::ng-deep .bica-input .p-datepicker-trigger.p-button{
+  background:var(--cal-soft-bg) !important;
+  border-color:var(--cal-soft-border) !important;
+  color:var(--cal-soft-text) !important;
+}
+:host ::ng-deep .bica-input .p-datepicker-trigger.p-button:enabled:hover{
+  background:#eceff3 !important;
+  filter:brightness(.98);
+}
+:host ::ng-deep .bica-input .p-datepicker-trigger.p-button:focus{box-shadow:0 0 0 2px var(--cal-soft-focus)}
+
+/* Bordure input (date & quantité dans le dialog) */
+:host ::ng-deep .bica-input .p-inputtext{border-color:var(--cal-soft-border) !important}
+:host ::ng-deep .bica-input .p-inputtext:focus{
+  border-color:var(--cal-soft-strong) !important;
+  box-shadow:0 0 0 2px var(--cal-soft-focus) !important;
+}
+/* jonction input ↔ trigger */
+:host ::ng-deep .bica-input .p-inputtext + .p-datepicker-trigger.p-button{border-left-color:var(--cal-soft-border) !important}
+
+/* Popup calendrier */
+:host ::ng-deep .p-datepicker table td > span.p-highlight{background:var(--cal-soft-strong) !important;color:#fff !important}
+:host ::ng-deep .p-datepicker .p-datepicker-today > span{border-color:var(--cal-soft-strong) !important}
+:host ::ng-deep .p-datepicker .p-datepicker-buttonbar button{
+  background:var(--cal-soft-strong) !important;border-color:var(--cal-soft-strong) !important;color:#fff !important
+}
+
+/* ======= Dialog d’ajout : Quantité = style soft aussi ======= */
+:host ::ng-deep .add-dialog .p-inputnumber .p-inputtext{
+  border-color:var(--cal-soft-border) !important;
+}
+:host ::ng-deep .add-dialog .p-inputnumber .p-inputtext:focus{
+  border-color:var(--cal-soft-strong) !important;
+  box-shadow:0 0 0 2px var(--cal-soft-focus) !important;
+}
+/* Boutons + / - de l'inputNumber (soft, cohérents avec calendrier) */
+:host ::ng-deep .add-dialog .p-inputnumber .p-inputnumber-button{
+  background:var(--cal-soft-bg) !important;
+  border-color:var(--cal-soft-border) !important;
+  color:var(--cal-soft-text) !important;
+}
+:host ::ng-deep .add-dialog .p-inputnumber .p-inputnumber-button:enabled:hover{
+  background:#eceff3 !important;
+}
+/* Icônes flèches */
+:host ::ng-deep .add-dialog .p-inputnumber .p-inputnumber-button .pi{
+  color:var(--cal-soft-text) !important;
+}
+
+/* ======= Responsive ======= */
+@media (max-width:992px){
+  .kpis-row{grid-template-columns:1fr 1fr}
+  .spacer{display:none}
+  .filters-line{grid-template-columns:1fr}
+  .dates{grid-template-columns:1fr}
+}
+/* Empêche la casse des nombres/dates */
+.mono { white-space: nowrap; }
+
+/* Mode stack : afficher les labels (noms de colonnes) avec data-title */
+@media (max-width: 768px) {
+  .bica-table .p-datatable-tbody > tr > td {
+    display: grid;
+    grid-template-columns: 110px 1fr; /* label / valeur */
+    gap: .25rem .75rem;
+    align-items: center;
+    padding: .6rem .75rem;
+  }
+  .bica-table .p-datatable-tbody > tr > td::before {
+    content: attr(data-title);
+    color: var(--bica-muted);
+    font-size: .8rem;
+    font-weight: 600;
+  }
+  /* Aligner joliment les actions en mobile */
+  .bica-table .p-datatable-tbody > tr > td[data-title="Actions"] {
+    grid-template-columns: 110px auto;
+  }
+  .bica-table .p-datatable-tbody > tr > td[data-title="Actions"] .p-button {
+    margin-left: .25rem;
+  }
+}
+/* évite toute fuite visuelle de la table hors carte */
+.prod-card { overflow: hidden; }
+
+/* conteneur scrollable horizontal si nécessaire */
+.table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 12px; /* aligne les coins avec la carte */
+}
+
+/* la table ne force pas un scroll global */
+.bica-table .p-datatable { width: 100%; }
+
+/* lisibilité des nombres/dates */
+.mono { white-space: nowrap; }
+
+/* mode stack : montrer les noms de colonnes via data-title */
+@media (max-width: 768px) {
+  .bica-table .p-datatable-tbody > tr > td {
+    display: grid;
+    grid-template-columns: 110px 1fr; /* label / valeur */
+    gap: .25rem .75rem;
+    align-items: center;
+    padding: .6rem .75rem;
+  }
+  .bica-table .p-datatable-tbody > tr > td::before {
+    content: attr(data-title);
+    color: var(--bica-muted);
+    font-size: .8rem;
+    font-weight: 600;
+  }
+  /* actions mieux alignées */
+  .bica-table .p-datatable-tbody > tr > td[data-title="Actions"] {
+    grid-template-columns: 110px auto;
+  }
+}
+
+
+
+
+/* === Tokens verts alignés sur la puce "Total" === */
+:host{
+  --chip-green-bg:     #f0fdf4;  /* track très clair */
+  --chip-green-border: #86efac;  /* bord */
+  --chip-green-text:   #065f46;  /* texte */
+  --bar-green-fill:    #22c55e;  /* remplissage (lisible) */
+  --bar-green-fill-100:#16a34a;  /* remplissage quand 100% */
+}
+
+/* === ProgressBar local (PrimeNG) === */
+:host ::ng-deep .p-progressbar.bica-progress{
+  height: 15px;
+  border-radius: 999px;
+  background: var(--chip-green-bg);
+  border: 1px solid var(--chip-green-border);
+
+  /* PrimeNG >= v17 (variables CSS) */
+  --p-progressbar-background:        var(--chip-green-bg);
+  --p-progressbar-value-background:  var(--bar-green-fill);
+}
+:host ::ng-deep .p-progressbar.bica-progress .p-progressbar-value{
+  background: var(--bar-green-fill) !important;  /* compat v15/v16 */
+  border-radius: inherit;
+}
+:host ::ng-deep .p-progressbar.bica-progress .p-progressbar-label{
+  color: var(--chip-green-text) !important;
+  font-weight: 700;
+  text-shadow: none;
+}
+
+/* Quand la cible est atteinte (même vert, un poil plus dense) */
+:host ::ng-deep .p-progressbar.bica-progress.is-complete .p-progressbar-value{
+  background: var(--bar-green-fill-100) !important;
+}

@@ -74,6 +74,11 @@ const routes: Routes = [
         data: { roles: ['OWNER'] }
       },
         {
+    path: 'production',
+    loadChildren: () =>
+      import('./pages/production/production.module').then(m => m.ProductionModule)
+  },
+        {
     path: 'stock',
     loadChildren: () =>
       import('./pages/stock/stock.module').then(m => m.StockModule)

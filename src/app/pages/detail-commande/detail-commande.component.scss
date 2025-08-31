@@ -120,7 +120,7 @@ $bica-green-dark: #8d9c2e;
 :host ::ng-deep .edit-identite-card .p-inputtext,
 :host ::ng-deep .edit-identite-card .p-inputnumber,
 :host ::ng-deep .edit-identite-card .p-inputnumber input {
-  width: 100% !important;
+  
   box-sizing: border-box;
 }
 
@@ -504,6 +504,64 @@ img, svg, video { max-width: 100%; height: auto; }
   /* Exemple: masquer la colonne # en tout petit écran */
   :host ::ng-deep .p-datatable .col-idx { display: none; }
 }
+
+
+:host ::ng-deep .pli-compact.p-inputnumber .p-inputtext {
+  width: 90px !important;          /* correspond à [inputStyle].width */
+  padding: .32rem .5rem !important; /* réduit la hauteur */
+  height: 34px;
+  font-size: .95rem;
+}
+
+
+
+
+
+
+/* Couleur cible */
+:host {
+  --bica-switch: #374151; /* slate */
+}
+
+/* Base des 2 boutons (mêmes dimensions/arrondis) */
+.bica-switch.p-button {
+  border-radius: 10px;
+  font-weight: 700;
+  padding: .5rem 1rem;
+}
+
+/* ÉTAT ACTIF (rempli) = quand le bouton n'a PAS la classe p-button-outlined */
+.bica-switch.p-button:not(.p-button-outlined) {
+  background: var(--bica-switch);
+  border-color: var(--bica-switch);
+  color: #fff;
+}
+.bica-switch.p-button:not(.p-button-outlined):enabled:hover {
+  filter: brightness(.95);
+}
+
+/* ÉTAT INACTIF (contour) = quand la classe p-button-outlined est présente */
+.bica-switch.p-button.p-button-outlined {
+  background: transparent;
+  color: var(--bica-switch);
+  border: 1px solid var(--bica-switch);
+}
+.bica-switch.p-button.p-button-outlined:enabled:hover {
+  background: rgba(55, 65, 81, 0.06); /* très léger hover */
+}
+
+/* Icône : suit la couleur du texte */
+.bica-switch .p-button-icon {
+  color: currentColor;
+}
+
+/* Focus ring plus soft */
+.bica-switch.p-button:focus {
+  box-shadow: 0 0 0 2px rgba(55,65,81,.18);
+}
+
+
+
 
 
 
