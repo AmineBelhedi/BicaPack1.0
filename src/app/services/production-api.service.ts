@@ -5,6 +5,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment.prod';
 import { AuthService } from './auth.service';
 import { User } from '../models/user';
+import { Subject } from 'rxjs';
 
 export interface ProductionDTO {
   id?: number;
@@ -58,4 +59,5 @@ export class ProductionApiService {
   remove(commandeId: number, id: number): Observable<void> {
     return this.http.delete<void>(this.join(this.base, `${commandeId}/production/${id}`));
   }
+  changed$ = new Subject<number>();
 }

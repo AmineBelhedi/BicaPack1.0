@@ -62,10 +62,25 @@
             <button pButton pRipple icon="pi pi-times" class="p-button-text p-button-sm"
                     (click)="onGlobalFilter(dt, { target: { value: '' } })"
                     aria-label="Effacer la recherche"></button>
+
+            <!-- ================= ADDED: SWITCH TABLE/CARD ================= -->
+            <div class="ml-2 flex gap-2 view-switch">
+              <button pButton label="Table" icon="pi pi-table"
+                      [ngClass]="{'is-active': viewMode==='table'}"
+                      (click)="toggleView('table')"></button>
+
+              <button pButton label="Card" icon="pi pi-id-card"
+                      [ngClass]="{'is-active': viewMode==='card'}"
+                      (click)="toggleView('card')"></button>
+            </div>
+
+            <!-- ================= /ADDED ================= -->
           </div>
         </div>
       </div>
 
+      <!-- ================= ADDED: WRAP TABLE WITH *ngIf ================= -->
+      <ng-container *ngIf="viewMode==='table' || !viewMode">
       <!-- ===== TABLE ===== -->
       <div class="table-wrap px-3 pb-4">
         <p-table #dt
@@ -122,6 +137,12 @@
                   <p-sortIcon field="quantite"></p-sortIcon>
                 </div>
               </th>
+              <!-- header -->
+              <th class="th-produced text-right">
+                <div class="th-line is-right">
+                  <span class="th-title"><i class="pi pi-cog"></i> Quantité Produite</span>
+                </div>
+              </th>
 
               <!-- Poids (non triable) -->
               <th class="th-weight text-right">
@@ -170,7 +191,14 @@
               </td>
 
               <!-- Quantité -->
-              <td class="td-qty text-right mono">{{ c.quantite }}</td>
+              <td class="td-qty text-right mono">
+                {{ c.quantite | number:'1.0-0':'fr-FR' }} <!-- CHANGED -->
+              </td>
+
+              <!-- quantité produite -->
+              <td class="td-produced text-right mono">
+                {{ getProdTotal(c) | number:'1.0-0':'fr-FR' }} <!-- CHANGED -->
+              </td>
 
               <!-- Poids -->
               <td class="td-weight text-right mono">{{ formatGrams(calculPoidsUnitaireFromRow(c)) }}</td>
@@ -226,6 +254,83 @@
           </ng-template>
         </p-table>
       </div>
+      </ng-container>
+      
+      <!-- ================= ADDED: CARD VIEW ================= -->
+      <div class="px-5 pb-4 cards-section" *ngIf="viewMode==='card'">
+        <div class="grid cards-row">
+          <div class="col-12 sm:col-6 lg:col-4 xl:col-3" *ngFor="let c of (dt?.filteredValue || rows)">
+            <p-card class="cmd-card">
+              <!-- Header visuel + badges -->
+              <ng-template pTemplate="header">
+                <div class="cmd-media">
+                  <img *ngIf="c.imageSac" [src]="c.imageSac" alt="aperçu" />
+                  <div *ngIf="!c.imageSac" class="no-img">
+                    <i class="pi pi-image"></i> Aperçu
+                  </div>
+
+                  <!-- badges overlay -->
+                  <div class="cmd-badges">
+                    <span class="chip">{{ c.typeSac === 'FOND_CARRE' ? 'Fond Carré' : 'Fond V' }}</span>
+                    <span class="chip alt">{{ c.grammage | number:'1.0-0':'fr-FR' }} g/m²</span> <!-- CHANGED -->
+                  </div>
+                </div>
+              </ng-template>
+
+              <!-- Corps -->
+              <div class="cmd-body">
+                <div class="row-top">
+                  <div class="title">
+                    <span class="muted">Commande:</span>
+                    <span class="mono">#{{ c.numeroCommande }}</span>
+                  </div>
+                  <span class="id-pill">ID: {{ c.id }}</span>
+                </div>
+
+                <div class="meta">
+                  <span class="muted">Poids (unité):</span>
+                  <span class="meta-item"><i class="pi pi-weight"></i>{{ formatGrams(calculPoidsUnitaireFromRow(c)) }}</span>
+                </div>
+
+                <!-- Progress production -->
+                <div class="progress-wrap" *ngIf="c.quantite">
+                  <div class="progress-row">
+                    <span class="label">Avancement</span>
+                    <span class="value mono">
+                      {{ getProdTotal(c) | number:'1.0-0':'fr-FR' }}/{{ c.quantite | number:'1.0-0':'fr-FR' }} <!-- CHANGED -->
+                    </span>
+                  </div>
+                  <div class="progress">
+                    <div class="bar" [style.width.%]="(getProdTotal(c) / c.quantite) * 100" [ngClass]="{
+                        'is-green': (getProdTotal(c) / c.quantite) >= 0.5 && (getProdTotal(c) / c.quantite) < 1,
+                        'is-complete': (getProdTotal(c) / c.quantite) >= 1}"></div>
+                  </div>
+                  <div class="today" *ngIf="getProdToday(c) > 0">
+                    <i class="pi pi-bolt"></i> {{ getProdToday(c) | number:'1.0-0':'fr-FR' }} aujourd’hui <!-- CHANGED -->
+                  </div>
+                </div>
+
+                <div class="divider"></div>
+
+                <!-- Actions -->
+                <div class="actions">
+                  <button pButton pRipple icon="pi pi-eye" class="p-button-rounded p-button-sm p-button-info"
+                          pTooltip="Détails" [routerLink]="['/pages/detail-commande', c.id]"></button>
+                  <button pButton pRipple icon="pi pi-chart-line" class="p-button-rounded p-button-sm p-button-warning"
+                          pTooltip="Production" [routerLink]="['/pages/detail-commande', c.id]"
+                          [queryParams]="{ view: 'production' }"></button>
+                  <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-sm p-button-success"
+                          (click)="edit(c)" pTooltip="Modifier"></button>
+                  <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-sm p-button-danger"
+                          (click)="askDelete($event, c)" pTooltip="Supprimer"></button>
+                </div>
+              </div>
+            </p-card>
+          </div>
+        </div>
+      </div>
+      <!-- ================= /ADDED ================= -->
+
     </div>
 
     <!-- ===== DIALOGS ===== -->

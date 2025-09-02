@@ -29,6 +29,7 @@ import { SelectButtonModule } from 'primeng/selectbutton';
 import { DividerModule } from 'primeng/divider';
 import { SplitButtonModule } from 'primeng/splitbutton';
 import { RouterModule } from '@angular/router';
+import { CardModule } from 'primeng/card';
 
 @NgModule({
   imports: [
@@ -58,6 +59,7 @@ import { RouterModule } from '@angular/router';
     DividerModule,
         SplitButtonModule,
     RouterModule,
+    CardModule
   ],
   declarations: [CommandeComponent],
   providers: [MessageService, ConfirmationService]

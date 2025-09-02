@@ -3,11 +3,13 @@ import { MessageService } from 'primeng/api';
 import { Table } from 'primeng/table';
 import { CommandeDTO } from 'src/app/models/CommandeDTO';
 import { CommandeService } from 'src/app/services/commande.service';
-import { ProductionStoreService } from 'src/app/services/production-store.service';
+import { ProductionApiService } from 'src/app/services/production-api.service';
 import { MenuItem } from 'primeng/api';          // ✅ pour le type MenuItem
 import { Router } from '@angular/router';
+import { ViewChild , OnDestroy} from '@angular/core';
+import { Subscription } from 'rxjs';
 
-/** Vue UI = DTO + champs non-API qu'on garde seulement côté front */
+// /** Vue UI = DTO + champs non-API qu'on garde seulement côté front */
 type RowView = CommandeDTO & {
   imageUrl?: string;   // aperçu local éventuel
   // Aliases UI pour confort de saisie
@@ -21,20 +23,20 @@ type RowView = CommandeDTO & {
   styleUrls: ['./commande.component.scss'],
   providers: [MessageService]
 })
-export class CommandeComponent implements OnInit {
+export class CommandeComponent implements OnInit, OnDestroy { // [MOD] implémente OnDestroy
   rows: RowView[] = [];
   selected: RowView[] = [];
   rowsPerPageOptions = [10, 20, 30];
   loading = false;
   prodTotalCache = new Map<number, number>();
-prodTodayCache = new Map<number, number>();
+  prodTodayCache = new Map<number, number>();
 
+  @ViewChild('dt') dt?:Table;
+  // 1) état de vue (en haut de la classe)
+  viewMode: 'table' | 'card' = (localStorage.getItem('cmdView') as any) || 'table';
 
-tableDensity: 'compact' | 'comfort' = 'compact';
-densityOptions = [
-  { label: 'Compact', value: 'compact' },
-  { label: 'Confort', value: 'comfort' } // value en anglais
-];
+  // [MOD] abonnement pour le bus d'événements production
+  private prodSub?: Subscription;
 
   // Dialogs
   dialogVisible = false;
@@ -66,7 +68,7 @@ densityOptions = [
   constructor(
     private svc: CommandeService,
     private toast: MessageService,
-    private prodStore: ProductionStoreService ,
+    private prodApi: ProductionApiService,   // [MOD] remplacer l'ancien store par ProductionApiService
     private router: Router
   ) {}
 
@@ -163,6 +165,23 @@ densityOptions = [
 
   ngOnInit(): void {
     this.getAll();
+
+    // [MOD] écoute des changements de production (page Production)
+    this.prodSub = this.prodApi.changed$.subscribe((cmdId) => {
+      if (!cmdId) return;
+      this.prodTotalCache.delete(cmdId);
+      this.prodTodayCache.delete(cmdId);
+      const row = this.rows.find(r => r.id === cmdId);
+      if (row) {
+        this.fetchProdTotal(row);
+        this.fetchProdToday(row);
+      }
+    });
+  }
+
+  // [MOD] se désabonner proprement
+  ngOnDestroy(): void {
+    this.prodSub?.unsubscribe();
   }
 
   uploading = false;
@@ -325,8 +344,6 @@ densityOptions = [
     return L_eff * W_eff;
   }
 
-
-
   // Poids d’un sac en grammes (g)
   calculPoidsUnitaireFromRow(c: RowView): number {
     const surfaceCm2   = this.surfaceUnitaireFromRow(c);
@@ -348,40 +365,62 @@ densityOptions = [
       maximumFractionDigits: 3
     }) + ' g';
   }
+
   private todayISO(): string {
-  const d = new Date();
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate()).toLocaleDateString('en-CA'); // YYYY-MM-DD
-}
-
-getProdTotal(c: RowView): number {
-  if (!c?.id) return 0;
-  if (!this.prodTotalCache.has(c.id!)) {
-    this.prodTotalCache.set(c.id!, this.prodStore.total(c.id!));
+    const d = new Date();
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate()).toLocaleDateString('en-CA'); // YYYY-MM-DD
   }
-  return this.prodTotalCache.get(c.id!) || 0;
-}
 
-getProdToday(c: RowView): number {
-  if (!c?.id) return 0;
-  if (!this.prodTodayCache.has(c.id!)) {
+  // [MOD] helpers pour charger les chiffres production via API et remplir le cache
+  private fetchProdTotal(c: RowView): void {
+    if (!c?.id) return;
+    const id = c.id!;
+    this.prodApi.total(id).subscribe({
+      next: v => this.prodTotalCache.set(id, v || 0),
+      error: () => this.prodTotalCache.set(id, 0)
+    });
+  }
+
+  private fetchProdToday(c: RowView): void {
+    if (!c?.id) return;
+    const id = c.id!;
     const iso = this.todayISO();
-    const qty = this.prodStore
-      .list(c.id!)
-      .filter(r => r.dateProduction === iso)
-      .reduce((s, r) => s + (r.quantite || 0), 0);
-    this.prodTodayCache.set(c.id!, qty);
+    this.prodApi.listBetween(id, iso, iso).subscribe({
+      next: rows => {
+        const qty = (rows || []).reduce((s, r) => s + (r.quantite || 0), 0);
+        this.prodTodayCache.set(id, qty);
+      },
+      error: () => this.prodTodayCache.set(id, 0)
+    });
   }
-  return this.prodTodayCache.get(c.id!) || 0;
-}
 
-/** À rappeler quand la liste change (après load, create, update, delete) */
-refreshProdStatsForVisibleRows() {
-  this.prodTotalCache.clear();
-  this.prodTodayCache.clear();
-  for (const c of this.rows || []) {
-    this.getProdTotal(c);
-    this.getProdToday(c);
+  // [MOD] lecture du cache + déclenchement lazy des fetch
+  getProdTotal(c: RowView): number {
+    if (!c?.id) return 0;
+    const cached = this.prodTotalCache.get(c.id!);
+    if (cached == null) { this.fetchProdTotal(c); return 0; }
+    return cached;
   }
-}
 
+  getProdToday(c: RowView): number {
+    if (!c?.id) return 0;
+    const cached = this.prodTodayCache.get(c.id!);
+    if (cached == null) { this.fetchProdToday(c); return 0; }
+    return cached;
+  }
+
+  /** À rappeler quand la liste change (après load, create, update, delete) */
+  refreshProdStatsForVisibleRows() {
+    this.prodTotalCache.clear();
+    this.prodTodayCache.clear();
+    for (const c of this.rows || []) {
+      this.getProdTotal(c);
+      this.getProdToday(c);
+    }
+  }
+
+  toggleView(mode: 'table' | 'card') {
+    this.viewMode = mode;
+    localStorage.setItem('cmdView', mode);
+  }
 }
