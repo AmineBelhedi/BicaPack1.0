@@ -1,13 +1,17 @@
-import { Component, Input, OnChanges } from '@angular/core';
+// src/app/components/production-card/production-card.component.ts
+import { Component, Input, OnChanges, OnInit } from '@angular/core';
 import { ProductionApiService, ProductionDTO } from 'src/app/services/production-api.service';
 import { ConfirmationService } from 'primeng/api';
+import { formatDate } from '@angular/common';
+import { User } from 'src/app/models/user';
+import { AuthService } from 'src/app/services/auth.service';
 
 @Component({
   selector: 'app-production-card',
   templateUrl: './production-card.component.html',
   styleUrls: ['./production-card.component.scss']
 })
-export class ProductionCardComponent implements OnChanges {
+export class ProductionCardComponent implements OnChanges ,OnInit {
   @Input() commandeId!: number;
   @Input() cible = 0;
 
@@ -25,14 +29,17 @@ export class ProductionCardComponent implements OnChanges {
   addVisible = false;
   addModel: { date: Date | null; qty: number | null } = { date: new Date(), qty: 100 };
 
-  // Dialog édition
+  // Dialog édition (par ligne)
   editVisible = false;
-  editModel: { dateISO: string; qty: number | null } = { dateISO: '', qty: null };
+  editModel: { id?: number; dateISO: string; qty: number | null } = { id: undefined, dateISO: '', qty: null };
 
-  // Données du back (une ligne par jour, avec id)
+  // Données (une ligne = un enregistrement)
   private rows: ProductionDTO[] = [];
 
-  constructor(private api: ProductionApiService, private confirm: ConfirmationService) {}
+  constructor(private api: ProductionApiService, private confirm: ConfirmationService , private auth : AuthService) {}
+  ngOnInit(): void {
+    this.getUser() ;
+  }
 
   ngOnChanges(): void {
     const t = new Date();
@@ -43,28 +50,38 @@ export class ProductionCardComponent implements OnChanges {
     if (this.commandeId != null) this.refreshAll();
   }
 
-  // ==== Utils dates
+  // Utils dates (ISO strict)
   private toIso(d: Date): string {
-    const dd = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    return dd.toLocaleDateString('en-CA'); // 'YYYY-MM-DD'
+    return formatDate(d, 'yyyy-MM-dd', 'en'); // ⬅️ évite 500 parsing
   }
   private isoToday(): string { return this.toIso(new Date()); }
 
-  // ==== Règle métier : cible atteinte ?
+  // Cible atteinte ?
   get isCompleted(): boolean {
     return (this.cible ?? 0) > 0 && (this.total ?? 0) >= (this.cible ?? 0) - 1e-9;
   }
 
-  // ==== Chargement
+  // Tri: date desc, puis id asc
+  private sortRows(a: ProductionDTO, b: ProductionDTO): number {
+    if (a.dateProduction < b.dateProduction) return 1;
+    if (a.dateProduction > b.dateProduction) return -1;
+    return (a.id ?? 0) - (b.id ?? 0);
+  }
+
+  // Chargement
   private refreshAll(): void {
     const fromISO = this.toIso(this.filterFrom);
     const toISO   = this.toIso(this.filterTo);
 
     this.api.listBetween(this.commandeId, fromISO, toISO).subscribe({
       next: rows => {
-        this.rows = rows ?? [];
+        this.rows = (rows ?? []).sort(this.sortRows.bind(this));
+
+        // Aujourd’hui = somme des lignes du jour
         const tISO = this.isoToday();
-        this.today = this.rows.find(r => r.dateProduction === tISO)?.quantite ?? 0;
+        this.today = this.rows
+          .filter(r => r.dateProduction === tISO)
+          .reduce((s, r) => s + (r.quantite || 0), 0);
       },
       error: () => { this.rows = []; this.today = 0; }
     });
@@ -73,24 +90,19 @@ export class ProductionCardComponent implements OnChanges {
       next: v => {
         this.total = v || 0;
         this.progress = this.cible > 0 ? Math.min(100, Math.round((this.total / this.cible) * 100)) : 0;
+        this.remain = this.cible > 0 ? Math.max(0, this.cible - this.total) : 0;
       },
-      error: () => { this.total = 0; this.progress = 0; }
-    });
-
-    this.api.remaining(this.commandeId).subscribe({
-      next: v => this.remain = v || 0,
-      error: () => this.remain = 0
+      error: () => { this.total = 0; this.progress = 0; this.remain = 0; }
     });
   }
 
-  // ==== Table (tri décroissant : le plus récent en haut)
-  get displayedDays(): { date: string; quantite: number }[] {
+  // Table (filtre + tri)
+  get displayedRows(): ProductionDTO[] {
     const fromISO = this.toIso(this.filterFrom);
     const toISO   = this.toIso(this.filterTo);
     return (this.rows ?? [])
       .filter(r => r.dateProduction >= fromISO && r.dateProduction <= toISO)
-      .sort((a, b) => b.dateProduction.localeCompare(a.dateProduction)) // ⬅️ décroissant
-      .map(r => ({ date: r.dateProduction, quantite: r.quantite || 0 }));
+      .sort(this.sortRows.bind(this));
   }
 
   onPeriodChange(): void { this.refreshAll(); }
@@ -118,10 +130,10 @@ export class ProductionCardComponent implements OnChanges {
     this.refreshAll();
   }
 
-  // ==== Ajout
+  // Ajout
   openAdd(): void {
-    if (this.isCompleted) return; // sécurité
-    this.addModel = { date: new Date(), qty: 100 };
+    if (this.isCompleted) return;
+    this.addModel = { date: new Date(), qty: 100 ,};
     this.addVisible = true;
   }
 
@@ -138,74 +150,123 @@ export class ProductionCardComponent implements OnChanges {
 
     const iso = this.toIso(this.addModel.date!);
     const wanted  = Math.max(0, Number(this.addModel.qty || 0));
-    const allowed = Math.max(0, (this.cible || 0) - (this.total || 0)); // restant
+    const allowed = Math.max(0, (this.cible || 0) - (this.total || 0)); // restant par rapport à la cible
+    const q = this.cible > 0 ? Math.min(wanted, allowed) : wanted;
 
-    if (allowed <= 0) { this.addVisible = false; this.resetAdd(); return; }
+    const dto = { commandeId: this.commandeId, dateProduction: iso, quantite: q , createdBy : this.fullnameUser  } ;
+    // console.log('[POST dto]', dto);
 
-    const q = Math.min(wanted, allowed); // on ne dépasse pas la cible
+    this.api.create(this.commandeId, dto).subscribe({
+      next: (created) => {
+        this.addVisible = false;
+        this.resetAdd();
 
-    this.api.create(this.commandeId, {
-      commandeId: this.commandeId,
-      dateProduction: iso,
-      quantite: q
-    }).subscribe({
-      next: () => { this.addVisible = false; this.resetAdd(); this.refreshAll(); }
+        // Mise à jour locale (évite un nouveau GET)
+        this.rows = [created, ...this.rows].sort(this.sortRows.bind(this));
+
+        // KPIs
+        this.total = (this.total || 0) + (created.quantite || 0);
+        this.progress = this.cible > 0 ? Math.min(100, Math.round((this.total / this.cible) * 100)) : 0;
+        if (created.dateProduction === this.isoToday()) {
+          this.today += created.quantite || 0;
+        }
+        this.remain = this.cible > 0 ? Math.max(0, this.cible - this.total) : 0;
+      }
     });
   }
 
-  // ==== Édition
-  private currentQtyOf(dateISO: string): number {
-    return this.rows.find(r => r.dateProduction === dateISO)?.quantite ?? 0;
-  }
 
-  editDay(dateISO: string): void {
-    this.editModel = { dateISO, qty: this.currentQtyOf(dateISO) };
+    user : User = new User() ; 
+    fullnameUser : string ; 
+  
+    getUser(){
+      this.auth.getProfile().subscribe(res=>{
+        this.user = res ;
+        this.fullnameUser = this.user.firstname + ' ' + this.user.lastname ;
+      })
+      }
+
+  // Édition par ligne
+  openEdit(row: ProductionDTO): void {
+    this.editModel = { id: row.id, dateISO: row.dateProduction, qty: row.quantite };
     this.editVisible = true;
   }
 
   canConfirmEdit(): boolean {
     const q = Number(this.editModel.qty || 0);
-    return !!this.editModel.dateISO && q >= 0;
+    return !!this.editModel.id && !!this.editModel.dateISO && q >= 0;
   }
 
   cancelEdit(): void { this.editVisible = false; this.resetEdit(); }
-  resetEdit(): void { this.editModel = { dateISO: '', qty: null }; }
+  resetEdit(): void { this.editModel = { id: undefined, dateISO: '', qty: null }; }
 
   confirmEdit(): void {
     if (!this.canConfirmEdit()) return;
-    const { dateISO } = this.editModel;
+    const { id, dateISO } = this.editModel;
+    if (id == null) return;
 
-    const current = this.currentQtyOf(dateISO);
+    const old = this.rows.find(r => r.id === id);
+    const current = old?.quantite || 0;
     const wanted  = Math.max(0, Number(this.editModel.qty || 0));
-    // total_new = total - current + wanted <= cible
-    const allowedNew = Math.max(0, (this.cible || 0) - ((this.total || 0) - current));
-    const q = Math.min(wanted, allowedNew);
+    const allowedNew = this.cible > 0 ? Math.max(0, (this.cible || 0) - ((this.total || 0) - current)) : Number.MAX_SAFE_INTEGER;
+    const q = this.cible > 0 ? Math.min(wanted, allowedNew) : wanted;
 
-    this.api.setDayTotal(this.commandeId, dateISO, q).subscribe({
-      next: () => { this.editVisible = false; this.resetEdit(); this.refreshAll(); }
+    this.api.update(this.commandeId, id, {
+      commandeId: this.commandeId,
+      dateProduction: dateISO,
+      quantite: q,
+      updatedBy : this.fullnameUser
+    }).subscribe({
+      next: (updated) => {
+        const i = this.rows.findIndex(r => r.id === updated.id);
+        if (i >= 0) this.rows[i] = updated;
+        this.rows = [...this.rows].sort(this.sortRows.bind(this));
+
+        // KPIs
+        this.total = (this.total - current) + (updated.quantite || 0);
+        const tISO = this.isoToday();
+        if (dateISO === tISO) {
+          this.today = this.rows
+            .filter(r => r.dateProduction === tISO)
+            .reduce((s, r) => s + (r.quantite || 0), 0);
+        }
+        this.progress = this.cible > 0 ? Math.min(100, Math.round((this.total / this.cible) * 100)) : 0;
+        this.remain = this.cible > 0 ? Math.max(0, this.cible - this.total) : 0;
+
+        this.editVisible = false;
+        this.resetEdit();
+      }
     });
   }
 
-  // ==== Suppression
-  removeDay(dateISO: string): void {
-    const row = this.rows.find(r => r.dateProduction === dateISO);
+  // Suppression par ligne
+  deleteRow(row: ProductionDTO): void {
+    if (row.id == null) return;
 
     this.confirm.confirm({
       header: 'Supprimer',
-      message: `Supprimer la production du ${dateISO} ?`,
+      message: `Supprimer la ligne du ${row.dateProduction} (${row.quantite | 0} pièces) ?`,
       icon: 'pi pi-exclamation-triangle',
       acceptLabel: 'Oui',
       rejectLabel: 'Non',
       accept: () => {
-        if (row?.id != null) {
-          this.api.deleteDay(this.commandeId, row.id).subscribe({
-            next: () => this.refreshAll()
-          });
-        } else {
-          this.api.setDayTotal(this.commandeId, dateISO, 0).subscribe({
-            next: () => this.refreshAll()
-          });
-        }
+        this.api.remove(this.commandeId, row.id!).subscribe({
+          next: () => {
+            const wasToday = row.dateProduction === this.isoToday();
+
+            this.rows = this.rows.filter(r => r.id !== row.id);
+            this.total = (this.total || 0) - (row.quantite || 0);
+
+            if (wasToday) {
+              this.today = this.rows
+                .filter(r => r.dateProduction === this.isoToday())
+                .reduce((s, r) => s + (r.quantite || 0), 0);
+            }
+
+            this.progress = this.cible > 0 ? Math.min(100, Math.round((this.total / this.cible) * 100)) : 0;
+            this.remain = this.cible > 0 ? Math.max(0, this.cible - this.total) : 0;
+          }
+        });
       }
     });
   }

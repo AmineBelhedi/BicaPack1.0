@@ -8,6 +8,7 @@ import { ImportService } from 'src/app/services/import.service';
 @Component({
     selector: 'app-import',
     templateUrl: './import.component.html',
+    styleUrls: ['./import.component.scss'],
     providers: [MessageService]
 })
 export class ImportComponent implements OnInit {

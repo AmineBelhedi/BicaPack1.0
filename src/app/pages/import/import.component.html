@@ -1,138 +1,252 @@
 <ng-container *ngIf="loading">
-    <div class="spinner-overlay">
-        <p-progressSpinner styleClass="w-6rem h-6rem" strokeWidth="2" fill="var(--surface-ground)"
-            animationDuration=".5s"></p-progressSpinner>
-    </div>
+  <div class="spinner-overlay">
+    <p-progressSpinner styleClass="w-6rem h-6rem" strokeWidth="2" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
+  </div>
 </ng-container>
 
-  
-
 <div class="grid">
-    <div class="col-12">
-        <div class="card px-6 py-6">
-            <p-toast></p-toast>
-            <p-toolbar styleClass="mb-4">
-                <ng-template pTemplate="left">
-                    <div class="my-2">
-                        <button pButton pRipple label="Nouveau" icon="pi pi-plus" class="p-button-success mr-2" (click)="openNew()"></button>
-                        <!-- <button pButton pRipple label="Supprimer" icon="pi pi-trash" class="p-button-danger" (click)="deleteSelectedImports()" [disabled]="!selectedImports || !selectedImports.length"></button>
-                         -->
-                    </div>
-                </ng-template>
-                <!-- <ng-template pTemplate="right">
-                   <button pButton pRipple label="Exporter" icon="pi pi-upload" class="p-button-help" (click)="dt.exportCSV()"></button>
-                </ng-template> -->
-            </p-toolbar>
+  <div class="col-12">
+    <div class="card p-0">
+      <p-toast></p-toast>
 
-            <p-table #dt [value]="imports" responsiveLayout="scroll" [rows]="10" [paginator]="true"
-                [rowsPerPageOptions]="rowsPerPageOptions" [globalFilterFields]="['numeroImport','nomProduit','fournisseur']"
-                [(selection)]="selectedImports" selectionMode="multiple" dataKey="id">
-                <ng-template pTemplate="caption">
-                    <div class="flex justify-content-between align-items-center">
-                        <h5 class="m-0">Liste des Importations</h5>
-                        <span class="p-input-icon-left">
-                            <i class="pi pi-search"></i>
-                            <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Rechercher..." class="w-full sm:w-auto" />
-                        </span>
-                    </div>
-                </ng-template>
+      <!-- ===== HERO ===== -->
+      <div class="page-hero px-5 py-4">
+        <div class="flex align-items-center justify-content-between flex-wrap gap-3">
+          <div class="flex align-items-center gap-3">
+            <div class="hero-icon flex align-items-center justify-content-center">
+              <i class="pi pi-truck text-2xl text-white"></i>
+            </div>
+            <div>
+              <h2 class="m-0">Importations</h2>
+              <small class="text-600">Gestion & suivi des approvisionnements</small>
+            </div>
+          </div>
 
-                <ng-template pTemplate="header">
-                    <tr>
-                        <th style="width: 3rem">
-                            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
-                        </th>
-                        <th pSortableColumn="numeroImport">N° Import <p-sortIcon field="numeroImport"></p-sortIcon></th>
-                        <th pSortableColumn="produit">Produit <p-sortIcon field="produit"></p-sortIcon></th>
-                        <th pSortableColumn="fournisseur">Fournisseur <p-sortIcon field="fournisseur"></p-sortIcon></th>
-                        <th pSortableColumn="dateImport">Date Import <p-sortIcon field="dateImport"></p-sortIcon></th>
-                        <th>Actions</th>
-                    </tr>
-                </ng-template>
-
-                <ng-template pTemplate="body" let-import>
-                    <tr>
-                        <td>
-                            <p-tableCheckbox [value]="import"></p-tableCheckbox>
-                        </td>
-                        <td>{{ import.numeroImport }}</td>
-                        <td>{{ import.nomProduit }}</td>
-                        <td>{{ import.fournisseur }}</td>
-                        <td>{{ import.dateImport | date: 'dd/MM/yyyy' }}</td>
-                        <td class="flex gap-2">
-                            <!-- Bouton Détails -->
-                            <button pButton pRipple label="Details" icon="pi pi-eye"
-                                class="p-button-text p-button-sm text-primary" [routerLink]="['/pages/import-details', import.id]"></button>
-
-                            <!-- Bouton Modifier -->
-                            <button pButton pRipple icon="pi pi-pencil"
-                                class="p-button-rounded p-button-sm p-button-info"
-                                (click)="editImport(import)" title="Modifier"></button>
-
-                            <!-- Bouton Supprimer -->
-                            <button pButton pRipple icon="pi pi-trash"
-                                class="p-button-rounded p-button-sm p-button-danger"
-                                (click)="deleteImport(import)" title="Supprimer"></button>
-                        </td>
-                    </tr>
-                </ng-template>
-            </p-table>
+          <div class="kpi-row flex gap-3">
+            <div class="kpi-card">
+              <span class="kpi-value">{{ imports?.length || 0 }}</span>
+              <span class="kpi-label">Total</span>
+            </div>
+            <div class="kpi-card alt" *ngIf="selectedImports?.length">
+              <span class="kpi-value">{{ selectedImports.length }}</span>
+              <span class="kpi-label">Sélection</span>
+            </div>
+          </div>
         </div>
+      </div>
 
-        <p-dialog [(visible)]="importDialog" header="Détails Import" [modal]="true" [style]="{ width: '450px' }" class="p-fluid">
-            <ng-template pTemplate="content">
-                <div class="field">
-                    <label for="numeroImport">N° Import</label>
-                    <input pInputText id="numeroImport" [(ngModel)]="importData.numeroImport" required />
-                </div>
-                <div class="field">
-                    <label for="produit">Produit</label>
-                    <input pInputText id="produit" [(ngModel)]="importData.nomProduit" required />
-                </div>
-                <div class="field">
-                    <label for="fournisseur">Fournisseur</label>
-                    <input pInputText id="fournisseur" [(ngModel)]="importData.fournisseur" required />
-                </div>
-                <div class="field">
-                <label for="dateImport">Date Import</label>
-                <p-calendar
-                    inputId="dateImport"
-                    [(ngModel)]="importData.dateImport"
-                    dateFormat="dd/mm/yy"
-                    showIcon="true"
-                    [showButtonBar]="true"
-                    appendTo="body">
-                </p-calendar>
-                </div>
+      <!-- ===== FILTRES ===== -->
+      <div class="filters px-5 py-3">
+        <div class="filters-row">
+          <div class="filters-left">
+            <button pButton pRipple label="Nouveau" icon="pi pi-plus"
+                    class="p-button-success p-button-sm"
+                    (click)="openNew()"></button>
 
+            <!--<button pButton pRipple label="Supprimer" icon="pi pi-trash"
+                    class="p-button-danger p-button-sm"
+                    (click)="deleteSelectedImports()"
+                    [disabled]="!selectedImports || !selectedImports.length"></button>-->
+          </div>
 
-            </ng-template>
-            <ng-template pTemplate="footer">
-                <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="importDialog=false"></button>
-                <button pButton label="Enregistrer" icon="pi pi-check" class="p-button-text" (click)="saveImport()"></button>
-            </ng-template>
-        </p-dialog>
+          <div class="filters-right">
+            <span class="p-input-icon-left w-full md:w-22rem">
+              <i class="pi pi-search"></i>
+              <input pInputText type="text"
+                     (input)="onGlobalFilter(dt, $event)"
+                     placeholder="Rechercher par N°, produit ou fournisseur…"
+                     class="w-full" />
+            </span>
+            <button pButton pRipple icon="pi pi-times" class="p-button-text p-button-sm"
+                    (click)="onGlobalFilter(dt, { target: { value: '' } })"
+                    aria-label="Effacer la recherche"></button>
+          </div>
+        </div>
+      </div>
 
-        <p-dialog [(visible)]="deleteImportDialog" header="Confirmation" [modal]="true" [style]="{ width: '400px' }">
-            <div class="confirmation-content">
-                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
-                <span>Confirmez-vous la suppression de <b>{{ importData.numeroImport }}</b> ?</span>
+      <!-- ===== TABLE ===== -->
+      <div class="table-wrap px-3 pb-4">
+        <p-table #dt
+                 [value]="imports"
+                 [rows]="10"
+                 [paginator]="true"
+                 [rowsPerPageOptions]="rowsPerPageOptions"
+                 [globalFilterFields]="['numeroImport','nomProduit','fournisseur']"
+                 [(selection)]="selectedImports"
+                 selectionMode="multiple"
+                 dataKey="id"
+                 responsiveLayout="scroll"
+                 [rowHover]="true"
+                 styleClass="bica-table is-sticky">
+
+          <!-- Caption -->
+          <ng-template pTemplate="caption">
+            <div class="table-caption">
+              <div class="flex align-items-center gap-2">
+                <i class="pi pi-list text-700"></i>
+                <span class="font-semibold">Liste des Importations</span>
+              </div>
+              <div class="text-600 text-sm" *ngIf="selectedImports?.length" aria-live="polite">
+                {{ selectedImports.length }} sélectionnée(s)
+              </div>
             </div>
-            <ng-template pTemplate="footer">
-                <button pButton label="Non" icon="pi pi-times" class="p-button-text" (click)="deleteImportDialog=false"></button>
-                <button pButton label="Oui" icon="pi pi-check" class="p-button-text" (click)="confirmDelete()"></button>
-            </ng-template>
-        </p-dialog>
+          </ng-template>
 
-        <p-dialog [(visible)]="deleteImportsDialog" header="Confirmation" [modal]="true" [style]="{ width: '400px' }">
-            <div class="confirmation-content">
-                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
-                <span>Confirmez-vous la suppression des importations sélectionnées ?</span>
-            </div>
-            <ng-template pTemplate="footer">
-                <button pButton label="Non" icon="pi pi-times" class="p-button-text" (click)="deleteImportsDialog=false"></button>
-                <button pButton label="Oui" icon="pi pi-check" class="p-button-text" (click)="confirmDeleteSelected()"></button>
-            </ng-template>
-        </p-dialog>
+          <!-- Header -->
+          <ng-template pTemplate="header">
+            <tr>
+              <th class="th-select">
+                <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+              </th>
+
+              <th pSortableColumn="numeroImport" class="th-num">
+                <div class="th-line">
+                  <span class="th-title"><i class="pi pi-hashtag"></i> N° Import</span>
+                  <p-sortIcon field="numeroImport"></p-sortIcon>
+                </div>
+              </th>
+
+              <th pSortableColumn="nomProduit" class="th-product">
+                <div class="th-line">
+                  <span class="th-title"><i class="pi pi-tag"></i> Produit</span>
+                  <p-sortIcon field="nomProduit"></p-sortIcon>
+                </div>
+              </th>
+
+              <th pSortableColumn="fournisseur" class="th-supplier">
+                <div class="th-line">
+                  <span class="th-title"><i class="pi pi-briefcase"></i> Fournisseur</span>
+                  <p-sortIcon field="fournisseur"></p-sortIcon>
+                </div>
+              </th>
+
+              <th pSortableColumn="dateImport" class="th-date text-right">
+                <div class="th-line is-right">
+                  <span class="th-title"><i class="pi pi-calendar"></i> Date Import</span>
+                  <p-sortIcon field="dateImport"></p-sortIcon>
+                </div>
+              </th>
+
+              <th class="th-actions text-right">
+                <div class="th-line th-actions-center">
+                  <span class="th-title">Actions</span>
+                </div>
+              </th>
+            </tr>
+          </ng-template>
+
+          <!-- Body -->
+          <ng-template pTemplate="body" let-import>
+            <tr>
+              <td class="td-select">
+                <p-tableCheckbox [value]="import"></p-tableCheckbox>
+              </td>
+
+              <td class="td-num">
+                <div class="cell-id flex align-items-center gap-3">
+                  <div class="avatar-badge">
+                    <i class="pi pi-ticket"></i>
+                  </div>
+                  <div class="flex flex-column">
+                    <span class="font-medium mono">{{ import.numeroImport }}</span>
+                    <small class="text-500">ID: {{ import.id }}</small>
+                  </div>
+                </div>
+              </td>
+
+              <td class="td-product">{{ import.nomProduit }}</td>
+              <td class="td-supplier">{{ import.fournisseur }}</td>
+              <td class="td-date text-right mono">{{ import.dateImport | date:'dd/MM/yyyy' }}</td>
+
+              <td class="td-actions text-right">
+                <div class="row-actions flex align-items-center justify-content-end gap-2">
+                  <button pButton pRipple icon="pi pi-eye"
+                          class="p-button-rounded p-button-sm p-button-info"
+                          pTooltip="Détails"
+                          [routerLink]="['/pages/import-details', import.id]">
+                  </button>
+
+                  <button pButton pRipple icon="pi pi-pencil"
+                          class="p-button-rounded p-button-sm p-button-success"
+                          (click)="editImport(import)"
+                          pTooltip="Modifier">
+                  </button>
+
+                  <button pButton pRipple icon="pi pi-trash"
+                          class="p-button-rounded p-button-sm p-button-danger"
+                          (click)="deleteImport(import)"
+                          pTooltip="Supprimer">
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+
+          <!-- Empty -->
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="6" class="text-center py-6">
+                <i class="pi pi-inbox text-400 mr-2"></i> Aucune importation
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
     </div>
+
+    <!-- ===== DIALOGS ===== -->
+    <p-dialog [(visible)]="importDialog" header="Détails Import" [modal]="true" [style]="{ width: '450px' }" styleClass="p-fluid bica-dialog">
+      <ng-template pTemplate="content">
+        <div class="field">
+          <label for="numeroImport">N° Import</label>
+          <input pInputText id="numeroImport" [(ngModel)]="importData.numeroImport" required />
+        </div>
+        <div class="field">
+          <label for="produit">Produit</label>
+          <input pInputText id="produit" [(ngModel)]="importData.nomProduit" required />
+        </div>
+        <div class="field">
+          <label for="fournisseur">Fournisseur</label>
+          <input pInputText id="fournisseur" [(ngModel)]="importData.fournisseur" required />
+        </div>
+        <div class="field">
+          <label for="dateImport">Date Import</label>
+          <p-calendar
+            inputId="dateImport"
+            [(ngModel)]="importData.dateImport"
+            dateFormat="dd/mm/yy"
+            [showIcon]="true"
+            [showButtonBar]="true"
+            appendTo="body">
+          </p-calendar>
+        </div>
+      </ng-template>
+      <ng-template pTemplate="footer">
+        <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="importDialog=false"></button>
+        <button pButton label="Enregistrer" icon="pi pi-check" class="p-button-text" (click)="saveImport()"></button>
+      </ng-template>
+    </p-dialog>
+
+    <p-dialog [(visible)]="deleteImportDialog" header="Confirmation" [modal]="true" [style]="{ width: '400px' }" styleClass="bica-dialog">
+      <div class="confirmation-content">
+        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+        <span>Confirmez-vous la suppression de <b>{{ importData?.numeroImport }}</b> ?</span>
+      </div>
+      <ng-template pTemplate="footer">
+        <button pButton label="Non" icon="pi pi-times" class="p-button-text" (click)="deleteImportDialog=false"></button>
+        <button pButton label="Oui" icon="pi pi-check" class="p-button-text" (click)="confirmDelete()"></button>
+      </ng-template>
+    </p-dialog>
+
+    <p-dialog [(visible)]="deleteImportsDialog" header="Confirmation" [modal]="true" [style]="{ width: '400px' }" styleClass="bica-dialog">
+      <div class="confirmation-content">
+        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+        <span>Confirmez-vous la suppression des importations sélectionnées ?</span>
+      </div>
+      <ng-template pTemplate="footer">
+        <button pButton label="Non" icon="pi pi-times" class="p-button-text" (click)="deleteImportsDialog=false"></button>
+        <button pButton label="Oui" icon="pi pi-check" class="p-button-text" (click)="confirmDeleteSelected()"></button>
+      </ng-template>
+    </p-dialog>
+  </div>
 </div>

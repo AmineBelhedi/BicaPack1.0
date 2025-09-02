@@ -4,6 +4,8 @@ import { Table } from 'primeng/table';
 import { CommandeDTO } from 'src/app/models/CommandeDTO';
 import { CommandeService } from 'src/app/services/commande.service';
 import { ProductionStoreService } from 'src/app/services/production-store.service';
+import { MenuItem } from 'primeng/api';          // ✅ pour le type MenuItem
+import { Router } from '@angular/router';
 
 /** Vue UI = DTO + champs non-API qu'on garde seulement côté front */
 type RowView = CommandeDTO & {
@@ -26,6 +28,13 @@ export class CommandeComponent implements OnInit {
   loading = false;
   prodTotalCache = new Map<number, number>();
 prodTodayCache = new Map<number, number>();
+
+
+tableDensity: 'compact' | 'comfort' = 'compact';
+densityOptions = [
+  { label: 'Compact', value: 'compact' },
+  { label: 'Confort', value: 'comfort' } // value en anglais
+];
 
   // Dialogs
   dialogVisible = false;
@@ -57,9 +66,37 @@ prodTodayCache = new Map<number, number>();
   constructor(
     private svc: CommandeService,
     private toast: MessageService,
-    private prodStore: ProductionStoreService 
+    private prodStore: ProductionStoreService ,
+    private router: Router
   ) {}
 
+  getRowActions(row: any): MenuItem[] {
+    return [
+      {
+        label: 'Détails',
+        icon: 'pi pi-eye',
+        // ✔️ navigation déclarative
+        routerLink: ['/pages/detail-commande', row.id]
+      },
+      {
+        label: 'Production',
+        icon: 'pi pi-chart-line',
+        routerLink: ['/pages/detail-commande', row.id],
+        queryParams: { view: 'production' }
+      },
+      { separator: true },
+      {
+        label: 'Modifier',
+        icon: 'pi pi-pencil',
+        command: () => this.edit(row)          // ✔️ appelle ta méthode existante
+      },
+      {
+        label: 'Supprimer',
+        icon: 'pi pi-trash',
+        command: (event) => this.askDelete(event, row) // ✔️ passe l’event + la row
+      }
+    ];
+  }
   /* ===================== Mapping API ⇄ Vue ===================== */
 
   /** API -> UI : mapping direct, sans defaults conditionnels */
@@ -192,10 +229,10 @@ prodTodayCache = new Map<number, number>();
     this.dialogVisible = true;
   }
 
-  askDelete(_: Event, item: RowView) {
-    this.current = { ...item };
-    this.deleteDialog = true;
-  }
+  askDelete(_: any, item: RowView) {
+      this.current = { ...item };
+      this.deleteDialog = true;
+    }
 
   confirmDelete() {
     if (!this.current?.id) return;

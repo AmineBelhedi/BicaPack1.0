@@ -25,6 +25,10 @@ import { CommandesRoutingModule } from './commandes-routing.module';
 import { CommandeComponent } from './commande.component';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { SelectButtonModule } from 'primeng/selectbutton';
+import { DividerModule } from 'primeng/divider';
+import { SplitButtonModule } from 'primeng/splitbutton';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
   imports: [
@@ -49,7 +53,11 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
     ConfirmDialogModule,
     ConfirmPopupModule,
     ImageModule,
-    TooltipModule
+    TooltipModule,
+    SelectButtonModule,
+    DividerModule,
+        SplitButtonModule,
+    RouterModule,
   ],
   declarations: [CommandeComponent],
   providers: [MessageService, ConfirmationService]

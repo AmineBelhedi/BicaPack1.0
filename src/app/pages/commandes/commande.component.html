@@ -1,130 +1,259 @@
 <ng-container *ngIf="loading">
-    <div class="spinner-overlay">
-        <p-progressSpinner styleClass="w-6rem h-6rem" strokeWidth="2" fill="var(--surface-ground)"
-            animationDuration=".5s"></p-progressSpinner>
-    </div>
+  <div class="spinner-overlay">
+    <p-progressSpinner styleClass="w-6rem h-6rem" strokeWidth="2" fill="var(--surface-ground)" animationDuration=".5s"></p-progressSpinner>
+  </div>
 </ng-container>
-
 
 <div class="grid">
   <div class="col-12">
-    <div class="card px-6 py-6">
+    <div class="card p-0">
+
+      <!-- Toast -->
       <p-toast></p-toast>
 
-      <p-toolbar styleClass="mb-4">
-        <ng-template pTemplate="left">
-          <div class="my-2">
-            <button pButton pRipple label="Nouveau" icon="pi pi-plus" class="p-button-success mr-2" (click)="openNew()"></button>
-            <button pButton pRipple label="Supprimer" icon="pi pi-trash" class="p-button-danger"
-                    (click)="deleteSelected()" [disabled]="!selected || !selected.length"></button>
+      <!-- ===== HERO ===== -->
+      <div class="page-hero px-5 py-4">
+        <div class="flex align-items-center justify-content-between flex-wrap gap-3">
+          <div class="flex align-items-center gap-3">
+            <div class="hero-icon flex align-items-center justify-content-center">
+              <i class="pi pi-briefcase text-2xl text-white"></i>
+            </div>
+            <div>
+              <h2 class="m-0">Commandes</h2>
+              <small class="text-600">Gestion & suivi des commandes</small>
+            </div>
           </div>
-        </ng-template>
-      </p-toolbar>
 
-      <p-table #dt
-               [value]="rows"
-               responsiveLayout="scroll"
-               [rows]="10"
-               [paginator]="true"
-               [rowsPerPageOptions]="rowsPerPageOptions"
-               [globalFilterFields]="['numeroCommande', 'quantite']"
-               [(selection)]="selected"
-               selectionMode="multiple"
-               dataKey="id">
-        <ng-template pTemplate="caption">
-          <div class="flex justify-content-between align-items-center">
-            <h5 class="m-0">Liste des Commandes</h5>
-            <span class="p-input-icon-left">
+          <div class="kpi-row flex gap-3">
+            <div class="kpi-card">
+              <span class="kpi-value">{{ rows?.length || 0 }}</span>
+              <span class="kpi-label">Total</span>
+            </div>
+            <div class="kpi-card alt" *ngIf="selected?.length">
+              <span class="kpi-value">{{ selected.length }}</span>
+              <span class="kpi-label">Sélection</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== FILTRES ===== -->
+      <div class="filters px-5 py-3">
+        <div class="filters-row">
+          <div class="filters-left">
+            <button pButton pRipple label="Nouveau" icon="pi pi-plus"
+                    class="p-button-success p-button-sm"
+                    (click)="openNew()"></button>
+
+            <!--<button pButton pRipple label="Supprimer" icon="pi pi-trash"
+                    class="p-button-danger p-button-sm"
+                    (click)="deleteSelected()"
+                    [disabled]="!selected || !selected.length"></button>-->
+          </div>
+
+          <div class="filters-right">
+            <span class="p-input-icon-left w-full md:w-22rem">
               <i class="pi pi-search"></i>
-              <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Rechercher..." class="w-full sm:w-auto" />
+              <input pInputText type="text"
+                     (input)="onGlobalFilter(dt,$event)"
+                     placeholder="Rechercher par N° ou quantité…"
+                     class="w-full" />
             </span>
+            <button pButton pRipple icon="pi pi-times" class="p-button-text p-button-sm"
+                    (click)="onGlobalFilter(dt, { target: { value: '' } })"
+                    aria-label="Effacer la recherche"></button>
           </div>
-        </ng-template>
+        </div>
+      </div>
 
-        <ng-template pTemplate="header">
-          <tr>
-            <th style="width: 3rem">
-              <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
-            </th>
-            <th pSortableColumn="numeroCommande">N° Commande <p-sortIcon field="numeroCommande"></p-sortIcon></th>
-            <!--<th pSortableColumn="description">Description <p-sortIcon field="description"></p-sortIcon></th>-->
-            <th pSortableColumn="quantite">Quantité <p-sortIcon field="quantite"></p-sortIcon></th>
-            <th>Poids (unité)</th>
-            <th>Image</th>
-            <th>Actions</th>
-          </tr>
-        </ng-template>
+      <!-- ===== TABLE ===== -->
+      <div class="table-wrap px-3 pb-4">
+        <p-table #dt
+                 [value]="rows"
+                 [rows]="10"
+                 [paginator]="true"
+                 [rowsPerPageOptions]="rowsPerPageOptions"
+                 [globalFilterFields]="['numeroCommande','quantite']"
+                 [(selection)]="selected"
+                 selectionMode="multiple"
+                 dataKey="id"
+                 responsiveLayout="scroll"
+                 [rowHover]="true"
+                 styleClass="bica-table is-sticky">
 
-        <ng-template pTemplate="body" let-c>
-          <tr>
-            <td><p-tableCheckbox [value]="c"></p-tableCheckbox></td>
-            <td>{{ c.numeroCommande }}</td>
-            <!--<td>{{ c.description }}</td>-->
-            <td>{{ c.quantite }}</td>
-            <td>{{ formatGrams(calculPoidsUnitaireFromRow(c)) }}</td>
-            <td>
-              <p-image *ngIf="c.imageSac" [src]="c.imageSac" [preview]="true" alt="image" width="50"></p-image>
-              <span *ngIf="!c.imageSac" class="text-400">—</span>
-            </td>
-            <td >
-              <button pButton pRipple label="Détails" icon="pi pi-eye"
-                      class="p-button-text p-button-sm text-primary mr-2"
-                      [routerLink]="['/pages/detail-commande', c.id]"></button>
+          <!-- Caption -->
+          <ng-template pTemplate="caption">
+            <div class="table-caption">
+              <div class="flex align-items-center gap-2">
+                <i class="pi pi-list text-700"></i>
+                <span class="font-semibold">Liste des Commandes</span>
+              </div>
+              <div class="text-600 text-sm" *ngIf="selected?.length" aria-live="polite">
+                {{ selected.length }} sélectionnée(s)
+              </div>
+            </div>
+          </ng-template>
 
-                <button pButton pRipple label="Production" icon="pi pi-chart-line"
-                    class="p-button-text p-button-sm text-primary mr-2"
-                    [routerLink]="['/pages/detail-commande', c.id]"
-                    [queryParams]="{ view: 'production' }"></button>
+          <!-- Header -->
+          <ng-template pTemplate="header">
+            <tr>
+              <th class="th-select">
+                <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+              </th>
 
-              <button pButton pRipple icon="pi pi-pencil"
-                      class="p-button-rounded p-button-sm p-button-info mr-2"
-                      (click)="edit(c)" title="Modifier"></button>
+              <!-- N° commande -->
+              <th pSortableColumn="numeroCommande" class="th-num">
+                <div class="th-line">
+                  <span class="th-title">
+                    <i class="pi pi-hashtag"></i>
+                    N° Commande
+                  </span>
+                  <p-sortIcon field="numeroCommande"></p-sortIcon>
+                </div>
+              </th>
 
-              <button pButton pRipple icon="pi pi-trash"
-                      class="p-button-rounded p-button-sm p-button-danger mr-2"
-                      (click)="askDelete($event, c)" title="Supprimer"></button>
-            </td>
-          </tr>
-        </ng-template>
+              <!-- Quantité -->
+              <th pSortableColumn="quantite" class="th-qty text-right">
+                <div class="th-line is-right">
+                  <span class="th-title">
+                    <i class="pi pi-box"></i>
+                    Quantité
+                  </span>
+                  <p-sortIcon field="quantite"></p-sortIcon>
+                </div>
+              </th>
 
-        <ng-template pTemplate="emptymessage">
-          <tr><td colspan="8" class="text-center py-5">Aucune commande</td></tr>
-        </ng-template>
-      </p-table>
+              <!-- Poids (non triable) -->
+              <th class="th-weight text-right">
+                <div class="th-line is-right">
+                  <span class="th-title">
+                    <i class="pi pi-weight"></i>
+                    Poids (unité)
+                  </span>
+                </div>
+              </th>
+
+              <!-- Image -->
+              <th class="th-image">
+                <div class="th-line">
+                  <span class="th-title">Aperçu</span>
+                </div>
+              </th>
+
+              <!-- Actions -->
+              <th class="th-actions text-right">
+                <div class="th-line is-right">
+                  <span class="th-title">Actions</span>
+                </div>
+              </th>
+            </tr>
+          </ng-template>
+
+          <!-- Body -->
+          <ng-template pTemplate="body" let-c>
+            <tr>
+              <td class="td-select">
+                <p-tableCheckbox [value]="c"></p-tableCheckbox>
+              </td>
+
+              <!-- N° Commande -->
+              <td class="td-num">
+                <div class="cell-id flex align-items-center gap-3">
+                  <div class="avatar-badge">
+                    <i class="pi pi-ticket"></i>
+                  </div>
+                  <div class="flex flex-column">
+                    <span class="font-medium mono">{{ c.numeroCommande }}</span>
+                    <small class="text-500">ID: {{ c.id }}</small>
+                  </div>
+                </div>
+              </td>
+
+              <!-- Quantité -->
+              <td class="td-qty text-right mono">{{ c.quantite }}</td>
+
+              <!-- Poids -->
+              <td class="td-weight text-right mono">{{ formatGrams(calculPoidsUnitaireFromRow(c)) }}</td>
+
+              <!-- Image -->
+              <td class="td-image">
+                <div class="flex align-items-center">
+                  <p-image *ngIf="c.imageSac" [src]="c.imageSac" [preview]="true" alt="image"
+                           width="52" height="52" styleClass="border-round-md"></p-image>
+                  <span *ngIf="!c.imageSac" class="text-400">—</span>
+                </div>
+              </td>
+
+              <!-- Actions -->
+              <td class="td-actions text-right">
+                <div class="row-actions flex align-items-center justify-content-end gap-2">
+                  <button pButton pRipple icon="pi pi-eye"
+                          class="p-button-rounded p-button-sm p-button-info"
+                          pTooltip="Détails"
+                          [routerLink]="['/pages/detail-commande', c.id]">
+                  </button>
+
+                  <button pButton pRipple icon="pi pi-chart-line"
+                          class="p-button-rounded p-button-sm p-button-warning"
+                          pTooltip="Production"
+                          [routerLink]="['/pages/detail-commande', c.id]"
+                          [queryParams]="{ view: 'production' }">
+                  </button>
+
+                  <button pButton pRipple icon="pi pi-pencil"
+                          class="p-button-rounded p-button-sm p-button-success"
+                          (click)="edit(c)"
+                          pTooltip="Modifier">
+                  </button>
+
+                  <button pButton pRipple icon="pi pi-trash"
+                          class="p-button-rounded p-button-sm p-button-danger"
+                          (click)="askDelete($event, c)"
+                          pTooltip="Supprimer">
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+
+          <!-- Empty -->
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="6" class="text-center py-6">
+                <i class="pi pi-inbox text-400 mr-2"></i> Aucune commande
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+      </div>
     </div>
 
-    <!-- Dialog CRUD (nouveau layout) -->
+    <!-- ===== DIALOGS ===== -->
+
+    <!-- CRUD -->
     <p-dialog [(visible)]="dialogVisible"
               header="Détails Commande"
               [modal]="true"
-              [style]="{ width: '720px', maxWidth: '95vw' }"
+              [style]="{ width: '760px', maxWidth: '95vw' }"
               styleClass="p-fluid">
       <ng-template pTemplate="content">
         <div class="grid">
-          <!-- Colonne gauche : identité -->
           <div class="col-12 md:col-5">
             <p-fieldset legend="Identité" [toggleable]="false" class="mb-3">
               <div class="field">
                 <label for="numeroCommande">N° Commande</label>
                 <input pInputText id="numeroCommande" [(ngModel)]="form.numeroCommande" required />
               </div>
-
               <div class="field">
                 <label for="description">Description</label>
                 <input pInputText id="description" [(ngModel)]="form.description" />
               </div>
-
               <div class="field">
                 <label>Type du sac</label>
                 <p-dropdown
-                  [options]="[
-                    { label: 'Fond V', value: 'FOND_V' },
-                    { label: 'Fond Carré', value: 'FOND_CARRE' }
-                  ]"
-                  optionLabel="label"
-                  optionValue="value"
-                  [(ngModel)]="form.typeSac"
-                  placeholder="Sélectionner">
+                  [options]="[{label:'Fond V',value:'FOND_V'},{label:'Fond Carré',value:'FOND_CARRE'}]"
+                  optionLabel="label" optionValue="value"
+                  [(ngModel)]="form.typeSac" placeholder="Sélectionner">
                 </p-dropdown>
               </div>
             </p-fieldset>
@@ -137,80 +266,36 @@
             </p-fieldset>
           </div>
 
-          <!-- Colonne droite : dimensions -->
           <div class="col-12 md:col-7">
-            <p-fieldset legend="Dimensions" [toggleable]="false" class="mb-3">
-              <div class="grid">
+            <p-fieldset legend="Dimensions" [toggleable]="false" class="mb-3 dim-fieldset">
+              <div class="grid dim-grid">
                 <div class="field col-12 sm:col-6">
                   <label for="largeur">Largeur (cm)</label>
-                  <p-inputNumber
-                    inputId="largeur"
-                    [(ngModel)]="form.largeur"
-                    name="largeur"
-                    [min]="0"
-                    [mode]="'decimal'"
-                    [minFractionDigits]="0"
-                    [maxFractionDigits]="2"
-                    [locale]="'en-US'"
-                    [useGrouping]="false"
-                    suffix=" cm"
-                    [showButtons]="true"
-                    [step]="0.1">
-                  </p-inputNumber>
+                  <p-inputNumber inputId="largeur" [(ngModel)]="form.largeur" [min]="0"
+                                 [mode]="'decimal'" [minFractionDigits]="0" [maxFractionDigits]="2"
+                                 [locale]="'en-US'" [useGrouping]="false" suffix=" cm"
+                                 [showButtons]="true" [step]="0.1"></p-inputNumber>
                 </div>
-
                 <div class="field col-12 sm:col-6">
                   <label for="longueur">Longueur (cm)</label>
-                  <p-inputNumber
-                    inputId="longueur"
-                    [(ngModel)]="form.longueur"
-                    name="longueur"
-                    [min]="0"
-                    [mode]="'decimal'"
-                    [minFractionDigits]="0"
-                    [maxFractionDigits]="2"
-                    [locale]="'en-US'"
-                    [useGrouping]="false"
-                    suffix=" cm"
-                    [showButtons]="true"
-                    [step]="0.1">
-                  </p-inputNumber>
+                  <p-inputNumber inputId="longueur" [(ngModel)]="form.longueur" [min]="0"
+                                 [mode]="'decimal'" [minFractionDigits]="0" [maxFractionDigits]="2"
+                                 [locale]="'en-US'" [useGrouping]="false" suffix=" cm"
+                                 [showButtons]="true" [step]="0.1"></p-inputNumber>
                 </div>
-
                 <div class="field col-12 sm:col-6">
                   <label for="grammage">Grammage (g/m²)</label>
-                  <p-inputNumber
-                    inputId="grammage"
-                    [(ngModel)]="form.grammage"
-                    name="grammage"
-                    [min]="0"
-                    [mode]="'decimal'"
-                    [minFractionDigits]="0"
-                    [maxFractionDigits]="2"
-                    [locale]="'en-US'"
-                    [useGrouping]="false"
-                    suffix=" g/m²"
-                    [showButtons]="true"
-                    [step]="0.1">
-                  </p-inputNumber>
+                  <p-inputNumber inputId="grammage" [(ngModel)]="form.grammage" [min]="0"
+                                 [mode]="'decimal'" [minFractionDigits]="0" [maxFractionDigits]="2"
+                                 [locale]="'en-US'" [useGrouping]="false" suffix=" g/m²"
+                                 [showButtons]="true" [step]="0.1"></p-inputNumber>
                 </div>
-
                 <div class="field col-12 sm:col-6">
                   <label for="soufflet">Soufflet (v) — cm</label>
-                  <p-inputNumber
-                    inputId="soufflet"
-                    [(ngModel)]="form.soufflet"
-                    name="soufflet"
-                    [min]="0"
-                    [mode]="'decimal'"
-                    [minFractionDigits]="0"
-                    [maxFractionDigits]="2"
-                    [locale]="'en-US'"
-                    [useGrouping]="false"
-                    suffix=" cm"
-                    [showButtons]="true"
-                    [step]="0.1">
-                  </p-inputNumber>
+                  <p-inputNumber inputId="soufflet" [(ngModel)]="form.soufflet" [min]="0"
+                                 [mode]="'decimal'" [minFractionDigits]="0" [maxFractionDigits]="2"
+                                 [locale]="'en-US'" [useGrouping]="false" suffix=" cm"
+                                 [showButtons]="true" [step]="0.1"></p-inputNumber>
                 </div>
               </div>
             </p-fieldset>
@@ -219,32 +304,17 @@
               <div class="grid">
                 <div class="field col-12 sm:col-6">
                   <label>Pli (longueur)</label>
-                  <p-inputNumber
-                    [(ngModel)]="form.pliL"
-                    [min]="0"
-                    [mode]="'decimal'"
-                    [minFractionDigits]="0"
-                    [maxFractionDigits]="2"
-                    [useGrouping]="false"
-                    suffix=" cm"
-                    [showButtons]="true"
-                    [step]="0.1">
-                  </p-inputNumber>
+                  <p-inputNumber [(ngModel)]="form.pliL" [min]="0" [mode]="'decimal'"
+                                 [minFractionDigits]="0" [maxFractionDigits]="2"
+                                 [useGrouping]="false" suffix=" cm"
+                                 [showButtons]="true" [step]="0.1"></p-inputNumber>
                 </div>
-
                 <div class="field col-12 sm:col-6">
                   <label>Pli (largeur)</label>
-                  <p-inputNumber
-                    [(ngModel)]="form.pliW"
-                    [min]="0"
-                    [mode]="'decimal'"
-                    [minFractionDigits]="0"
-                    [maxFractionDigits]="2"
-                    [useGrouping]="false"
-                    suffix=" cm"
-                    [showButtons]="true"
-                    [step]="0.1">
-                  </p-inputNumber>
+                  <p-inputNumber [(ngModel)]="form.pliW" [min]="0" [mode]="'decimal'"
+                                 [minFractionDigits]="0" [maxFractionDigits]="2"
+                                 [useGrouping]="false" suffix=" cm"
+                                 [showButtons]="true" [step]="0.1"></p-inputNumber>
                 </div>
               </div>
             </p-fieldset>
@@ -260,8 +330,7 @@
       </ng-template>
     </p-dialog>
 
-
-    <!-- Dialog suppression simple -->
+    <!-- SUPPRESSION SIMPLE -->
     <p-dialog [(visible)]="deleteDialog" header="Confirmation" [modal]="true" [style]="{ width: '400px' }">
       <div class="confirmation-content">
         <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
@@ -273,7 +342,7 @@
       </ng-template>
     </p-dialog>
 
-    <!-- Dialog suppression multiple -->
+    <!-- SUPPRESSION MULTIPLE -->
     <p-dialog [(visible)]="deleteManyDialog" header="Confirmation" [modal]="true" [style]="{ width: '400px' }">
       <div class="confirmation-content">
         <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>

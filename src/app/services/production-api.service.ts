@@ -1,19 +1,29 @@
 // src/app/services/production-api.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment.prod';
+import { AuthService } from './auth.service';
+import { User } from '../models/user';
 
 export interface ProductionDTO {
   id?: number;
   commandeId: number;
   dateProduction: string; // 'YYYY-MM-DD'
   quantite: number;
+  createdAt?: string;
+  updatedAt?: string;
+  createdBy?: string;
+  updatedBy?: string;
+
 }
 
 @Injectable({ providedIn: 'root' })
 export class ProductionApiService {
-  constructor(private http: HttpClient) {}
+
+
+
+  constructor(private http: HttpClient ) {}
 
   private join(base: string, path: string) {
     const b = base.endsWith('/') ? base.slice(0, -1) : base;
@@ -35,42 +45,17 @@ export class ProductionApiService {
     return this.http.get<number>(this.join(this.base, `${commandeId}/production/total`));
   }
 
-  remaining(commandeId: number): Observable<number> {
-    return this.http.get<number>(this.join(this.base, `${commandeId}/production/remaining`));
-  }
+
 
   create(commandeId: number, dto: Omit<ProductionDTO, 'id'>): Observable<ProductionDTO> {
     return this.http.post<ProductionDTO>(this.join(this.base, `${commandeId}/production`), dto);
   }
 
-  setDaily(commandeId: number, date: string, qty: number): Observable<ProductionDTO> {
-    const params = new HttpParams().set('qty', String(qty));
-    return this.http.put<ProductionDTO>(this.join(this.base, `${commandeId}/production/day/${date}`), null, { params });
+  update(commandeId: number, id: number, dto: ProductionDTO): Observable<ProductionDTO> {
+    return this.http.put<ProductionDTO>(this.join(this.base, `${commandeId}/production/${id}`), dto);
   }
 
-  addToDay(commandeId: number, date: string, delta: number): Observable<ProductionDTO> {
-    const params = new HttpParams().set('delta', String(delta));
-    return this.http.post<ProductionDTO>(this.join(this.base, `${commandeId}/production/day/${date}/add`), null, { params });
-  }
-
-  /** 🔥 Supprimer réellement la ligne de production (par id) */
-  deleteDay(commandeId: number, id: number): Observable<void> {
+  remove(commandeId: number, id: number): Observable<void> {
     return this.http.delete<void>(this.join(this.base, `${commandeId}/production/${id}`));
-  }
-
-  // Helpers
-  getDailyTotal(commandeId: number, dateISO: string): Observable<number> {
-    return this.listBetween(commandeId, dateISO, dateISO).pipe(map(rows => rows?.[0]?.quantite ?? 0));
-  }
-  setDayTotal(commandeId: number, dateISO: string, totalWanted: number) {
-    return this.setDaily(commandeId, dateISO, Math.max(0, Number(totalWanted) || 0));
-  }
-  aggregateByDate(commandeId: number, startISO: string, endISO: string): Observable<{ dateProduction: string; quantite: number }[]> {
-    return this.listBetween(commandeId, startISO, endISO).pipe(
-      map(rows => (rows ?? [])
-        .sort((a, b) => a.dateProduction.localeCompare(b.dateProduction))
-        .map(r => ({ dateProduction: r.dateProduction, quantite: r.quantite || 0 }))
-      )
-    );
   }
 }

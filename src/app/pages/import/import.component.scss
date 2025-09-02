@@ -1,0 +1,93 @@
+/* import.component.scss — thème aligné sur “Commandes” */
+
+/* ===== Palette / variables ===== */
+:host{
+  --bica-orange:#F59E0B;     /* hover, accents */
+  --bica-green:#9fb60c;      /* Nouveau / Edit */
+  --bica-green-dark:#8d9c2e;
+  --bica-blue:#3B82F6;       /* Détails */
+  --bica-red:#DC2626;        /* Supprimer */
+  --bica-teal:#14B8A6;       /* Badge id */
+  --bica-light:#F3F4F6;
+  --bica-border: var(--surface-border, #E5E7EB);
+  --accent-orange: var(--bica-orange);
+}
+
+/* Cartes */
+.card,.p-card{border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.06);}
+
+/* ===== HERO ===== */
+.page-hero{background:linear-gradient(90deg,#fff 0%,#fafafa 100%);border-bottom:1px solid var(--bica-border);}
+.hero-icon{width:3.2rem;height:3.2rem;border-radius:1rem;background:var(--bica-blue);}
+.kpi-row .kpi-card{background:#fff;border:1px solid var(--bica-border);border-radius:.9rem;padding:.55rem .9rem;min-width:100px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.04);}
+.kpi-value{font-weight:800;font-size:1.1rem;line-height:1;}
+.kpi-label{font-size:.78rem;color:#4b5563;}
+
+/* Icône du hero en orange pour cohérence */
+:host ::ng-deep .page-hero .hero-icon i.pi.pi-truck{color:var(--bica-orange)!important;}
+.page-hero .hero-icon{background:rgba(245,158,11,.12)!important;border:1px solid rgba(245,158,11,.22)!important;}
+
+/* ===== Filtres ===== */
+.filters{background:#fff;border-bottom:1px solid var(--bica-border);}
+.filters-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;}
+.filters-left{display:flex;align-items:center;gap:.5rem;}
+.filters-right{display:flex;align-items:center;gap:.5rem;}
+@media (max-width:640px){.filters-row{flex-direction:column;align-items:stretch}.filters-right{width:100%}}
+
+/* Boutons (PrimeNG override) */
+.p-button-success{background:var(--bica-green)!important;border-color:var(--bica-green)!important;color:#fff!important;}
+.p-button-success:hover{background:var(--bica-green-dark)!important;border-color:var(--bica-green-dark)!important;}
+.p-button-info{background:var(--bica-blue)!important;border-color:var(--bica-blue)!important;color:#fff!important;}
+.p-button-danger{background:var(--bica-red)!important;border-color:var(--bica-red)!important;color:#fff!important;}
+
+/* Supprimer (barre de filtres) en rouge SOFT quand actif */
+.filters .filters-left .p-button-danger[disabled]{background:rgba(0,0,0,.04)!important;border-color:rgba(0,0,0,.06)!important;color:#9aa0a6!important;box-shadow:none!important;}
+.filters .filters-left .p-button-danger:not([disabled]){background:rgba(220,38,38,.12)!important;border-color:rgba(220,38,38,.22)!important;color:var(--bica-red)!important;transition:background-color .12s ease,box-shadow .12s ease,transform .08s ease;}
+.filters .filters-left .p-button-danger:not([disabled]):hover{background:rgba(220,38,38,.18)!important;box-shadow:0 6px 14px rgba(220,38,38,.18)!important;transform:translateY(-1px);}
+
+/* Recherche — hover & focus ORANGE */
+.filters .filters-right .p-input-icon-left:hover i{color:var(--accent-orange)!important;}
+.filters .filters-right .p-inputtext{border-radius:10px;transition:border-color .12s ease,box-shadow .12s ease,background-color .12s ease;}
+.filters .filters-right .p-inputtext:hover{border-color:var(--accent-orange)!important;box-shadow:0 0 0 2px rgba(245,158,11,.18)!important;}
+.filters .filters-right .p-inputtext:focus{border-color:var(--accent-orange)!important;box-shadow:0 0 0 2px rgba(245,158,11,.24)!important;outline:none;}
+.filters .filters-right .p-input-icon-left:focus-within i{color:var(--accent-orange)!important;}
+
+/* ===== Table ===== */
+.bica-table{border-radius:12px;overflow:hidden;}
+.bica-table .table-caption{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1rem;border-bottom:1px solid var(--bica-border);background:#fff;position:sticky;top:0;z-index:2;}
+.bica-table .p-datatable-thead>tr>th{background:var(--bica-light);color:#111827;font-weight:600;border:0;}
+.bica-table .p-datatable-tbody>tr>td{border:0;vertical-align:middle;}
+.bica-table .th-with-icon{display:flex;align-items:center;gap:.5rem;}
+.bica-table .th-with-icon.justify-end{justify-content:flex-end;}
+.bica-table .p-datatable-tbody>tr:hover{background:rgba(245,158,11,.08)!important;}
+.bica-table .p-datatable-tbody>tr.p-highlight:hover{background:rgba(245,158,11,.14)!important;}
+.bica-table.is-sticky .p-datatable-wrapper{max-height:65vh;overflow:auto;}
+.bica-table.is-sticky .p-datatable-thead>tr>th{position:sticky;top:48px;z-index:1;}
+
+/* Badge “id” */
+.avatar-badge{width:2.2rem;height:2.2rem;border-radius:.75rem;display:inline-flex;align-items:center;justify-content:center;background:rgba(20,184,166,.12);color:var(--bica-teal);}
+
+/* Actions rondes */
+.row-actions .p-button{border-radius:50%!important;width:2.2rem;height:2.2rem;display:inline-flex;align-items:center;justify-content:center;transition:transform .08s ease,box-shadow .12s ease;}
+.row-actions .p-button:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(0,0,0,.08);}
+
+/* Densité par défaut */
+.bica-table.comfort,
+.p-datatable.bica-table.comfort{
+  font-size:1rem;
+  .p-datatable-thead>tr>th{padding:1.1rem 1.2rem!important;}
+  .p-datatable-tbody>tr>td{padding:1rem 1.2rem!important;}
+}
+
+/* Checkbox — orange soft */
+:host ::ng-deep .p-checkbox .p-checkbox-box.p-highlight{background:rgba(245,158,11,.15)!important;border-color:rgba(245,158,11,.45)!important;color:var(--bica-orange)!important;}
+:host ::ng-deep .p-checkbox .p-checkbox-box.p-highlight .p-checkbox-icon{color:var(--bica-orange)!important;}
+:host ::ng-deep .p-checkbox:not(.p-disabled) .p-checkbox-box:hover{border-color:var(--bica-orange)!important;}
+:host ::ng-deep .p-checkbox:not(.p-disabled) .p-checkbox-box.p-highlight:hover{background:rgba(245,158,11,.22)!important;border-color:rgba(245,158,11,.55)!important;}
+:host ::ng-deep .p-checkbox.p-focus .p-checkbox-box,
+:host ::ng-deep .p-checkbox:focus-within .p-checkbox-box{box-shadow:0 0 0 2px rgba(245,158,11,.25)!important;border-color:var(--bica-orange)!important;}
+
+/* Dialogs */
+.bica-dialog .p-dialog-header{border-bottom:1px solid var(--bica-border);}
+.bica-dialog .p-field label{font-weight:600;color:#111827;}
+.bica-dialog .p-fieldset{border-radius:12px;}

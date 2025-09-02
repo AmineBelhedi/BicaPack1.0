@@ -233,10 +233,11 @@
 
 /* === ProgressBar local (PrimeNG) === */
 :host ::ng-deep .p-progressbar.bica-progress{
-  height: 15px;
+  height: 20px;
   border-radius: 999px;
   background: var(--chip-green-bg);
   border: 1px solid var(--chip-green-border);
+  margin-top: 2rem;
 
   /* PrimeNG >= v17 (variables CSS) */
   --p-progressbar-background:        var(--chip-green-bg);

@@ -65,7 +65,8 @@
           [showButtonBar]="true"
           dateFormat="yy-mm-dd"
           (ngModelChange)="onPeriodChange()"
-          styleClass="w-full bica-input">
+          styleClass="w-full bica-input"
+          appendTo="body">
         </p-calendar>
       </div>
       <div class="field">
@@ -76,7 +77,8 @@
           [showButtonBar]="true"
           dateFormat="yy-mm-dd"
           (ngModelChange)="onPeriodChange()"
-          styleClass="w-full bica-input">
+          styleClass="w-full bica-input"
+          appendTo="body">
         </p-calendar>
       </div>
 
@@ -93,49 +95,45 @@
   </div>
 
   <!-- Historique -->
-  <section class="history-section">
-    <h5 class="muted mb-2">Historique</h5>
+<section class="history-section">
+  <h5 class="muted mb-2">Historique</h5>
 
-    <div class="table-wrap">
-      <p-table
-        [value]="displayedDays"
-        responsiveLayout="stack"
-        [breakpoint]="'768px'"
-        styleClass="bica-table">
+  <div class="table-wrap">
+    <p-table
+      [value]="displayedRows"
+      responsiveLayout="stack"
+      [breakpoint]="'768px'"
+      styleClass="bica-table">
 
-        <ng-template pTemplate="header">
-          <tr>
-            <th>Date</th>
-            <th class="text-right">Quantité</th>
-            <th class="text-right" style="width:120px;">Actions</th>
-          </tr>
-        </ng-template>
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Date</th>
+          <th class="text-right">Quantité</th>
+          <th class="text-right" style="width:120px;">Actions</th>
+        </tr>
+      </ng-template>
 
-        <ng-template pTemplate="body" let-r>
-          <tr>
-            <td class="mono" data-title="Date">{{ r.date }}</td>
-            <td class="mono text-right" data-title="Quantité">{{ r.quantite | number:'1.0-0' }}</td>
-            <td class="text-right" data-title="Actions">
-              <button pButton
-                      class="bica-edit p-button-sm"
-                      icon="pi pi-pencil"
-                      (click)="editDay(r.date)"
-                      pTooltip="Éditer"></button>
-              <button pButton
-                      class="bica-link--danger p-button-sm"
-                      icon="pi pi-trash"
-                      (click)="removeDay(r.date)"
-                      pTooltip="Supprimer"></button>
-            </td>
-          </tr>
-        </ng-template>
+      <ng-template pTemplate="body" let-r>
+        <tr>
+          <td class="mono" data-title="Date">{{ r.dateProduction }}</td>
+          <td class="mono text-right" data-title="Quantité">{{ r.quantite | number:'1.0-0' }}</td>
+          <td class="text-right" data-title="Actions">
+            <button pButton class="bica-edit p-button-sm" icon="pi pi-pencil"
+                    (click)="openEdit(r)" pTooltip="Éditer"></button>
+            <button pButton class="bica-link--danger p-button-sm" icon="pi pi-trash"
+                    (click)="deleteRow(r)" pTooltip="Supprimer"></button>
+          </td>
+        </tr>
+      </ng-template>
 
-        <ng-template pTemplate="emptymessage">
-          <tr><td colspan="3" class="text-center py-4 muted">Aucune donnée</td></tr>
-        </ng-template>
-      </p-table>
-    </div>
-  </section>
+      <ng-template pTemplate="emptymessage">
+        <tr><td colspan="3" class="text-center py-4 muted">Aucune donnée</td></tr>
+      </ng-template>
+    </p-table>
+  </div>
+</section>
+
+
 </div>
 
 <!-- Dialog d’ajout -->
@@ -157,7 +155,8 @@
         [showIcon]="true"
         [showButtonBar]="true"
         dateFormat="yy-mm-dd"
-        styleClass="w-full bica-input">
+        styleClass="w-full bica-input"
+        appendTo="body">
       </p-calendar>
     </div>
 
