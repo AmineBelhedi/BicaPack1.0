@@ -1,0 +1,625 @@
+<ng-container *ngIf="loading">
+    <div class="spinner-overlay">
+        <p-progressSpinner
+            styleClass="w-6rem h-6rem"
+            strokeWidth="2"
+            fill="var(--surface-ground)"
+            animationDuration=".5s"
+        ></p-progressSpinner>
+    </div>
+</ng-container>
+
+<div class="grid">
+    <div class="col-12">
+        <div class="card px-6 py-6" *ngIf="isDesktop">
+            <p-toast></p-toast>
+            <p-toolbar styleClass="mb-4">
+                <ng-template pTemplate="left">
+                    <div class="my-2">
+                        <button
+                            pButton
+                            pRipple
+                            label="Nouveau"
+                            icon="pi pi-plus"
+                            class="p-button-success mr-2"
+                            (click)="openNew()"
+                        ></button>
+                    </div>
+                </ng-template>
+                <ng-template  pTemplate="right">
+                    <p-button icon="pi pi-file-excel" label="Export" (click)="dt.exportCSV()" />
+                </ng-template>
+            </p-toolbar>
+
+            <p-table
+            #dt
+            [value]="fournisseurs"
+            id="fournisseurTable"
+            [columns]="cols"
+            responsiveLayout="scroll"
+            [rows]="10"
+            [exportFilename]="'fournisseurs'"
+            [globalFilterFields]="['nom', 'matFiscale', 'email', 'phone1', 'tva', 'siteWeb']"
+            [paginator]="true"
+            [rowsPerPageOptions]="[10, 20, 30]"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="Affichage de {first} à {last} sur {totalRecords} entrées"
+            [(selection)]="selectedFournisseurs"
+            selectionMode="multiple"
+            [rowHover]="true"
+            dataKey="id"
+        >
+            <ng-template pTemplate="caption">
+                <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+                    <h5 class="m-0">Fournisseurs</h5>
+                    <span class="block mt-2 md:mt-0 p-input-icon-left">
+                        <i class="pi pi-search"></i>
+                        <input
+                            pInputText
+                            type="text"
+                            (input)="onGlobalFilter(dt, $event)"
+                            placeholder="Rechercher..."
+                            class="w-full sm:w-auto"
+                        />
+                    </span>
+                </div>
+            </ng-template>
+        
+            <ng-template pTemplate="header">
+                <tr>
+                    <th style="width: 3rem">
+                        <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                    </th>
+                    <th></th>
+                    <th>Nom Fournisseur</th>
+                    <th>Matricule Fiscale</th>
+                    <th>Famille</th>
+                    <th>Téléphone</th>
+                    <!-- <th>TVA</th>
+                    <th>Site Web</th> -->
+                    <th>Actions</th>
+                </tr>
+            </ng-template>
+        
+            <ng-template pTemplate="body" let-fournisseur>
+                <tr>
+                    <td>
+                        <p-tableCheckbox [value]="fournisseur"></p-tableCheckbox>
+                    </td>
+                    <td>
+                        <span
+                            class="status-indicator"
+                            [ngStyle]="{
+                                'background-color': hasEmptyFields(fournisseur) ? 'red' : 'transparent'
+                            }"
+                            title="This model has empty fields"
+                        ></span>
+                    </td>
+                    <td>
+                        <span class="p-column-title">Nom Fournisseur</span>
+                        {{ fournisseur.nom }}
+                    </td>
+                    <td>
+                        <span class="p-column-title">Matricule Fiscale</span>
+                        {{ fournisseur.matFiscale || " - " }}
+                    </td>
+                    <td>
+                        <span class="p-column-title">Famille</span>
+                        {{ fournisseur.famille || " - " }}
+                    </td>
+                    <td>
+                        <span class="p-column-title">Téléphone</span>
+                        {{ fournisseur.phone1 || " - " }}
+                    </td>
+                    <!-- <td>
+                        <span class="p-column-title">TVA</span>
+                        {{ fournisseur.tva || "N/A" }}
+                    </td>
+                    <td>
+                        <span class="p-column-title">Site Web</span>
+                        {{ fournisseur.siteWeb || "N/A" }}
+                    </td> -->
+                    <td>
+                        <div class="flex">
+                            <p-button
+                                pRipple
+                                icon="pi pi-pencil"
+                                class="mr-2"
+                                [rounded]="true"
+                                [outlined]="false"
+                                severity="info"
+                                (onClick)="editFournisseur(fournisseur)"
+                            ></p-button>
+                            <p-button
+                                pRipple
+                                icon="pi pi-trash"
+                                severity="danger"
+                                [rounded]="true"
+                                [outlined]="false"
+                                (onClick)="deleteFournisseur(fournisseur)"
+                            ></p-button>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+        
+        </div>
+    </div>
+</div>
+
+<p-dialog
+    [(visible)]="fournisseurDialogCreate"
+    [style]="{ width: '40%', height: 'auto' }"
+    [maximizable]="true"
+    header="Nouveau Fournisseur"
+    (onHide)="hideDialog()"
+    [modal]="true"
+    class="p-fluid"
+    [closable]="true"
+>
+   <ng-template pTemplate="content">
+    <div class="p-fluid">
+        <div class="p-grid p-formgrid">
+
+            <div class="p-col-12 p-md-6">
+                <div class="field">
+                    <label for="nom">Nom</label>
+                    <input
+                        type="text"
+                        pInputText
+                        id="nom"
+                        [(ngModel)]="fournisseur.nom"
+                        required
+                        autofocus
+                        [ngClass]="{ 'ng-invalid ng-dirty': submitted && !fournisseur.nom }"
+                    />
+                    <small class="p-error" *ngIf="submitted && !fournisseur.nom">Le nom est requis.</small>
+                </div>
+            </div>
+
+            <div class="p-col-12 p-md-6">
+                <div class="field">
+                    <label for="matFiscale">Matricule Fiscale</label>
+                    <input
+                        type="text"
+                        pInputText
+                        id="matFiscale"
+                        [(ngModel)]="fournisseur.matFiscale"
+                        required
+                        [ngClass]="{ 'ng-invalid ng-dirty': submitted && !fournisseur.matFiscale }"
+                    />
+                    <small class="p-error" *ngIf="submitted && !fournisseur.matFiscale">Le matricule fiscale est requis.</small>
+                </div>
+            </div>
+
+            <div class="p-col-12 p-md-6">
+                <div class="field">
+                <label for="compteCredit">Compte Crédit</label>
+                <p-autoComplete
+                  [dropdown]="true"
+                  [showClear]="true"
+                  appendTo="body"
+                  [(ngModel)]="fournisseur.compteCredit"
+                  styleClass="my-autocomplete"
+                  [suggestions]="filteredCompteCredit"
+                  (completeMethod)="filterComptesCredit($event)"
+                  optionLabel="numeroCompte"
+                >
+                  <ng-template let-item pTemplate="item">
+                    <div>{{ item?.numeroCompte }}</div>
+                  </ng-template>
+                  <ng-template pTemplate="footer">
+                    <p-button label="Ajouter" size="small" severity="secondary"
+                              (onClick)="openNewCompteCredit()" [text]="true" icon="pi pi-plus"></p-button>
+                  </ng-template>
+                </p-autoComplete>
+                </div>
+              </div>
+        
+              <!-- Compte Débit -->
+              <div class="p-col-12 p-md-6">
+                <div class="field">
+                <label for="compteDebit">Compte Débit</label>
+                <p-autoComplete
+                  [dropdown]="true"
+                  [showClear]="true"
+                  appendTo="body"
+                  [(ngModel)]="fournisseur.compteDebit"
+                  [suggestions]="filteredCompteDebit"
+                  styleClass="my-autocomplete"
+                  (completeMethod)="filterComptesDebit($event)"
+                  optionLabel="numeroCompte"
+                >
+                  <ng-template let-item pTemplate="item">
+                    <div>{{ item?.numeroCompte }}</div>
+                  </ng-template>
+                  <ng-template pTemplate="footer">
+                    <p-button label="Ajouter" size="small" severity="secondary"
+                              (onClick)="openNewCompteDebit()" [text]="true" icon="pi pi-plus"></p-button>
+                  </ng-template>
+                </p-autoComplete>
+                </div>
+              </div>
+            <div class="p-col-12 p-md-6">
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input type="email" pInputText id="email" [(ngModel)]="fournisseur.email" />
+                </div>
+            </div>
+
+            <div class="p-col-12 p-md-6">
+                <div class="field">
+                    <label for="adresse">Adresse</label>
+                    <input type="text" pInputText id="adresse" [(ngModel)]="fournisseur.adresse" />
+                </div>
+            </div>
+
+            <div class="p-col-12 p-md-6">
+                <div class="field">
+                    <label for="phone1">Téléphone 1</label>
+                    <input type="text" pInputText id="phone1" [(ngModel)]="fournisseur.phone1" />
+                </div>
+            </div>
+
+            <div class="p-col-12 p-md-6">
+                <div class="field">
+                    <label for="phone2">Téléphone 2</label>
+                    <input type="text" pInputText id="phone2" [(ngModel)]="fournisseur.phone2" />
+                </div>
+            </div>
+
+            <div class="p-col-12 p-md-6">
+                <div class="field">
+                    <label for="tva">TVA</label>
+                    <input type="text" pInputText id="tva" [(ngModel)]="fournisseur.tva" />
+                </div>
+            </div>
+
+            <div class="p-col-12 p-md-6">
+                <div class="field">
+                    <label for="siteWeb">Site Web</label>
+                    <input type="text" pInputText id="siteWeb" [(ngModel)]="fournisseur.siteWeb" />
+                </div>
+            </div>
+
+            <div class="p-col-12 p-md-6">
+                <div class="field">
+                    <label for="fax">Fax</label>
+                    <input type="text" pInputText id="fax" [(ngModel)]="fournisseur.fax" />
+                </div>
+            </div>
+
+        </div>
+    </div>
+</ng-template>
+
+
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+        <button pButton pRipple label="Enregistrer" icon="pi pi-check" class="p-button-text" (click)="saveFournisseur()"></button>
+    </ng-template>
+</p-dialog>
+
+
+<p-dialog
+    [(visible)]="fournisseurDialogUpdate"
+    [style]="{ width: '40%', height: 'auto' }"
+    [maximizable]="true"
+    header="Modifier Fournisseur"
+    [modal]="true"
+    class="p-fluid"
+>
+<ng-template pTemplate="content">
+    <div class="p-fluid">
+        <div class="p-grid p-formgrid">
+
+            <div class="p-col-12 p-md-6">
+                <div class="field">
+                    <label for="nom">Nom</label>
+                    <input
+                        type="text"
+                        pInputText
+                        id="nom"
+                        [(ngModel)]="fournisseur.nom"
+                        autofocus
+                    />
+                </div>
+            </div>
+
+            <div class="p-col-12 p-md-6">
+                <div class="field">
+                    <label for="matFiscale">Matricule Fiscale</label>
+                    <input
+                        type="text"
+                        pInputText
+                        id="matFiscale"
+                        [(ngModel)]="fournisseur.matFiscale"
+                    />
+                </div>
+            </div>
+            <div class="p-col-12 p-md-6">
+                <div class="field">
+                <label for="compteCredit">Compte Crédit</label>
+                <p-autoComplete
+                  [dropdown]="true"
+                  [showClear]="true"
+                  appendTo="body"
+                  [(ngModel)]="fournisseur.compteCredit"
+                  styleClass="my-autocomplete"
+                  [suggestions]="filteredCompteCredit"
+                  (completeMethod)="filterComptesCredit($event)"
+                  optionLabel="numeroCompte"
+                >
+                  <ng-template let-item pTemplate="item">
+                    <div>{{ item?.numeroCompte }}</div>
+                  </ng-template>
+                  <ng-template pTemplate="footer">
+                    <p-button label="Ajouter" size="small" severity="secondary"
+                              (onClick)="openNewCompteCredit()" [text]="true" icon="pi pi-plus"></p-button>
+                  </ng-template>
+                </p-autoComplete>
+                </div>
+              </div>
+        
+              <!-- Compte Débit -->
+              <div class="p-col-12 p-md-6">
+                <div class="field">
+                <label for="compteDebit">Compte Débit</label>
+                <p-autoComplete
+                  [dropdown]="true"
+                  [showClear]="true"
+                  appendTo="body"
+                  [(ngModel)]="fournisseur.compteDebit"
+                  [suggestions]="filteredCompteDebit"
+                  styleClass="my-autocomplete"
+                  (completeMethod)="filterComptesDebit($event)"
+                  optionLabel="numeroCompte"
+                >
+                  <ng-template let-item pTemplate="item">
+                    <div>{{ item?.numeroCompte }}</div>
+                  </ng-template>
+                  <ng-template pTemplate="footer">
+                    <p-button label="Ajouter" size="small" severity="secondary"
+                              (onClick)="openNewCompteDebit()" [text]="true" icon="pi pi-plus"></p-button>
+                  </ng-template>
+                </p-autoComplete>
+                </div>
+              </div>
+            <div class="p-col-12 p-md-6">
+                <div class="field">
+                    <label for="email">Email</label>
+                    <input type="email" pInputText id="email" [(ngModel)]="fournisseur.email" />
+                </div>
+            </div>
+
+            <div class="p-col-12 p-md-6">
+                <div class="field">
+                    <label for="adresse">Adresse</label>
+                    <input type="text" pInputText id="adresse" [(ngModel)]="fournisseur.adresse" />
+                </div>
+            </div>
+
+            <div class="p-col-12 p-md-6">
+                <div class="field">
+                    <label for="phone1">Téléphone 1</label>
+                    <input type="text" pInputText id="phone1" [(ngModel)]="fournisseur.phone1" />
+                </div>
+            </div>
+
+            <div class="p-col-12 p-md-6">
+                <div class="field">
+                    <label for="phone2">Téléphone 2</label>
+                    <input type="text" pInputText id="phone2" [(ngModel)]="fournisseur.phone2" />
+                </div>
+            </div>
+
+            <div class="p-col-12 p-md-6">
+                <div class="field">
+                    <label for="tva">TVA</label>
+                    <input type="text" pInputText id="tva" [(ngModel)]="fournisseur.tva" />
+                </div>
+            </div>
+
+            <div class="p-col-12 p-md-6">
+                <div class="field">
+                    <label for="siteWeb">Site Web</label>
+                    <input type="text" pInputText id="siteWeb" [(ngModel)]="fournisseur.siteWeb" />
+                </div>
+            </div>
+
+            <div class="p-col-12 p-md-6">
+                <div class="field">
+                    <label for="fax">Fax</label>
+                    <input type="text" pInputText id="fax" [(ngModel)]="fournisseur.fax" />
+                </div>
+            </div>
+
+        </div>
+    </div>
+</ng-template>
+
+    <ng-template pTemplate="footer">
+        <button pButton pRipple label="Annuler" icon="pi pi-times" class="p-button-text" (click)="hideDialog()"></button>
+        <button pButton pRipple label="Enregistrer" icon="pi pi-check" class="p-button-text" (click)="saveFournisseur()"></button>
+    </ng-template>
+</p-dialog>
+
+
+<!-- Dialog pour la suppression d'un fournisseur spécifique -->
+<p-dialog
+    [(visible)]="deleteFournisseurDialog"
+    header="Confirmer"
+    [modal]="true"
+    [style]="{ width: '450px' }"
+>
+    <div class="flex align-items-center justify-content-center">
+        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+        <span *ngIf="fournisseur"
+            >Êtes-vous sûr de vouloir supprimer
+            <b>{{ fournisseur?.nom }}</b> ?</span
+        >
+    </div>
+    <ng-template pTemplate="footer">
+        <button
+            pButton
+            pRipple
+            icon="pi pi-times"
+            class="p-button-text"
+            label="Non"
+            (click)="deleteFournisseurDialog = false"
+        ></button>
+        <button
+            pButton
+            pRipple
+            icon="pi pi-check"
+            class="p-button-text"
+            label="Oui"
+            (click)="confirmDelete()"
+        ></button>
+    </ng-template>
+</p-dialog>
+
+<!-- Dialog pour la suppression de plusieurs fournisseurs sélectionnés -->
+<p-dialog
+    [(visible)]="deleteFournisseursDialog"
+    header="Confirmer"
+    [modal]="true"
+    [style]="{ width: '450px' }"
+>
+    <div class="flex align-items-center justify-content-center">
+        <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+        <span
+            >Êtes-vous sûr de vouloir supprimer les fournisseurs sélectionnés ?</span
+        >
+    </div>
+    <ng-template pTemplate="footer">
+        <button
+            pButton
+            pRipple
+            icon="pi pi-times"
+            class="p-button-text"
+            label="Non"
+            (click)="deleteFournisseursDialog = false"
+        ></button>
+        <button
+            pButton
+            pRipple
+            icon="pi pi-check"
+            class="p-button-text"
+            label="Oui"
+            (click)="confirmDeleteSelected()"
+        ></button>
+    </ng-template>
+</p-dialog>
+
+
+<p-dialog
+    [(visible)]="compteCreditDialog"
+    [style]="{ width: '300px', height: '30%' }"
+    [maximizable]="true"
+    header="Compte Crédit"
+    (onHide)="hideDialogCompteCredit()"
+    [modal]="true"
+    class="p-fluid"
+>
+    <ng-template pTemplate="content">
+        <div class="field">
+            <label for="name">Intitulé</label>
+            <input
+                type="text"
+                pInputText
+                id="name"
+                [(ngModel)]="compteCredit.intitule"
+                required
+                
+            />
+        </div>
+        <div class="field">
+
+            <label for="name">Numéro Compte</label>
+            <input
+                type="text"
+                pInputText
+                id="name"
+                [(ngModel)]="compteCredit.numeroCompte"
+                required
+                autofocus
+            />
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <button
+            pButton
+            pRipple
+            label="Annuler"
+            icon="pi pi-times"
+            class="p-button-text"
+            (click)="hideDialogCompteCredit()"
+        ></button>
+        <button
+            pButton
+            pRipple
+            label="Enregistrer"
+            icon="pi pi-check"
+            class="p-button-text"
+            (click)="saveCompteCredit()"
+        ></button>
+    </ng-template>
+</p-dialog>
+
+
+<p-dialog
+    [(visible)]="compteDebitDialog"
+    [style]="{ width: '300px', height: '30%' }"
+    [maximizable]="true"
+    header="Compte Débit"
+    (onHide)="hideDialogCompteDebit()"
+    [modal]="true"
+    class="p-fluid"
+>
+    <ng-template pTemplate="content">
+        <div class="field">
+            <label for="name">Intitulé</label>
+            <input
+                type="text"
+                pInputText
+                id="name"
+                [(ngModel)]="compteDebit.intitule"
+                required
+                
+            />
+        </div>
+        <div class="field">
+            <label for="name">Numéro Compte</label>
+            <input
+                type="text"
+                pInputText
+                id="name"
+                [(ngModel)]="compteDebit.numeroCompte"
+                required
+                autofocus
+            />
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <button
+            pButton
+            pRipple
+            label="Annuler"
+            icon="pi pi-times"
+            class="p-button-text"
+            (click)="hideDialogCompteDebit()"
+        ></button>
+        <button
+            pButton
+            pRipple
+            label="Enregistrer"
+            icon="pi pi-check"
+            class="p-button-text"
+            (click)="saveCompteDebit()"
+        ></button>
+    </ng-template>
+</p-dialog>

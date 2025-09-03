@@ -8,6 +8,6 @@ import { EmptyDemoComponent } from './emptydemo.component';
         CommonModule,
         EmptyDemoRoutingModule
     ],
-    declarations: [EmptyDemoComponent]
+    declarations: []
 })
 export class EmptyDemoModule { }

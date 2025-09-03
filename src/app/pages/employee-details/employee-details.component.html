@@ -1,0 +1,269 @@
+<div class="grid">
+    <div class="col-12">
+        <div class="card px-6 py-6">
+            <p-toast></p-toast>
+            <p-messages *ngIf="!checkForChanges()" [(value)]="messages" [enableService]="false" [closable]="false" />
+
+            <div class="surface-section">
+                <!-- Breadcrumb -->
+                <ul class="list-none p-0 m-0 flex align-items-center font-medium mb-4 text-sm">
+                    <li>
+                        <a class="text-500 no-underline cursor-pointer hover:text-700 transition"
+                            [href]="'/pages/employees-st/'+employee?.sousTraitant?.id">
+                            <i class="pi pi-home mr-2"></i>Employés
+                        </a>
+                    </li>
+                    <li class="px-2">
+                        <i class="pi pi-angle-right text-500"></i>
+                    </li>
+                    <li>
+                        <span class="text-900">Détails Employé</span>
+                    </li>
+                </ul>
+
+                <div class="card p-4 border-round-3xl mb-4">
+                    <div class="flex flex-column md:flex-row md:items-start w-full relative">
+                        <!-- 📷 Infos gauche -->
+                        <div class="flex flex-row flex-grow-1 gap-4">
+                            <!-- Photo -->
+                            <div class="border-circle bg-gray-200 overflow-hidden shadow-1 flex align-items-center justify-content-center"
+                                style="width: 100px; height: 100px;">
+                                <img *ngIf="employee.photo" [src]="employee.photo" alt="Photo"
+                                    style="width: 100%; height: 100%; object-fit: cover;" />
+                                <i *ngIf="!employee.photo" class="pi pi-user text-4xl text-gray-500"></i>
+                            </div>
+                            <!-- Texte -->
+                            <div class="flex flex-column justify-content-center">
+                                <h2 class="mb-2 text-2xl font-bold text-900">
+                                    {{ employee.lastname | uppercase }} {{ employee.firstname  | uppercase }}
+                                </h2>
+                                <div class="text-m text-600 flex flex-column gap-1 ">
+                                    <span><i class="pi pi-briefcase mr-2 text-primary"></i>{{ employee.jobTitle || '—'
+                                        }}</span>
+                                    <span><i class="pi pi-phone mr-2 text-green-600"></i>{{ employee.phoneNumber || '—'
+                                        }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 🧭 Actions à l'extrémité droite en haut -->
+                        <div class="absolute top-0 right-0 flex gap-2">
+                            <button pButton icon="pi pi-save" label="Enregistrer" severity="success" class="p-button-sm"
+                                (click)="updateEmployee()">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="card">
+                <h5>Informations de l'employé</h5>
+                <div class="p-fluid p-formgrid grid">
+                    <div class="field col-12 md:col-3">
+                        <label htmlFor="firstname2">Prénom</label>
+                        <input pInputText id="firstname2" [(ngModel)]="employee.firstname" type="text" />
+                    </div>
+                    <div class="field col-12 md:col-3">
+                        <label htmlFor="lastname2">Nom </label>
+                        <input pInputText id="lastname2" [(ngModel)]="employee.lastname" type="text" />
+                    </div>
+                    <div class="field col-12 md:col-3">
+                        <label htmlFor="address">Date de naissance</label>
+                        <!-- <input pInputTextarea id="address" rows="4" [readonly]="locked" [(ngModel)]="employee.birthDate" /> -->
+                        <p-calendar [iconDisplay]="'input'" [showIcon]="true" [autoZIndex]="true" dateFormat="dd/mm/yy"
+                            [(ngModel)]="employee.birthDate" inputId="icondisplay" />
+                    </div>
+                    <div class="field col-12 md:col-3">
+                        <label for="gender">Genre</label>
+                        <p-dropdown [options]="genders" [(ngModel)]="employee.gender" optionValue="value"
+                            optionLabel="label" placeholder="Sélectionner un genre" inputId="gender"></p-dropdown>
+
+
+                    </div>
+                    <div class="field col-12 md:col-3">
+                        <label htmlFor="city">Numéro CIN</label>
+                        <input pInputText id="city" [(ngModel)]="employee.cin" type="text" />
+                    </div>
+                    <div class="field col-12 md:col-3">
+                        <label htmlFor="city">Email</label>
+                        <input pInputText id="city" [(ngModel)]="employee.email" type="email" />
+                    </div>
+                    <div class="field col-12 md:col-3">
+                        <label htmlFor="city">Numéro Téléphone</label>
+                        <input pInputText id="city" [(ngModel)]="employee.phoneNumber" type="text" />
+                    </div>
+                    <div class="field col-12 md:col-2">
+                        <label for="matricule">Catégorie</label>
+                        <input type="text" pInputText id="categorie" [(ngModel)]="employee.categorie"  
+                            />
+                  
+                    </div>
+                    <div class="field col-12 md:col-1">
+                        <label for="echelon">Echelon</label>
+                        <input type="text" pInputText id="echelon" [(ngModel)]="employee.echelon"  
+                            />
+                  
+                    </div>
+                    <div class="field col-12 md:col-3">
+                        <label htmlFor="city">Poste Occupé</label>
+                        <input pInputText id="city" [(ngModel)]="employee.jobTitle" type="text" />
+                    </div>
+                  
+                    <div class="field col-12 md:col-3">
+                        <label htmlFor="address">Matricule</label>
+                        <input pInputTextarea id="address" [(ngModel)]="employee.matricule" rows="4" />
+                    </div>
+                    <div class="field col-12 md:col-3">
+                        <label htmlFor="address">Type Contrat</label>
+                        <!-- <input pInputTextarea id="address" [(ngModel)]="employee.employmentType" [readonly]="locked" rows="4" /> -->
+                        <p-dropdown [options]="types" [(ngModel)]="employee.employmentType" optionLabel="label"
+                            optionValue="value" placeholder="Sélectionner un type"
+                            inputId="employmentType"></p-dropdown>
+                    </div>
+                    <div class="field col-12 md:col-3">
+                        <label htmlFor="address">Salaire Net</label>
+                        <!-- <input pInputTextarea id="address" [(ngModel)]="employee.employmentType" [readonly]="locked" rows="4" /> -->
+                        <p-inputNumber 
+                        [(ngModel)]="employee.salary" 
+                        suffix=" DT" 
+                        inputId="currency-tunisie"
+                        [minFractionDigits]="3"
+                        [maxFractionDigits]="3"
+                        locale="en-US">
+                      </p-inputNumber>
+                    </div>
+                    <!-- <div class="field col-12 md:col-3">
+                        <label htmlFor="address">Salaire Brut</label>
+                        <p-inputNumber [(ngModel)]="employee.salaryBrut" id="qte" placeholder="Salaire Brut"
+                            [showButtons]="true" [step]="500" [min]="0" decrementButtonClass="p-button-secondary"
+                            incrementButtonClass="p-button-secondary" inputId="minmax-buttons" />
+                    </div> -->
+                    <div class="field col-12 md:col-3">
+                        <label htmlFor="address">Date d'embauche</label>
+                        <!-- <input pInputTextarea id="address" [(ngModel)]="employee.hireDate" rows="4" [readonly]="locked" /> -->
+                        <p-calendar [iconDisplay]="'input'" [showIcon]="true" [autoZIndex]="true" dateFormat="dd/mm/yy"
+                            [(ngModel)]="employee.hireDate" inputId="icondisplay" />
+                    </div>
+                    <div class="field col-12 md:col-3">
+                        <label htmlFor="address">Date fin de contrat</label>
+                        <!-- <input pInputTextarea id="address" [(ngModel)]="employee.contractEndDate" rows="4" [readonly]="locked" /> -->
+                        <p-calendar [iconDisplay]="'input'" [showIcon]="true" [autoZIndex]="true" dateFormat="dd/mm/yy"
+                            [(ngModel)]="employee.contractEndDate" inputId="icondisplay" />
+                    </div>
+                    <div class="field col-12 md:col-3">
+                        <label htmlFor="address">Numéro Sécurité Sociale</label>
+                        <input pInputTextarea id="address" [(ngModel)]="employee.socialSecurityNumber" rows="4" />
+                    </div>
+                    <div class="field col-12 md:col-3">
+                        <label htmlFor="address">Département</label>
+                        <input pInputTextarea id="address" [(ngModel)]="employee.department" rows="4" />
+                    </div>
+                    <!-- <div class="field col-12 md:col-3">
+                    <label htmlFor="state">Email</label>
+                    <p-dropdown
+                        [options]="dropdownItems"
+                        optionLabel="name"
+                        [(ngModel)]="selectedState"
+                    ></p-dropdown>
+                </div> -->
+                    <div class="field col-12 md:col-3">
+                        <label htmlFor="zip">Adresse</label>
+                        <textarea rows="4" cols="50" [(ngModel)]="employee.address" pInputTextarea [autoResize]="true">
+                        </textarea>
+                    </div>
+                  <!-- ✅ Checkbox Contrat suspendu -->
+<div class="field-checkbox col-12 md:col-3 mt-3">
+    <p-checkbox 
+        inputId="suspended" 
+        [(ngModel)]="employee.suspended" 
+        binary="true"
+        styleClass="mr-2"
+    ></p-checkbox>
+    <label for="suspended">Contrat suspendu ?</label>
+</div>
+
+<!-- ✅ Champs affichés si suspended = true -->
+<ng-container *ngIf="employee.suspended">
+    <div class="field col-12 md:col-3">
+        <label for="dateSuspension">Date de suspension</label>
+        <p-calendar 
+            inputId="dateSuspension"
+            [(ngModel)]="employee.dateSuspension" 
+            dateFormat="dd/mm/yy"
+            [showIcon]="true"
+            [autoZIndex]="true">
+        </p-calendar>
+    </div>
+
+    <div class="field col-12 md:col-3">
+        <label for="raisonSuspension">Raison de la suspension</label>
+        <textarea 
+            pInputTextarea 
+            id="raisonSuspension"
+            [(ngModel)]="employee.raisonSuspension" 
+            rows="4" 
+            autoResize="true"
+            placeholder="Décrivez brièvement la raison de la suspension...">
+        </textarea>
+    </div>
+</ng-container>
+
+                    
+                    
+                </div>
+            </div>
+            <!-- <div class="card">
+                <p-toolbar>
+                    <div class="p-toolbar-group-start">
+                       
+                        <p-fileUpload #fileUpload mode="basic" name="demo[]" chooseIcon="pi pi-file-arrow-up"
+                            accept=".pdf, .xlsx, .xls" maxFileSize="1000000" (onSelect)="onFileSelected(fileUpload)"
+                            [auto]="false" chooseLabel="Upload" [style]="{
+                                'background-color': '#4CAF50',
+                                color: 'white',
+                                border: 'none'
+                            }" />
+                    </div>
+                </p-toolbar>
+                <h5>Documents Utiles</h5>
+                <p-table [value]="documents" responsiveLayout="scroll" class="p-datatable-gridlines" [paginator]="true"
+                    [rows]="5" [rowsPerPageOptions]="[5, 10, 20, 30]">
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th>Type</th>
+                            <th>Nom Fichier</th>
+
+                            <th></th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-item>
+                        <tr>
+                        
+                            <td>
+                                <ng-container *ngIf="
+                                        item.fileType === 'application/pdf';
+                                        else excelIcon
+                                    ">
+                                    <img alt="PDF icon" src="/assets/img/pdf-icon.png" />
+                                </ng-container>
+                                <ng-template #excelIcon>
+                                    <img alt="EXCEL icon" src="/assets/img/excel-icon.png" />
+                                </ng-template>
+                            </td>
+                            <td>
+
+                                <b>{{ item.filename }}</b>
+                            </td>
+                            <td>
+                                <p-button [text]="true" icon="pi pi-times" severity="danger"
+                                    (onClick)="deleteSelectedFile(item)" />
+                                <p-button [text]="true" icon="pi pi-download" severity="danger"
+                                    (onClick)="downloadFile(item.filename, item.id)" />
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </div> -->
+        </div>
+    </div>
+</div>

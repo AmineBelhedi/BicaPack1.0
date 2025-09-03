@@ -21,16 +21,11 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 
 @NgModule({
-  declarations: [ImportDetailsComponent],
+  declarations: [],
   imports: [
     CommonModule,
     FormsModule,
-    RouterModule.forChild([
-      {
-        path: '',
-        component: ImportDetailsComponent
-      }
-    ]),
+   
     TableModule,
     ButtonModule,
     ToastModule, 

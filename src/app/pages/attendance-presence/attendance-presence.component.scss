@@ -1,0 +1,165 @@
+.attendance-header {
+    .header-title {
+      text-align: center;
+      margin: 0 0 1.25rem 0;
+      line-height: 1;
+    }
+  
+    /* rangée centrée et largeur max pour un rendu pro */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+  
+    /* cards identiques, alignées, même hauteur */
+    .kpi-card {
+      background: var(--surface-card);
+      border-radius: var(--border-radius);
+      box-shadow: var(--shadow-1);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    height: 100px; /* assure la même taille */
+      transition: transform .15s ease, box-shadow .15s ease;
+  
+      &:hover {
+        
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-3);
+      }
+  
+      .kpi-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .kpi-label {
+        font-size: 1.2rem;
+        color: var(--text-color-secondary);
+      }
+      .kpi-value {
+        font-size: 2rem;
+        font-weight: 600;
+        margin-top: .25rem;
+      }
+    }
+  }
+  
+  /* ProgressBars : arrondies + couleurs via ::ng-deep */
+  :host ::ng-deep .p-progressbar {
+    height: .95rem;
+    border-radius: 999px;
+  }
+  :host ::ng-deep .p-progressbar .p-progressbar-value {
+    border-radius: 999px;
+  }
+  
+  /* Vert pour Présents, Rouge pour Absents */
+  :host ::ng-deep .pb-presence .p-progressbar-value {
+    background: var(--green-500) !important;
+  }
+  :host ::ng-deep .pb-presence.p-progressbar {
+    background: rgba(16,185,129,.15) !important; /* léger fond */
+  }
+  
+  :host ::ng-deep .pb-absence .p-progressbar-value {
+    background: var(--red-500) !important;
+  }
+  :host ::ng-deep .pb-absence.p-progressbar {
+    background: rgba(239,68,68,.15) !important;
+  }
+  
+  /* Responsive: empiler en mobile */
+  @media (max-width: 768px) {
+    .attendance-header .kpi-row {
+      grid-template-columns: 1fr;
+      max-width: 520px;
+    }
+  }
+  
+
+
+  // 
+  .attendance-header {
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+}
+
+.kpi-card {
+  transition: transform 0.2s ease;
+}
+.kpi-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+
+/* Si tu mets ce bloc dans le SCSS du composant : */
+:host ::ng-deep .switch-present.p-inputswitch-checked .p-inputswitch-slider {
+  background-color: #22c55e !important;  /* vert quand PRESENT */
+  border-color: #22c55e !important;
+}
+
+:host ::ng-deep .switch-absent .p-inputswitch-slider {
+  background-color: #ef4444 !important;  /* rouge quand ABSENT */
+  border-color: #ef4444 !important;
+}
+
+/* (optionnel) garder le bouton rond blanc */
+:host ::ng-deep .switch-present .p-inputswitch-slider:before,
+:host ::ng-deep .switch-absent  .p-inputswitch-slider:before {
+  background-color: #fff !important;
+}
+
+/* (optionnel) léger feedback au hover si non désactivé */
+:host ::ng-deep .switch-present.p-inputswitch-checked:not(.p-disabled):hover .p-inputswitch-slider {
+  filter: brightness(1.05);
+}
+:host ::ng-deep .switch-absent:not(.p-disabled):hover .p-inputswitch-slider {
+  filter: brightness(0.95);
+}
+
+
+/* même look & hauteur que les autres KPI */
+.kpi-row { gap: 1rem; } /* si ta .kpi-row est en flex-wrap */
+.kpi-card { transition: box-shadow .15s ease; }
+.kpi-card:hover { box-shadow: 0 10px 24px rgba(0,0,0,.06); }
+
+/* progress collé en bas, cartes égales */
+.kpi-card { display:flex; flex-direction:column; }
+.kpi-progress { margin-top:auto; }
+.min-w-19rem { min-width: 19rem; } /* évite les cartes trop étroites en wrap */
+
+
+
+::ng-deep .p-calendar .p-datepicker-trigger {
+  background-color: #f2f2f2 !important;   // gris clair
+  border: none !important;
+        // coins arrondis
+ // box-shadow: 0 2px 4px rgba(0,0,0,0.15); // profondeur
+  color: #333333 !important;                 // couleur de l’icône
+  transition: all 0.2s ease;
+}
+
+::ng-deep .p-calendar .p-datepicker-trigger:hover {
+  background-color: #e0e0e0 !important;   // gris un peu plus foncé au hover
+  box-shadow: 0 3px 6px rgba(0,0,0,0.25); // ombre plus profonde
+}
+
+
+::ng-deep .p-inputnumber .p-inputnumber-button {
+  background-color: #f2f2f2 !important;   // gris clair
+  border: none !important;
+ // box-shadow: 0 2px 4px rgba(0,0,0,0.15); // effet profondeur
+  color: #555 !important;                 // icône gris foncé
+  transition: all 0.2s ease;
+}
+
+::ng-deep .p-inputnumber .p-inputnumber-button:hover {
+  background-color: #e0e0e0 !important;   // gris plus foncé au hover
+  box-shadow: 0 3px 6px rgba(0,0,0,0.25); // ombre plus marquée
+}
+

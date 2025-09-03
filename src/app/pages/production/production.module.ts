@@ -17,17 +17,12 @@ import { ProgressBarModule } from 'primeng/progressbar';
 import { DividerModule } from 'primeng/divider';
 import { TooltipModule } from 'primeng/tooltip';
 
-const routes: Routes = [
-  // ouvre avec /pages/commandes/:id/production
-  { path: '', component: ProductionComponent }
-];
 
 @NgModule({
-  declarations: [ProductionComponent],
+  declarations: [],
   imports: [
     CommonModule,
     FormsModule,
-    RouterModule.forChild(routes),
 
     /* PrimeNG */
     TableModule,

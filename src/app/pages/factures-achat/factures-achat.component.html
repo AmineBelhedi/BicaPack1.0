@@ -1,0 +1,1960 @@
+<ng-container *ngIf="loading">
+    <div class="spinner-overlay">
+      <p-progressSpinner
+        styleClass="w-6rem h-6rem"
+        strokeWidth="2"
+        fill="var(--surface-ground)"
+        animationDuration=".5s"
+      >
+      </p-progressSpinner>
+    </div>
+  </ng-container>
+  
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+
+  <div class="grid">
+    <div class="col-12">
+      <div class="card px-6 py-6">
+        <p-toolbar styleClass="mb-4">
+          <ng-template pTemplate="left">
+            <div class="my-2">
+              <p-button
+                label="Nouvelle Facture Achat"
+                icon="pi pi-plus"
+                severity="success"
+                class="mr-2"
+                (onClick)="openNewDialog()"
+              />
+            </div>
+          </ng-template>
+        </p-toolbar>
+  
+        <!-- <p-table #dtF [value]="factures"
+        [globalFilterFields]="['numeroFacture', 'fournisseur.nom', 'dateFacture', 'modePaiement']"
+        [paginator]="true"
+        [rowsPerPageOptions]="[10, 20, 30]"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Affichage de {first} à {last} sur {totalRecords} entrées"
+        [rows]="10"
+          [responsiveLayout]="'scroll'">
+          <ng-template pTemplate="caption">
+            <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+              <h5 class="m-0"><b>FACTURES ACHATS</b></h5>
+              <span class="block mt-2 md:mt-0 p-input-icon-left">
+                <i class="pi pi-search"></i>
+                <input
+                    pInputText
+                    type="text"
+                    (input)="onGlobalFilter(dtF, $event)"
+                    placeholder="Rechercher..."
+                    class="w-full sm:w-auto"
+                />
+            </span>
+            </div>
+          </ng-template>
+  
+       
+    <ng-template pTemplate="header">
+      <tr>
+          <th pSortableColumn="numeroFacture">
+              Numéro
+              <p-sortIcon field="numeroFacture"></p-sortIcon>
+          </th>
+          <th pSortableColumn="dateFacture">
+              Date
+              <p-sortIcon field="dateFacture"></p-sortIcon>
+          </th>
+          <th pSortableColumn="fournisseur.nom">
+              Fournisseur
+              <p-sortIcon field="fournisseur.nom"></p-sortIcon>
+          </th>
+          <th pSortableColumn="totalHT">
+              Total
+              <p-sortIcon field="totalHT"></p-sortIcon>
+          </th>
+          <th pSortableColumn="totalTTC">
+              Net à payer
+              <p-sortIcon field="totalTTC"></p-sortIcon>
+          </th>
+          <th pSortableColumn="modePaiement">
+              Paiement
+              <p-sortIcon field="modePaiement"></p-sortIcon>
+          </th>
+          <th>Actions</th>
+      </tr>
+  </ng-template>
+  
+          <ng-template pTemplate="body" let-facture>
+            <tr>
+              <td><b>{{ facture.numeroFacture  || '-' }} </b></td>
+              <td><b>{{ facture?.dateFacture | date: 'shortDate' }}</b></td>
+              <td>{{ facture?.fournisseur?.nom || '-' }}</td>
+              <td>
+                {{ facture.totalTTC | number:'1.2-2' }} {{ facture.devise }}
+              </td>
+              
+              <td>
+                {{ facture.netAPayer ?? facture.totalTTC | number:'1.2-2' }} {{ facture.devise }}
+              </td>
+              
+              <td><b>{{ facture?.modePaiement || '-'}} </b></td>
+              <td>
+                <div class="flex">
+                  <p-button severity="secondary" icon="pi pi-receipt" class="mr-2" [outlined]="true" [rounded]="true" pTooltip="Aperçu"
+                  tooltipPosition="top" (onClick)="openViewFacture(facture)" />
+                  <p-button
+                    icon="pi pi-pencil"
+                    class="mr-2"
+                    [rounded]="true"
+                    severity="info"
+                    (onClick)="editFacture(facture)"
+                  />
+                  <p-button
+                    icon="pi pi-trash"
+                    severity="danger"
+                    [rounded]="true"
+                    (onClick)="deleteFacture(facture)"
+                  />
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+  
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="100%">
+                <div
+                  class="flex flex-column align-items-center justify-content-center py-6 text-center gap-3"
+                >
+                  <i class="pi pi-folder-open text-4xl text-gray-400 animate-bounce"></i>
+                  <span class="text-xl text-color-secondary font-semibold">
+                    Aucune Facture d’achat enregistrée.
+                  </span>
+                  <small class="text-sm text-gray-500">
+                    Les données s'afficheront ici dès qu'elles seront disponibles.
+                  </small>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table> -->
+  
+        <!-- <p-table #dtF [value]="factures"
+        [globalFilterFields]="['numeroFacture', 'fournisseur.nom', 'dateFacture', 'modePaiement']" [paginator]="true"
+        [rowsPerPageOptions]="[10, 20, 30]" [showCurrentPageReport]="true"
+        currentPageReportTemplate="Affichage de {first} à {last} sur {totalRecords} entrées" [rows]="10"
+        [responsiveLayout]="'scroll'"> -->
+        <p-table
+  #dtF
+  [value]="factures"
+  [lazy]="true"
+  [paginator]="true"
+  [rows]="10"
+  [totalRecords]="totalRecords"
+  [loading]="loadingTable"
+  
+  [rowsPerPageOptions]="[10, 20, 30]"
+  [showCurrentPageReport]="true"
+  currentPageReportTemplate="Affichage de {first} à {last} sur {totalRecords} entrées"
+  (onLazyLoad)="loadFacturesLazy($event)"
+  [globalFilterFields]="['numeroFacture', 'fournisseur.nom', 'dateFacture', 'modePaiement']"
+  [responsiveLayout]="'scroll'">
+<ng-template pTemplate="caption">
+  <div class="flex flex-column gap-3">
+
+    <!-- Caption 1 : titre + recherche -->
+    <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-2">
+      <h5 class="m-0"><b>FACTURES ACHATS</b></h5>
+      <!-- <span class="p-input-icon-left">
+        <i class="pi pi-search"></i>
+        <input pInputText type="text" [(ngModel)]="search" (input)="onSearchChange()" 
+               placeholder="Rechercher..." class="w-full sm:w-auto" />
+      </span> -->
+    </div>
+
+    <!-- Caption 2 : filtres par date -->
+ <!-- Caption 2 : filtres par date + recherche -->
+<div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3">
+
+  <!-- Bloc gauche : filtres par date -->
+  <div class="flex flex-wrap align-items-center gap-2">
+    <p-calendar [(ngModel)]="startDate" dateFormat="yy-mm-dd" placeholder="Date début"
+                [iconDisplay]="'input'" inputId="icondisplay1" showIcon="true"></p-calendar>
+
+    <p-calendar [(ngModel)]="endDate" dateFormat="yy-mm-dd" placeholder="Date fin"
+                [iconDisplay]="'input'" inputId="icondisplay2" showIcon="true"></p-calendar>
+
+    <button pButton label="Filtrer" icon="pi pi-filter" severity="secondary"
+            (click)="applyDateFilter()" class="p-button-sm p-button-outlined"></button>
+
+    <button *ngIf="startDate || endDate"
+            pButton label="Clear" icon="pi pi-times"
+            (click)="clearDateFilter()" severity="danger"
+            class="p-button-sm p-button-outlined"></button>
+  </div>
+
+  <!-- Bloc droite : recherche -->
+  <div class="p-input-icon-left">
+    <i class="pi pi-search"></i>
+    <input pInputText type="text" [(ngModel)]="search"
+           (input)="onSearchChange()"
+           placeholder="Rechercher..." class="w-full sm:w-auto" />
+  </div>
+
+</div>
+
+
+    <!-- Caption 3 : Totaux -->
+ <div class="flex flex-wrap gap-3 mt-2">
+  <div class="px-3 py-2 bg-green-50 border border-green-200 rounded-lg shadow-sm text-center flex-1">
+    <div class="text-xs text-green-700 font-semibold">Total TND</div>
+    <div class="text-lg font-bold text-green-900">
+      {{ totaux['TND'] | number:'1.2-2' }} TND
+    </div>
+  </div>
+
+  <div class="px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg shadow-sm text-center flex-1">
+    <div class="text-xs text-blue-700 font-semibold">Total EUR</div>
+    <div class="text-lg font-bold text-blue-900">
+      {{ totaux['EUR'] | number:'1.2-2' }} EUR
+    </div>
+  </div>
+</div>
+
+
+  </div>
+</ng-template>
+
+
+
+
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="numeroFacture">
+              Numéro
+              <p-sortIcon field="numeroFacture"></p-sortIcon>
+            </th>
+            <th pSortableColumn="dateFacture">
+              Date
+              <p-sortIcon field="dateFacture"></p-sortIcon>
+            </th>
+            <th pSortableColumn="fournisseur.nom">
+              Fournisseur
+              <p-sortIcon field="fournisseur.nom"></p-sortIcon>
+            </th>
+        
+            <th pSortableColumn="datePaiement">
+              Date Paiement
+              <p-sortIcon field="datePaiement"></p-sortIcon>
+            </th>
+          
+            <th pSortableColumn="modePaiement">
+              Paiement
+              <p-sortIcon field="modePaiement"></p-sortIcon>
+            </th>
+                  <th pSortableColumn="totalTTC">
+              Net à payer
+              <p-sortIcon field="totalTTC"></p-sortIcon>
+            </th>
+            <th>Actions</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-facture>
+          <tr>
+            <td><b>{{ facture.numeroFacture || '-' }} </b></td>
+            <td><b>{{ facture?.dateFacture | date: 'shortDate' }}</b></td>
+            <td>{{ facture?.fournisseur?.nom || '-' }}</td>
+       
+        
+       <td><b>{{ facture?.datePaiement ? (facture.datePaiement | date:'shortDate') : '-' }}</b></td>
+
+      
+
+          
+
+            <td><b>{{ facture?.modePaiement || '-'}} </b></td>
+                   <td>
+              {{ facture.netAPayer ?? facture.totalTTC | number:'1.2-2' }} {{ facture.devise }}
+            </td>
+            <td>
+              <div class="flex">
+                <p-button severity="secondary" icon="pi pi-info" class="mr-2" [outlined]="true" [rounded]="true"
+                  pTooltip="Aperçu" tooltipPosition="top" (onClick)="openViewFacture(facture)" />
+                <p-button icon="pi pi-pencil" class="mr-2" [rounded]="true" severity="info"
+                  (onClick)="editFacture(facture)" />
+                <p-button icon="pi pi-trash" severity="danger" [rounded]="true" (onClick)="deleteFacture(facture)" />
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="footer">
+          <tr>
+            <td colspan="4" class="text-right font-bold">Total TND :</td>
+            <td class="text-left font-bold text-green-600">
+              {{ getTotalByDevise('TND') | number:'1.2-2' }} TND
+            </td>
+            <td colspan="3"></td>
+          </tr>
+
+          <tr>
+            <td colspan="4" class="text-right font-bold">Total EUR :</td>
+            <td class="text-left font-bold text-blue-600">
+              {{ getTotalByDevise('EUR') | number:'1.2-2' }} EUR
+            </td>
+            <td colspan="3"></td>
+          </tr>
+        </ng-template>
+      
+    
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="100%">
+              <div class="flex flex-column align-items-center justify-content-center py-6 text-center gap-3">
+                <i class="pi pi-folder-open text-4xl text-gray-400 animate-bounce"></i>
+                <span class="text-xl text-color-secondary font-semibold">
+                  Aucune Facture d’achat enregistrée.
+                </span>
+                <small class="text-sm text-gray-500">
+                  Les données s'afficheront ici dès qu'elles seront disponibles.
+                </small>
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+
+      </p-table>
+        <!-- ✅ Dialog Nouvelle Facture Achat -->
+        <p-dialog
+        header="NOUVELLE FACTURE ACHAT"
+        [maximizable]="true"
+        [(visible)]="dialogVisible"
+        [modal]="true"
+        [style]="{ width: '80vw' }"
+      >
+        <div class="grid">
+          <div class="col-12">
+            <div class="card mb-4">
+              <!-- Formulaire identique à FactureVente mais adapté -->
+              <div class="p-fluid grid formgrid">
+                <div class="field col-12 md:col-3">
+                  <label for="contact">Fournisseur</label>
+                  <!-- <p-autoComplete
+                    [dropdown]="true"
+                    [showClear]="true"
+                    [(ngModel)]="nouvelleFacture.fournisseur"
+                    [suggestions]="filteredFournisseur"
+                    styleClass="my-autocomplete"
+                    (completeMethod)="filterFournisseur($event)"
+                    optionLabel="nom"
+                  >
+                  </p-autoComplete> -->
+                  <p-autoComplete
+                  [dropdown]="true"
+                  [showClear]="true"
+                  [(ngModel)]="nouvelleFacture.fournisseur"
+                  [suggestions]="filteredFournisseur"
+                  (onSelect)="onFournisseurSelected($event)"
+                  styleClass="my-autocomplete"
+                  (completeMethod)="filterFournisseur($event)"
+                  optionLabel="nom"
+              >
+                  <ng-template let-item pTemplate="item">
+                      <div class="flex align-items-center gap-2">
+                          <div>{{ item?.nom }}</div>
+                      </div>
+                  </ng-template>
+
+                  <ng-template pTemplate="footer">
+                      <div class="flex align-items-center gap-2">
+                          <p-button
+                              label="Ajouter"
+                              size="small"
+                              severity="secondary"
+                              (onClick)="openNewFournisseur()"
+                              [text]="true"
+                              icon="pi pi-plus"
+                          ></p-button>
+                      </div>
+                  </ng-template>
+              </p-autoComplete>
+                </div>
+                <div class="field col-12 md:col-3" *ngIf="nouvelleFacture.fournisseur">
+                  <label for="famille">Famille Fournisseur</label>
+                  <p-autoComplete
+                    [(ngModel)]="nouvelleFacture.fournisseur.famille"
+                    [suggestions]="filteredFamilles"
+                    styleClass="my-autocomplete"
+                    (completeMethod)="filterFamilles($event)"
+                    [dropdown]="true"
+                    [forceSelection]="false"
+                    (ngModelChange)="convertFamilleMaj($event)"
+                    placeholder="Sélectionner ou saisir une famille"
+                    inputStyleClass="uppercase-input"
+                  ></p-autoComplete>
+                </div>
+                <div class="field col-12 md:col-3">
+                  <label for="numero">N° du document</label>
+                  <input pInputText id="numero" [(ngModel)]="nouvelleFacture.numeroFacture" />
+                </div>
+                <div class="field col-12 md:col-3">
+                  <label for="date">Date</label>
+                  <p-calendar
+                    [(ngModel)]="nouvelleFacture.dateFacture"
+                    dateFormat="dd/mm/yy"
+                    [iconDisplay]="'input'"   inputId="icondisplay" 
+                    showIcon="true"
+                  ></p-calendar>
+                </div>
+
+                   <div class="field col-12 md:col-3">
+                  <label for="date">Date Paiement</label>
+                  <p-calendar
+                    [(ngModel)]="nouvelleFacture.datePaiement"
+                    dateFormat="dd/mm/yy"
+                    [iconDisplay]="'input'"   inputId="icondisplay" 
+                    showIcon="true"
+                  ></p-calendar>
+                </div>
+                <!-- <div class="field col-12 md:col-3">
+                  <label for="echeance">Échéance</label>
+                  <p-calendar
+                    [(ngModel)]="nouvelleFacture.dateEcheance"
+                    dateFormat="dd/mm/yy"
+                    showIcon="true"
+                  ></p-calendar>
+                </div> -->
+                <div class="field col-12 md:col-3">
+                    <label for="modePaiement">Mode de Paiement</label>
+                    <p-dropdown
+                      id="modePaiement"
+                      [(ngModel)]="nouvelleFacture.modePaiement"
+                      [options]="modesPaiement"
+                      placeholder="Sélectionner"
+                    ></p-dropdown>
+                  </div>
+                  <div class="field col-6 md:col-3">
+                    <label for="devise">Devise</label>
+                    <p-dropdown 
+                      [(ngModel)]="nouvelleFacture.devise"
+                      [options]="[{label:'TND', value:'TND'},{label:'EUR', value:'EUR'}]"
+                      placeholder="Sélectionner devise">
+                    </p-dropdown>
+                  </div>
+                  
+                  <div class="field col-6 md:col-3" *ngIf="nouvelleFacture.devise === 'EUR'">
+                    <label for="cours">Cours EUR → TND</label>
+                    <input type="number" pInputText [(ngModel)]="nouvelleFacture.cours" />
+                  </div>
+              </div>
+      
+              <!-- 🔹 Mode Paiement + Catégorisation -->
+              <div class="p-fluid grid formgrid mt-3">
+               
+      
+                <!-- <div class="field col-12 md:col-6">
+                  <label for="categorisation">Catégorisation</label>
+                  <p-dropdown
+                    id="categorisation"
+                    [(ngModel)]="nouvelleFacture.categorisation"
+                    [options]="categorisations"
+                    placeholder="Sélectionner"
+                  ></p-dropdown>
+                </div> -->
+              </div>
+      
+              <!-- Table des lignes -->
+              <p-table [value]="nouvelleFacture.lignes" styleClass="p-datatable-sm mt-2">
+                <ng-template pTemplate="header">
+                  <tr>
+                    <th>Produit</th><th>Description</th><th>Qté</th>
+                    <th>Prix</th><th>TVA %</th><th>Réduction %</th>
+                    <!-- <th>Total</th> -->
+                    <th>Total</th><th>Actions</th>
+                  </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-ligne let-i="rowIndex">
+                  <tr>
+                    <td><input pInputText [(ngModel)]="ligne.produit" /></td>
+                    <td><input pInputText [(ngModel)]="ligne.description" /></td>
+                    <td><input type="number" pInputText [(ngModel)]="ligne.quantite" /></td>
+                    <td><input type="number" pInputText [(ngModel)]="ligne.prixUnitaire" /></td>
+                    <td><input pInputText type="number" [(ngModel)]="ligne.taxe" /></td>
+                    <td><input pInputText type="number" [(ngModel)]="ligne.reduction" /></td>
+                    <!-- <td><input type="number" pInputText [(ngModel)]="ligne.tot" /></td> -->
+                    <!-- <td>{{ (ligne.quantite * ligne.prixUnitaire  * (1 + ligne.taxe/100))* (1 - ligne.reduction/100) | number:'1.2-2' }}</td>
+                     -->
+                     <td>{{ getTotalLigne(ligne) | number:'1.2-2' }}</td>
+      
+                    <td class="text-center">
+                      <div class="flex justify-content-center gap-2">
+                        <button pButton icon="pi pi-trash"
+                                class="p-button-danger p-button-rounded p-button-outlined p-button-sm"
+                                (click)="removeLigne(i)" type="button"></button>
+                    
+                        <button pButton icon="pi pi-share-alt"
+                                class="p-button-help p-button-rounded p-button-outlined p-button-sm"
+                                (click)="openAffectationDialog(ligne)" type="button"></button>
+                      </div>
+                    </td>
+                    
+                  </tr>
+                </ng-template>
+              </p-table>
+      
+              <div class="flex flex-column mt-3 gap-3">
+                <p-button
+                  label="Ajouter une ligne"
+                  severity="secondary"
+                  [outlined]="true"
+                  (onClick)="addProduct()"
+                  icon="pi pi-plus"
+                ></p-button>
+              
+                <div class="text-right text-sm">
+                  <div>Total HT :
+                    <b>
+                      {{ totalHT | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                      <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
+                        ({{ (totalHT * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                      </span>
+                    </b>
+                  </div>
+              
+                  <div>TVA :
+                    <b>
+                      {{ totalTVA | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                      <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
+                        ({{ (totalTVA * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                      </span>
+                    </b>
+                  </div>
+              
+                  <div>Réduction :
+                    <b>
+                      {{ totalReduction | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                      <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
+                        ({{ (totalReduction * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                      </span>
+                    </b>
+                  </div>
+              
+                  <div>Total :
+                    <b>
+                      {{ totalTTC | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                      <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
+                        ({{ (totalTTC * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                      </span>
+                    </b>
+                  </div>
+              
+                  <!-- 🔹 Nouvelle ligne Retenue -->
+                  <div *ngIf="nouvelleFacture.compteRetenue?.taux">
+                    Retenue ({{ nouvelleFacture.compteRetenue.taux }}%) :
+                    <b>
+                      {{ totalRetenue | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                      <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
+                        ({{ (totalRetenue * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                      </span>
+                    </b>
+                  </div>
+              
+                  <!-- 🔹 Ligne Net à Payer -->
+                  <div class="mt-2 font-bold text-lg text-green-700">
+                    Net à Payer :
+                    <b>
+                      {{ netAPayer | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                      <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
+                        ({{ (netAPayer * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                      </span>
+                    </b>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="p-fluid grid formgrid mb-3">
+                <div class="col-12 grid">
+
+                  <!-- Bloc gauche : Catégorisation -->
+                  <div class="col-12 md:col-8">
+                    <h5 class="text-600 mb-3">Catégorisation</h5>
+                    <div class="p-fluid grid formgrid">
+                      
+                      <!-- Compte Crédit -->
+                      <div class="field col-12 md:col-6">
+                        <label for="compteCredit">Compte Crédit</label>
+                        <p-autoComplete
+                          [dropdown]="true"
+                          [showClear]="true"
+                          appendTo="body"
+                          [(ngModel)]="nouvelleFacture.compteCredit"
+                          styleClass="my-autocomplete"
+                          [suggestions]="filteredCompteCredit"
+                          (completeMethod)="filterComptesCredit($event)"
+                          optionLabel="numeroCompte"
+                        >
+                          <ng-template let-item pTemplate="item">
+                            <div>{{ item?.numeroCompte }}</div>
+                          </ng-template>
+                          <ng-template pTemplate="footer">
+                            <p-button label="Ajouter" size="small" severity="secondary"
+                                      (onClick)="openNewCompteCredit()" [text]="true" icon="pi pi-plus"></p-button>
+                          </ng-template>
+                        </p-autoComplete>
+                      </div>
+                
+                      <!-- Compte Débit -->
+                      <div class="field col-12 md:col-6">
+                        <label for="compteDebit">Compte Débit</label>
+                        <p-autoComplete
+                          [dropdown]="true"
+                          [showClear]="true"
+                          appendTo="body"
+                          [(ngModel)]="nouvelleFacture.compteDebit"
+                          [suggestions]="filteredCompteDebit"
+                          styleClass="my-autocomplete"
+                          (completeMethod)="filterComptesDebit($event)"
+                          optionLabel="numeroCompte"
+                        >
+                          <ng-template let-item pTemplate="item">
+                            <div>{{ item?.numeroCompte }}</div>
+                          </ng-template>
+                          <ng-template pTemplate="footer">
+                            <p-button label="Ajouter" size="small" severity="secondary"
+                                      (onClick)="openNewCompteDebit()" [text]="true" icon="pi pi-plus"></p-button>
+                          </ng-template>
+                        </p-autoComplete>
+                      </div>
+                
+                      <!-- Compte Retenue (retour à la ligne entière) -->
+                      <div class="field col-12 md:col-6">
+                        <label for="compteRetenue">Compte Retenue</label>
+                        <p-autoComplete
+                          [dropdown]="true"
+                          [showClear]="true"
+                          appendTo="body"
+                          [(ngModel)]="nouvelleFacture.compteRetenue"
+                          [suggestions]="filteredCompteRetenue"
+                          styleClass="my-autocomplete"
+                          (completeMethod)="filterComptesRetenue($event)"
+                          optionLabel="numeroCompte"
+                        >
+                          <ng-template let-item pTemplate="item">
+                            <div>{{ item?.nom + ' - '}}  {{ item?.numeroCompte}} — {{ item?.taux || 0 }}% </div>
+                          </ng-template>
+                          <ng-template pTemplate="footer">
+                            <p-button label="Ajouter" size="small" severity="secondary"
+                                      (onClick)="opennewCompteRetenue()" [text]="true" icon="pi pi-plus"></p-button>
+                          </ng-template>
+                        </p-autoComplete>
+                      </div>
+                      <div class="field col-12 md:col-3" *ngIf="nouvelleFacture?.compteRetenue">
+                        <label for="taux">Taux Retenue (%)</label>
+                        <p-inputNumber
+                          [(ngModel)]="nouvelleFacture.compteRetenue.taux"
+                          [min]="0" [max]="100"
+                          [step]="0.1"
+                          suffix=" %"
+                          mode="decimal"
+                          [showButtons]="true"
+                          decrementButtonClass="p-button-outlined p-button-secondary"
+                          incrementButtonClass="p-button-outlined p-button-secondary"
+                        
+                        ></p-inputNumber>
+                      </div>
+                
+                    </div>
+                  </div>
+                
+                  <!-- Bloc droit : Banque -->
+                  <div class="col-12 md:col-4">
+                    <h5 class="text-600 mb-3">Banque</h5>
+                    <div class="field col-12">
+                      <label for="banque">RIB (IBAN)</label>
+                      <p-autoComplete
+                        [dropdown]="true"
+                        [showClear]="true"
+                        appendTo="body"
+                        [(ngModel)]="nouvelleFacture.banque"
+                        [suggestions]="filteredBanque"
+                        styleClass="my-autocomplete"
+                        (completeMethod)="filterBanque($event)"
+                        optionLabel="numeroRib"
+                      >
+                        <ng-template let-item pTemplate="item">
+                          <div>{{ item?.numeroRib }}</div>
+                        </ng-template>
+                        <ng-template pTemplate="footer">
+                          <p-button label="Ajouter" size="small" severity="secondary"
+                                    (onClick)="openNewBanque()" [text]="true" icon="pi pi-plus"></p-button>
+                        </ng-template>
+                      </p-autoComplete>
+                    </div>
+                    <div class="field col-12" *ngIf="nouvelleFacture.banque">
+                      <label for="compteComptable">Compte Comptable</label>
+                      <p-autoComplete
+                        [dropdown]="true"
+                        [showClear]="true"
+                        appendTo="body"
+                        [(ngModel)]="nouvelleFacture.banque.compteComptable"
+                        [suggestions]="filteredComptesBanque"
+                        styleClass="my-autocomplete"
+                        (completeMethod)="filterComptesBanque($event)"
+                        optionLabel="numeroCompte"
+                      >
+                        <ng-template let-item pTemplate="item">
+                          <div>{{ item?.numeroCompte }}</div>
+                        </ng-template>
+                        <ng-template pTemplate="footer">
+                          <p-button label="Ajouter" size="small" severity="secondary"
+                                    (onClick)="openNewCompteBanque()" [text]="true" icon="pi pi-plus"></p-button>
+                        </ng-template>
+                      </p-autoComplete>
+                    </div>
+                  </div>
+                
+                </div>
+                
+              </div>
+              <!-- Upload multiple documents -->
+              <!-- <p-fileUpload
+              #factureAchatUploadCreate
+                name="files[]"
+                [multiple]="true"
+                accept=".pdf"
+                [maxFileSize]="20000000"
+                customUpload="true"
+                (uploadHandler)="uploadFactures($event)"
+              ></p-fileUpload> -->
+      
+              <div class="flex justify-content-end mt-3 gap-2">
+                <p-button label="Sauvegarder" severity="success" icon="pi pi-check" (onClick)="saveFacture()" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </p-dialog>
+ <p-dialog
+ [header]="'FACTURE N° ' + (nouvelleFacture?.numeroFacture || '')"
+  [maximizable]="true"
+  [(visible)]="dialogUpdate"
+  [modal]="true"
+  [style]="{ width: '95vw', height: '95vh' }"
+>
+  <div class="grid h-full">
+    
+    <!-- ===== Partie gauche : iFrame (40%) ===== -->
+    <div class="col-12 md:col-4 h-full">
+      <div class="h-full border-1 border-300 border-round overflow-hidden surface-card">
+        <ng-container *ngIf="nouvelleFacture.documents?.length > 0; else emptyIframe">
+          <iframe 
+            [src]="(nouvelleFacture.documents[0].fileUrl) | safeUrl"
+            width="100%" height="100%" frameborder="0"></iframe>
+        </ng-container>
+
+        <!-- Placeholder si aucun fichier -->
+        <ng-template #emptyIframe>
+          <div class="flex flex-column align-items-center justify-content-center h-full text-center">
+            <i class="pi pi-file-pdf text-6xl text-400 mb-3"></i>
+            <p class="text-600 text-lg">Aucun document à prévisualiser</p>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+
+    <!-- ===== Partie droite : Infos facture (60%) ===== -->
+    <div class="col-12 md:col-8 h-full">
+      <div class="card h-full flex flex-column">
+        <div class="flex-grow-1 overflow-y-auto pr-2">
+        <!-- Formulaire facture -->
+        <div class="p-fluid grid formgrid mb-3">
+          <div class="field col-12 md:col-3">
+            <label for="fournisseur">Fournisseur</label>
+            <p-autoComplete
+            [dropdown]="true"
+            [showClear]="true"
+            [(ngModel)]="nouvelleFacture.fournisseur"
+            [suggestions]="filteredFournisseur"
+            styleClass="my-autocomplete"
+            (onSelect)="onFournisseurSelected($event)"
+            (completeMethod)="filterFournisseur($event)"
+            optionLabel="nom"
+        >
+            <ng-template let-item pTemplate="item">
+                <div class="flex align-items-center gap-2">
+                    <div>{{ item?.nom }}</div>
+                </div>
+            </ng-template>
+
+            <ng-template pTemplate="footer">
+                <div class="flex align-items-center gap-2">
+                    <p-button
+                        label="Ajouter"
+                        size="small"
+                        severity="secondary"
+                        (onClick)="openNewFournisseur()"
+                        [text]="true"
+                        icon="pi pi-plus"
+                    ></p-button>
+                </div>
+            </ng-template>
+        </p-autoComplete>
+          </div>
+          <div class="field col-12 md:col-3" *ngIf="nouvelleFacture.fournisseur">
+            <label for="famille">Famille Fournisseur</label>
+            <p-autoComplete
+              [(ngModel)]="nouvelleFacture.fournisseur.famille"
+              [suggestions]="filteredFamilles"
+              (completeMethod)="filterFamilles($event)"
+              styleClass="my-autocomplete"
+              [dropdown]="true"
+              [forceSelection]="false"
+              (ngModelChange)="convertFamilleMaj($event)"
+              placeholder="Sélectionner ou saisir une famille"
+              inputStyleClass="uppercase-input"
+            ></p-autoComplete>
+          </div>
+          
+          <div class="field col-6 md:col-3">
+            <label for="numero">N° Document</label>
+            <input pInputText id="numero" [(ngModel)]="nouvelleFacture.numeroFacture" />
+          </div>
+          <div class="field col-6 md:col-3">
+            <label for="date">Date</label>
+            <p-calendar [(ngModel)]="nouvelleFacture.dateFacture"    [iconDisplay]="'input'"   inputId="icondisplay" 
+                        dateFormat="dd/mm/yy" showIcon="true"></p-calendar>
+          </div>
+          <div class="field col-12 md:col-3">
+                  <label for="date">Date Paiement</label>
+                  <p-calendar
+                    [(ngModel)]="nouvelleFacture.datePaiement"
+                    dateFormat="dd/mm/yy"
+                    [iconDisplay]="'input'"   inputId="icondisplay" 
+                    showIcon="true"
+                  ></p-calendar>
+                </div>
+          <div class="field col-12 md:col-3">
+            <label for="modePaiement">Mode Paiement</label>
+            <p-dropdown [(ngModel)]="nouvelleFacture.modePaiement"
+                        [options]="modesPaiement"
+                        placeholder="Sélectionner"></p-dropdown>
+          </div>
+          <div class="field col-6 md:col-3">
+            <label for="devise">Devise</label>
+            <p-dropdown 
+              [(ngModel)]="nouvelleFacture.devise"
+              [options]="[{label:'TND', value:'TND'},{label:'EUR', value:'EUR'}]"
+              placeholder="Sélectionner devise">
+            </p-dropdown>
+          </div>
+          
+          <div class="field col-6 md:col-3" *ngIf="nouvelleFacture.devise === 'EUR'">
+            <label for="cours">Cours EUR → TND</label>
+            <input type="number" pInputText [(ngModel)]="nouvelleFacture.cours" />
+          </div>
+          
+          
+        </div>
+
+        <!-- Table des lignes -->
+        <p-table [value]="nouvelleFacture.lignes" styleClass="p-datatable-sm mt-2">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Produit</th><th>Description</th><th>Qté</th>
+              <th>Prix</th><th>TVA %</th><th>Réduction %</th>
+              <!-- <th>Total</th> -->
+              <th>Total</th><th>Actions</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-ligne let-i="rowIndex">
+            <tr>
+              <td><input pInputText [(ngModel)]="ligne.produit" /></td>
+              <td><input pInputText [(ngModel)]="ligne.description" /></td>
+              <td><input type="number" pInputText [(ngModel)]="ligne.quantite" /></td>
+              <td><input type="number" pInputText [(ngModel)]="ligne.prixUnitaire" /></td>
+              <td><input pInputText type="number" [(ngModel)]="ligne.taxe" /></td>
+              <td><input pInputText type="number" [(ngModel)]="ligne.reduction" /></td>
+              <!-- <td><input type="number" pInputText [(ngModel)]="ligne.tot" /></td> -->
+              <!-- <td>{{ (ligne.quantite * ligne.prixUnitaire  * (1 + ligne.taxe/100))* (1 - ligne.reduction/100) | number:'1.2-2' }}</td>
+               -->
+               <td>{{ getTotalLigne(ligne) | number:'1.2-2' }}</td>
+
+              <td class="text-center">
+                <div class="flex justify-content-center gap-2">
+                  <button pButton icon="pi pi-trash"
+                          class="p-button-danger p-button-rounded p-button-outlined p-button-sm"
+                          (click)="removeLigne(i)" type="button"></button>
+              
+                  <button pButton icon="pi pi-share-alt"
+                          class="p-button-help p-button-rounded p-button-outlined p-button-sm"
+                          (click)="openAffectationDialog(ligne)" type="button"></button>
+                </div>
+              </td>
+              
+            </tr>
+          </ng-template>
+        </p-table>
+
+        <!-- Ajouter ligne + Totaux -->
+        <!-- <div class="flex justify-content-between align-items-center mt-3 mb-4">
+          <p-button label="Ajouter ligne" severity="secondary" [outlined]="true"
+                    (onClick)="addProduct()" icon="pi pi-plus"></p-button>
+          <div class="text-right text-sm">
+            <div>Total HT : <b>{{ totalHT | number:'1.2-2' }} €</b></div>
+            <div>TVA : <b>{{ totalTVA | number:'1.2-2' }} €</b></div>
+            <div>Total : <b>{{ totalTTC | number:'1.2-2' }} €</b></div>
+          </div>
+        </div> -->
+        <div class="flex flex-column mt-3 gap-3">
+          <p-button
+            label="Ajouter une ligne"
+            severity="secondary"
+            [outlined]="true"
+            (onClick)="addProduct()"
+            icon="pi pi-plus"
+          ></p-button>
+        
+          <div class="text-right text-sm">
+            <div>Total HT :
+              <b>
+                {{ totalHT | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
+                  ({{ (totalHT * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                </span>
+              </b>
+            </div>
+        
+            <div>TVA :
+              <b>
+                {{ totalTVA | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
+                  ({{ (totalTVA * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                </span>
+              </b>
+            </div>
+        
+            <div>Réduction :
+              <b>
+                {{ totalReduction | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
+                  ({{ (totalReduction * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                </span>
+              </b>
+            </div>
+        
+            <div>Total :
+              <b>
+                {{ totalTTC | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
+                  ({{ (totalTTC * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                </span>
+              </b>
+            </div>
+        
+            <!-- 🔹 Nouvelle ligne Retenue -->
+            <div *ngIf="nouvelleFacture.compteRetenue?.taux">
+              Retenue ({{ nouvelleFacture.compteRetenue.taux }}%) :
+              <b>
+                {{ totalRetenue | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
+                  ({{ (totalRetenue * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                </span>
+              </b>
+            </div>
+        
+            <!-- 🔹 Ligne Net à Payer -->
+            <div class="mt-2 font-bold text-lg text-green-700">
+              Net à Payer :
+              <b>
+                {{ netAPayer | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
+                  ({{ (netAPayer * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                </span>
+              </b>
+            </div>
+          </div>
+        </div>
+        
+        
+        <div class="p-fluid grid formgrid mb-3">
+
+          <!-- Section globale avec deux colonnes -->
+<div class="col-12 grid">
+
+  <!-- Bloc gauche : Catégorisation -->
+  <div class="col-12 md:col-8">
+    <h5 class="text-600 mb-3">Catégorisation</h5>
+    <div class="p-fluid grid formgrid">
+      
+      <!-- Compte Crédit -->
+      <div class="field col-12 md:col-6">
+        <label for="compteCredit">Compte Crédit</label>
+        <p-autoComplete
+          [dropdown]="true"
+          [showClear]="true"
+          appendTo="body"
+          [(ngModel)]="nouvelleFacture.compteCredit"
+          styleClass="my-autocomplete"
+          [suggestions]="filteredCompteCredit"
+          (completeMethod)="filterComptesCredit($event)"
+          optionLabel="numeroCompte"
+        >
+          <ng-template let-item pTemplate="item">
+            <div>{{ item?.numeroCompte }}</div>
+          </ng-template>
+          <ng-template pTemplate="footer">
+            <p-button label="Ajouter" size="small" severity="secondary"
+                      (onClick)="openNewCompteCredit()" [text]="true" icon="pi pi-plus"></p-button>
+          </ng-template>
+        </p-autoComplete>
+      </div>
+
+      <!-- Compte Débit -->
+      <div class="field col-12 md:col-6">
+        <label for="compteDebit">Compte Débit</label>
+        <p-autoComplete
+          [dropdown]="true"
+          [showClear]="true"
+          appendTo="body"
+          [(ngModel)]="nouvelleFacture.compteDebit"
+          [suggestions]="filteredCompteDebit"
+          styleClass="my-autocomplete"
+          (completeMethod)="filterComptesDebit($event)"
+          optionLabel="numeroCompte"
+        >
+          <ng-template let-item pTemplate="item">
+            <div>{{ item?.numeroCompte }}</div>
+          </ng-template>
+          <ng-template pTemplate="footer">
+            <p-button label="Ajouter" size="small" severity="secondary"
+                      (onClick)="openNewCompteDebit()" [text]="true" icon="pi pi-plus"></p-button>
+          </ng-template>
+        </p-autoComplete>
+      </div>
+
+      <!-- Compte Retenue (retour à la ligne entière) -->
+      <div class="field col-12 md:col-6">
+        <label for="compteRetenue">Compte Retenue</label>
+        <p-autoComplete
+          [dropdown]="true"
+          [showClear]="true"
+          appendTo="body"
+          [(ngModel)]="nouvelleFacture.compteRetenue"
+          [suggestions]="filteredCompteRetenue"
+          styleClass="my-autocomplete"
+          (completeMethod)="filterComptesRetenue($event)"
+          optionLabel="numeroCompte"
+        >
+          <ng-template let-item pTemplate="item">
+            <div>{{ item?.nom + ' - '}}  {{ item?.numeroCompte}} — {{ item?.taux || 0 }}% </div>
+          </ng-template>
+          <ng-template pTemplate="footer">
+            <p-button label="Ajouter" size="small" severity="secondary"
+                      (onClick)="opennewCompteRetenue()" [text]="true" icon="pi pi-plus"></p-button>
+          </ng-template>
+        </p-autoComplete>
+      </div>
+      <div class="field col-12 md:col-3" *ngIf="nouvelleFacture?.compteRetenue">
+        <label for="taux">Taux Retenue (%)</label>
+        <p-inputNumber
+          [(ngModel)]="nouvelleFacture.compteRetenue.taux"
+          [min]="0" [max]="100"
+          [step]="0.1"
+          suffix=" %"
+          mode="decimal"
+          [showButtons]="true"
+          decrementButtonClass="p-button-outlined p-button-secondary"
+          incrementButtonClass="p-button-outlined p-button-secondary"
+        
+        ></p-inputNumber>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bloc droit : Banque -->
+  <div class="col-12 md:col-4">
+    <h5 class="text-600 mb-3">Banque</h5>
+    <div class="field col-12">
+      <label for="banque">RIB (IBAN)</label>
+      <p-autoComplete
+        [dropdown]="true"
+        [showClear]="true"
+        appendTo="body"
+        [(ngModel)]="nouvelleFacture.banque"
+        [suggestions]="filteredBanque"
+        styleClass="my-autocomplete"
+        (completeMethod)="filterBanque($event)"
+        optionLabel="numeroRib"
+      >
+        <ng-template let-item pTemplate="item">
+          <div>{{ item?.numeroRib }}</div>
+        </ng-template>
+        <ng-template pTemplate="footer">
+          <p-button label="Ajouter" size="small" severity="secondary"
+                    (onClick)="openNewBanque()" [text]="true" icon="pi pi-plus"></p-button>
+        </ng-template>
+      </p-autoComplete>
+    </div>
+    <div class="field col-12" *ngIf="nouvelleFacture.banque">
+      <label for="compteComptable">Compte Comptable</label>
+      <p-autoComplete
+        [dropdown]="true"
+        [showClear]="true"
+        appendTo="body"
+        [(ngModel)]="nouvelleFacture.banque.compteComptable"
+        [suggestions]="filteredComptesBanque"
+        styleClass="my-autocomplete"
+        (completeMethod)="filterComptesBanque($event)"
+        optionLabel="numeroCompte"
+      >
+        <ng-template let-item pTemplate="item">
+          <div>{{ item?.numeroCompte }}</div>
+        </ng-template>
+        <ng-template pTemplate="footer">
+          <p-button label="Ajouter" size="small" severity="secondary"
+                    (onClick)="openNewCompteBanque()" [text]="true" icon="pi pi-plus"></p-button>
+        </ng-template>
+      </p-autoComplete>
+    </div>
+  </div>
+
+</div>
+
+        </div>
+        
+        <!-- Liste fichiers -->
+      
+        <!-- Actions -->
+     
+        
+        <p-panel header="Documents associés" [toggleable]="true" [collapsed]="true" class="mt-4 flex-grow-1 overflow-auto">
+          <ng-container *ngIf="nouvelleFacture.documents?.length > 0; else noDocs">
+            <ul class="list-none m-0 p-0">
+              <li *ngFor="let doc of nouvelleFacture.documents"
+                  class="flex items-center py-2 px-2 border-bottom-1 border-300">
+                <a [href]="doc.fileUrl" target="_blank" rel="noopener noreferrer"
+                   class="text-blue-600 hover:underline truncate max-w-[250px]">
+                  {{ doc.filename }}
+                </a>
+                <button pButton icon="pi pi-trash"
+                        class="p-button-rounded p-button-text p-button-danger ml-auto"
+                        (click)="confirmDeleteDocument(nouvelleFacture.id, doc.id)"
+                        type="button"></button>
+              </li>
+            </ul>
+          </ng-container>
+          <ng-template #noDocs>
+            <small class="text-500 italic">Aucun document uploadé</small>
+          </ng-template>
+        </p-panel>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <ng-template pTemplate="footer">
+    
+    <div class="flex justify-content-end mt-4 mb-4 gap-2">
+      <p-fileUpload #factureAchatUpload mode="basic" name="file"
+                    accept=".pdf" [auto]="true"
+                    (onSelect)="onFileSelect($event,factureAchatUpload )"
+                    chooseLabel="Téléverser PDF"
+                    chooseIcon="pi pi-file-arrow-up"
+                    [style]="{'background-color':'#D3D3D3','color':'black','border':'none'}">
+      </p-fileUpload>
+    
+      <p-button label="Mettre à jour"
+                severity="success"
+                icon="pi pi-check"
+                [disabled]="!isFormValid()"
+                (onClick)="updateFacture()"></p-button>
+    </div>
+    
+</ng-template>
+</p-dialog>
+
+    
+     
+      </div>
+    </div>
+  </div>
+  <p-dialog header="Confirmer la suppression" [(visible)]="dialogDelete" [modal]="true" [style]="{width: '30vw'}">
+    <div class="flex align-items-center justify-content-center">
+      <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+      <span *ngIf="factureToDelete">Êtes-vous sûr de vouloir supprimer <b>{{factureToDelete.numeroFacture}}</b>
+        ?</span>
+    </div>
+    <ng-template pTemplate="footer">
+      <button  
+          pButton
+          pRipple
+          icon="pi pi-times" 
+          class="p-button-text"
+          label="Non"
+        (click)="dialogDelete = false">
+      </button>
+      <button  
+        pButton
+        pRipple
+        icon="pi pi-check" 
+        class="p-button-text" 
+        label="Oui"
+        (click)="confirmDelete(factureToDelete!)">
+      </button>
+
+    </ng-template>
+
+  </p-dialog>
+
+
+
+  <p-dialog header="Affecter Ligne" [(visible)]="dialogAffectation" [modal]="true" [style]="{width: '70vw'}">
+    <div class="grid">
+      <!-- Colonne gauche : Affectations existantes -->
+      <div class="col-6">
+        <p-card header="Affectations existantes" styleClass="h-full">
+          <ng-container *ngIf="ligneEnCours?.affectations?.length > 0; else noAff">
+  
+            <div *ngFor="let aff of ligneEnCours.affectations; let i = index"
+              class="formgrid grid align-items-center mb-3">
+              <!-- Commande -->
+              <div class="col-7">
+                <label class="block mb-1">Commande</label>
+                <p-dropdown [options]="commandes" [(ngModel)]="aff.commandeId" optionLabel="numeroCommande"
+                  optionValue="id" placeholder="Sélectionner une commande">
+                </p-dropdown>
+              </div>
+  
+              <!-- Pourcentage -->
+              <div class="col-5">
+                <label class="block mb-1">%</label>
+                <!-- <input type="number" pInputText [(ngModel)]="aff.pourcentage" class="w-full" /> -->
+                <input type="number" pInputText [(ngModel)]="aff.pourcentage" 
+                class="w-full" [min]="1" [max]="100" />
+              </div>
+            </div>
+  
+          </ng-container>
+          <ng-template #noAff>
+            <small class="text-gray-500">Aucune affectation existante</small>
+          </ng-template>
+        </p-card>
+      </div>
+  
+      <!-- Colonne droite : Nouvelles affectations -->
+      <div class="col-6">
+        <p-card header="Nouvelles affectations" styleClass="h-full">
+  
+          <div *ngFor="let aff of affectations; let i = index" class="formgrid grid align-items-center mb-3">
+            <div class="col-7">
+              <label class="block mb-1">Commande</label>
+              <p-dropdown [options]="commandes" [(ngModel)]="aff.commandeId" optionLabel="numeroCommande" optionValue="id"
+                placeholder="Sélectionner une commande">
+              </p-dropdown>
+            </div>
+  
+            <div class="col-3">
+              <label class="block mb-1">%</label>
+              <!-- <input type="number" pInputText [(ngModel)]="aff.pourcentage" class="w-full" /> -->
+              <input type="number" pInputText [(ngModel)]="aff.pourcentage" 
+                class="w-full" [min]="1" [max]="100" />
+  
+            </div>
+  
+            <div class="col-2 flex justify-content-center align-items-end">
+              <button pButton icon="pi pi-trash" class="p-button-danger p-button-text" (click)="removeAffectation(i)">
+              </button>
+            </div>
+          </div>
+  
+          <div class="mt-3">
+            <button pButton label="Ajouter une affectation" icon="pi pi-plus" class="p-button-outlined w-full"
+              (click)="addAffectation()">
+            </button>
+          </div>
+        </p-card>
+      </div>
+    </div>
+  
+    <!-- Footer -->
+    <p-footer>
+      <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="dialogAffectation=false">
+      </button>
+      <button pButton label="Enregistrer" icon="pi pi-check" class="p-button-success" (click)="saveAffectations()">
+      </button>
+    </p-footer>
+  </p-dialog>
+
+  <!-- <p-dialog 
+  header="Affecter Ligne" 
+  [(visible)]="dialogAffectation" 
+  [modal]="true" 
+  [style]="{width: '70vw'}">
+
+  <div class="p-fluid p-grid">
+
+    <div class="p-col-6">
+      <h5 class="mb-2">Affectations existantes</h5>
+      <div *ngIf="ligneEnCours?.affectations?.length > 0">
+        <div *ngFor="let aff of ligneEnCours.affectations; let i = index" class="p-formgrid p-grid mb-2">
+          <div class="p-field p-col-7">
+            <label>Commande</label>
+            <p-dropdown 
+              [options]="commandes" 
+              [(ngModel)]="aff.commandeId" 
+              optionLabel="numeroCommande" 
+              optionValue="id" 
+              placeholder="Sélectionner une commande">
+            </p-dropdown>
+          </div>
+          <div class="p-field p-col-3">
+            <label>%</label>
+            <input type="number" pInputText [(ngModel)]="aff.pourcentage" />
+          </div>
+        
+        </div>
+      </div>
+      <ng-container *ngIf="!(ligneEnCours?.affectations?.length > 0)">
+        <small class="text-gray-500">Aucune affectation existante</small>
+      </ng-container>
+    </div>
+    <div class="p-col-6">
+      <h5 class="mb-2">Nouvelles affectations</h5>
+      <div *ngFor="let aff of affectations; let i = index" class="p-formgrid p-grid mb-2">
+        <div class="p-field p-col-7">
+          <label>Commande</label>
+          <p-dropdown 
+            [options]="commandes" 
+            [(ngModel)]="aff.commandeId" 
+            optionLabel="numeroCommande" 
+            optionValue="id" 
+            placeholder="Sélectionner une commande">
+          </p-dropdown>
+        </div>
+        <div class="p-field p-col-3">
+          <label>%</label>
+          <input type="number" pInputText [(ngModel)]="aff.pourcentage" />
+        </div>
+        <div class="p-field p-col-2 flex align-items-end">
+          <button 
+            pButton 
+            icon="pi pi-trash" 
+            class="p-button-danger p-button-text" 
+            (click)="removeAffectation(i)">
+          </button>
+        </div>
+      </div>
+
+      <button 
+        pButton 
+        label="Ajouter une affectation" 
+        icon="pi pi-plus" 
+        class="p-button-outlined mt-2" 
+        (click)="addAffectation()">
+      </button>
+    </div>
+
+  </div>
+
+  <p-footer>
+    <button 
+      pButton 
+      label="Annuler" 
+      icon="pi pi-times" 
+      class="p-button-text" 
+      (click)="dialogAffectation=false">
+    </button>
+    <button 
+      pButton 
+      label="Enregistrer" 
+      icon="pi pi-check" 
+      class="p-button-success" 
+      (click)="saveAffectations()">
+    </button>
+  </p-footer>
+</p-dialog> -->
+
+  
+
+
+
+<p-dialog
+    [(visible)]="fournisseurDialogCreate"
+    [style]="{ width: '300px', height: '30%' }"
+    [maximizable]="true"
+    header="Nouveau Fournisseur"
+    (onHide)="hideDialogFournisseur()"
+    [modal]="true"
+    class="p-fluid"
+>
+    <ng-template pTemplate="content">
+        <div class="field">
+            <label for="name">Nom</label>
+            <input
+                type="text"
+                pInputText
+                id="name"
+                [(ngModel)]="fournisseur.nom"
+                required
+                autofocus
+            />
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <button
+            pButton
+            pRipple
+            label="Annuler"
+            icon="pi pi-times"
+            class="p-button-text"
+            (click)="hideDialogFournisseur()"
+        ></button>
+        <button
+            pButton
+            pRipple
+            label="Enregistrer"
+            icon="pi pi-check"
+            class="p-button-text"
+            (click)="saveFournisseur()"
+        ></button>
+    </ng-template>
+</p-dialog>
+
+<p-dialog
+    [(visible)]="compteCreditDialog"
+    [style]="{ width: '300px', height: '30%' }"
+    [maximizable]="true"
+    header="Compte Crédit"
+    (onHide)="hideDialogCompteCredit()"
+    [modal]="true"
+    class="p-fluid"
+>
+    <ng-template pTemplate="content">
+        <div class="field">
+            <label for="name">Numéro Compte</label>
+            <input
+                type="text"
+                pInputText
+                id="name"
+                [(ngModel)]="compteCredit.numeroCompte"
+                required
+                autofocus
+            />
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <button
+            pButton
+            pRipple
+            label="Annuler"
+            icon="pi pi-times"
+            class="p-button-text"
+            (click)="hideDialogCompteCredit()"
+        ></button>
+        <button
+            pButton
+            pRipple
+            label="Enregistrer"
+            icon="pi pi-check"
+            class="p-button-text"
+            (click)="saveCompteCredit()"
+        ></button>
+    </ng-template>
+</p-dialog>
+
+
+<p-dialog
+    [(visible)]="compteDebitDialog"
+    [style]="{ width: '300px', height: '30%' }"
+    [maximizable]="true"
+    header="Compte Débit"
+    (onHide)="hideDialogCompteDebit()"
+    [modal]="true"
+    class="p-fluid"
+>
+    <ng-template pTemplate="content">
+        <div class="field">
+            <label for="name">Numéro Compte</label>
+            <input
+                type="text"
+                pInputText
+                id="name"
+                [(ngModel)]="compteDebit.numeroCompte"
+                required
+                autofocus
+            />
+        </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <button
+            pButton
+            pRipple
+            label="Annuler"
+            icon="pi pi-times"
+            class="p-button-text"
+            (click)="hideDialogCompteDebit()"
+        ></button>
+        <button
+            pButton
+            pRipple
+            label="Enregistrer"
+            icon="pi pi-check"
+            class="p-button-text"
+            (click)="saveCompteDebit()"
+        ></button>
+    </ng-template>
+</p-dialog>
+<p-dialog
+    [(visible)]="compteRetenueDialog"
+    [style]="{ width: '300px', height: '50%' }"
+    [maximizable]="true"
+    header="Compte Retenu"
+    (onHide)="hideCompteRetenueDialog()"
+    [modal]="true"
+    class="p-fluid"
+>
+    <ng-template pTemplate="content">
+        <div class="field">
+            <label for="name">Numéro Compte</label>
+            <input
+                type="text"
+                pInputText
+                id="name"
+                [(ngModel)]="compteRetenue.numeroCompte"
+                required
+                autofocus
+            />
+        </div>
+        <div class="field">
+          <label for="name">Intitulé</label>
+          <input
+              type="text"
+              pInputText
+              id="name"
+              [(ngModel)]="compteRetenue.intitule"
+              required
+              
+          />
+      </div>
+      <div class="field">
+        <label for="name">Taux (%)</label>
+        <input
+            type="text"
+            pInputText
+            id="name"
+            [(ngModel)]="compteRetenue.taux"
+            required
+            
+        />
+    </div>
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <button
+            pButton
+            pRipple
+            label="Annuler"
+            icon="pi pi-times"
+            class="p-button-text"
+            (click)="hideCompteRetenueDialog()"
+        ></button>
+        <button
+            pButton
+            pRipple
+            label="Enregistrer"
+            icon="pi pi-check"
+            class="p-button-text"
+            (click)="saveCompteRetenue()"
+        ></button>
+    </ng-template>
+</p-dialog>
+<p-dialog
+    [(visible)]="compteBanqueDialog"
+    [style]="{ width: '300px', height: '50%' }"
+    [maximizable]="true"
+    header="Compte Comptable"
+    (onHide)="hideCompteBanqueDialog()"
+    [modal]="true"
+    class="p-fluid"
+>
+    <ng-template pTemplate="content">
+        <div class="field">
+            <label for="name">Numéro Compte</label>
+            <input
+                type="text"
+                pInputText
+                id="name"
+                [(ngModel)]="compteComptableBanque.numeroCompte"
+                required
+                autofocus
+            />
+        </div>
+        <!-- <div class="field">
+          <label for="name">Intitulé</label>
+          <input
+              type="text"
+              pInputText
+              id="name"
+              [(ngModel)]="compteComptableBanque.intitule"
+              required
+              
+          />
+      </div>
+      <div class="field">
+        <label for="name">Taux (%)</label>
+        <input
+            type="text"
+            pInputText
+            id="name"
+            [(ngModel)]="compteRetenue.taux"
+            required
+            
+        />
+    </div> -->
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <button
+            pButton
+            pRipple
+            label="Annuler"
+            icon="pi pi-times"
+            class="p-button-text"
+            (click)="hideCompteBanqueDialog()"
+        ></button>
+        <button
+            pButton
+            pRipple
+            label="Enregistrer"
+            icon="pi pi-check"
+            class="p-button-text"
+            (click)="saveCompteBanque()"
+        ></button>
+    </ng-template>
+</p-dialog>
+
+<p-dialog
+    [(visible)]="banqueDialog"
+    [style]="{ width: '300px', height: '40%' }"
+    [maximizable]="true"
+    header="BANQUE"
+    (onHide)="hdieDialogBanque()"
+    [modal]="true"
+    class="p-fluid"
+>
+    <ng-template pTemplate="content">
+      <div class="field">
+        <label for="name">Banque</label>
+        <input
+            type="text"
+            pInputText
+            id="name"
+            [(ngModel)]="banque.nom"
+        />
+    </div>
+        <div class="field">
+            <label for="name">Numéro RIB</label>
+            <input
+                type="text"
+                pInputText
+                id="name"
+                [(ngModel)]="banque.numeroRib"
+                required
+                autofocus
+            />
+        </div>
+        
+    </ng-template>
+
+    <ng-template pTemplate="footer">
+        <button
+            pButton
+            pRipple
+            label="Annuler"
+            icon="pi pi-times"
+            class="p-button-text"
+            (click)="hdieDialogBanque()"
+        ></button>
+        <button 
+            pButton
+            pRipple
+            label="Enregistrer"
+            icon="pi pi-check"
+            class="p-button-text"
+            (click)="ajouterBanque()"
+        ></button>
+    </ng-template>
+</p-dialog>
+
+
+
+<p-dialog [header]="'FACTURE N° ' + (selectedFacture?.numeroFacture || '')" [dismissableMask]="true" [resizable]="true"
+  [(visible)]="dialogView" [modal]="true" [style]="{ width: '90%', height: '100%' }" [maximizable]="true"
+  [contentStyle]="{ padding: '0', }">
+
+  <div class="grid m-0">
+    <div class="col-12 lg:col-6 p-3" style="max-height: 200vh; overflow-y: auto;">
+      <p-card styleClass="h-full surface-card border-round shadow-1 p-4 flex flex-column gap-4 ">
+
+
+        <div class="flex justify-content-between align-items-start">
+          <div>
+            <div class="text-xl md:text-2xl font-semibold text-900">FACTURE</div>
+          </div>
+
+          <div class="text-right w-18rem font-semibold mt-3">
+            <div class="flex justify-content-between text-600 text-m"><span>Date :</span><span class="text-800">{{
+                selectedFacture?.dateFacture | date:'dd/MM/yyyy' }}</span></div>
+            <div class="flex justify-content-between text-600 text-m mt-1"><span>N° Document :</span><span
+                class="text-800">{{ selectedFacture?.numeroFacture || '-' }}</span></div>
+            <div class="flex justify-content-between text-600 text-m mt-1"><span>Mode paiement :</span><span
+                class="text-800">{{ selectedFacture?.modePaiement || '-' }}</span></div>
+                       <div class="flex justify-content-between text-600 text-m"><span>Date Paiement :</span><span class="text-800">{{
+                selectedFacture?.datePaiement | date:'dd/MM/yyyy' }}</span></div>
+            <div class="flex justify-content-between text-600 text-m mt-1"><span>Devise :</span><span
+                class="text-800">{{ selectedFacture?.devise || '-' }}</span></div>
+            <div class="flex justify-content-between text-600 text-m mt-1"><span>Fournisseur :</span><span
+                class="text-800">{{ selectedFacture?.fournisseur?.nom || '-' }}</span></div>
+            <div class="flex justify-content-between text-600 text-m mt-1"><span>Échéance :</span><span
+                class="text-800">{{ selectedFacture?.dateEcheance | date:'dd/MM/yyyy' }}</span></div>
+          </div>
+        </div>
+
+        <p-divider class="p-3"></p-divider>
+
+        <!-- <div class="grid">
+          <div class="col-12 md:col-6 font-semibold">
+            <div class="text-600 text-lg mb-1 text-left">Fournisseur</div>
+            <div class="text-900 text-left">{{ selectedFacture?.fournisseur?.nom || '-' }}</div>
+          </div>
+          <div class="col-12 md:col-6 font-semibold text-right">
+            <div class="text-600 text-lg mb-1 text-right">Échéance</div>
+            <div class="text-900">{{ selectedFacture?.dateEcheance | date:'dd/MM/yyyy' }}</div>
+          </div>
+        </div> -->
+
+        <p-table [value]="selectedFacture?.lignes" responsiveLayout="scroll"
+          styleClass="p-datatable-sm p-datatable-gridlines mb-4">
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Produit</th>
+              <th>Description</th>
+              <th class="text-center">Qté</th>
+              <th class="text-right">Prix</th>
+              <th class="text-center">TVA %</th>
+              <th class="text-center">Réduction %</th>
+              <th class="text-right">Total</th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="body" let-l>
+            <tr>
+              <td class="text-900">{{ l?.produit || '-' }}</td>
+              <td class="text-700">{{ l?.description || '-' }}</td>
+              <td class="text-center">{{ l?.quantite || 0 }}</td>
+              <td class="text-right">{{ l?.prixUnitaire | number:'1.2-2' }} {{ selectedFacture?.devise }}</td>
+              <td class="text-center">{{ l?.taxe || 0 }}</td>
+              <td class="text-center">{{ l?.reduction || 0 }}</td>
+              <td class="text-right">{{ getTotalLigne(l) | number:'1.2-2' }} {{ selectedFacture?.devise }}</td>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="7">
+                <div class="flex align-items-center justify-content-center py-4 text-600">
+                  Aucune ligne.
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
+
+
+        <div class="grid mt-5 px-3">
+
+          <div class="col-6 p-1 text-600 font-semibold">Total HT</div>
+          <div class="col-6 p-1  text-right text-900 font-medium">
+            {{ selectedTotalHT | number:'1.2-2' }} {{ selectedFacture?.devise }}
+          </div>
+
+          <div class="col-6 p-1 text-600 font-semibold">TVA</div>
+          <div class="col-6 p-1 text-right text-900 font-medium">
+            {{ selectedTotalTVA | number:'1.2-2' }} {{ selectedFacture?.devise }}
+          </div>
+
+          <div class="col-6 p-1 text-600 font-semibold">Réduction</div>
+          <div class="col-6 p-1 text-right text-900 font-medium">
+            -{{ selectedTotalReduction | number:'1.2-2' }} {{ selectedFacture?.devise }}
+          </div>
+
+          <div class="col-6 p-1 text-900 font-semibold text-lg">Total </div>
+          <div class="col-6 p-1 text-right text-900 font-semibold text-lg">
+            {{ selectedTotalTTC | number:'1.2-2' }} {{ selectedFacture?.devise }}
+          </div>
+
+          <ng-container *ngIf="selectedTotalRetenue > 0">
+            <div class="col-6 text-600 font-semibold">
+              Retenue ({{ selectedFacture?.compteRetenue?.taux }}%)
+            </div>
+            <div class="col-6 text-right text-900 font-medium">
+              -{{ selectedTotalRetenue | number:'1.2-2' }} {{ selectedFacture?.devise }}
+            </div>
+          </ng-container>
+
+          <div class="col-6 p-2 text-900 font-bold text-lg text-green-500">Net à Payer</div>
+          <div class="col-6 p-2 text-right text-900 font-bold text-lg text-green-500">
+            {{ selectedNetAPayer | number:'1.2-2' }} {{ selectedFacture?.devise }}
+          </div>
+
+          <div class="col-12" *ngIf="selectedFacture?.devise === 'EUR' && selectedFacture?.cours">
+            <div class="flex justify-content-between text-600 text-sm">
+              <span>Conversion (EUR → TND {{ selectedFacture.cours }})</span>
+              <span class="text-700 font-medium">
+                {{ (selectedNetAPayer * selectedFacture.cours) | number:'1.2-2' }} TND
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <p-divider class="p-3"></p-divider>
+
+        <div class="mt-0">
+          <div class="text-900 font-medium text-lg mb-3">Comptes</div>
+
+          <div class="accounts flex flex-wrap gap-3 align-items-stretch">
+            <!-- Crédit -->
+            <div class="account-tile">
+              <div class="account-head">
+                <div class="head-left"><i class="pi pi-credit-card text-blue-600"></i><span>Compte Crédit</span></div>
+                <p-chip label="Crédit" icon="pi pi-plus-circle" styleClass="text-xs px-2 py-0"></p-chip>
+              </div>
+              <div class="account-value value-mono">
+                {{ selectedFacture?.compteCredit?.numeroCompte || '—' }}
+              </div>
+
+              <div class="text-600 text-sm mt-1" *ngIf="selectedFacture?.compteCredit?.intitule">
+                {{ selectedFacture?.compteCredit?.intitule }}
+              </div>
+            </div>
+
+            <!-- Débit -->
+            <div class="account-tile">
+              <div class="account-head">
+                <div class="head-left"><i class="pi pi-wallet text-green-600"></i><span>Compte Débit</span></div>
+                <p-chip label="Débit" icon="pi pi-minus-circle" styleClass="text-xs px-2 py-0"></p-chip>
+              </div>
+              <div class="account-value value-mono">
+                {{ selectedFacture?.compteDebit?.numeroCompte || '—' }}
+              </div>
+
+              <div class="text-600 text-sm mt-1" *ngIf="selectedFacture?.compteCredit?.intitule">
+                {{ selectedFacture?.compteDebit?.intitule }}
+              </div>
+            </div>
+
+            <!-- Compte Retenu -->
+            <div class="account-tile">
+              <div class="account-head">
+                <div class="head-left"><i class="pi pi-shield text-indigo-600"></i><span>Compte Retenu</span></div>
+                <ng-container *ngIf="selectedFacture?.compteRetenue?.taux">
+                  <p-chip [label]="'Taux ' + selectedFacture?.compteRetenue?.taux + '%'" icon="pi pi-percentage"
+                    styleClass="text-xs px-2 py-0"></p-chip>
+                </ng-container>
+              </div>
+              <div class="account-value value-mono">
+                {{ selectedFacture?.compteRetenue?.numeroCompte || '—' }}
+              </div>
+              <div class="text-600 text-sm mt-1" *ngIf="selectedFacture?.compteRetenue?.intitule">
+                {{ selectedFacture?.compteRetenue?.intitule }}
+              </div>
+            </div>
+
+            <!-- Tuile Banque : apparence du 1er code, contenu du 2e -->
+            <div class="account-tile">
+              <div class="account-head">
+                <div class="head-left">
+                  <!-- Avatar/logo ou initiales -->
+                  <p-avatar *ngIf="selectedFacture?.banque?.logoUrl; else bankInitials"
+                    [image]="selectedFacture?.banque?.logoUrl" shape="circle" size="large"></p-avatar>
+                  <ng-template #bankInitials>
+                    <p-avatar [label]="getBankInitials(selectedFacture?.banque?.nom)" shape="circle"
+                      size="large"></p-avatar>
+                  </ng-template>
+
+                  <i class="pi pi-building-columns text-primary"></i>
+                  <span>{{ selectedFacture?.banque?.nom || 'Banque' }}</span>
+                </div>
+                <p-chip label="Banque" icon="pi pi-bank" styleClass="text-xs px-2 py-0"></p-chip>
+              </div>
+
+              <div class="text-xs text-600 text-center mb-1">
+                {{ selectedFacture?.banque?.agence || '' }}
+              </div>
+
+              <div>
+                <div class="text-600 text-xs mb-1">RIB</div>
+                <div class="account-value value-mono flex align-items-center gap-2">
+                  <i class="pi pi-hashtag text-600"></i>
+                  <span style="word-break: break-all;">
+                    {{ selectedFacture?.banque?.numeroRib || '—' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </p-card>
+    </div>
+
+    <div class="col-12 lg:col-6 p-3">
+      <div class="surface-card border-round p-3 md:p-4 shadow-1 flex flex-column"
+        style="position: sticky; top: 12px; height: calc(92vh - 84px); overflow: hidden;">
+
+        <ng-container *ngIf="selectedFacture?.documents?.length; else noPdf">
+
+          <!-- HEADER AU-DESSUS DU PDF -->
+          <div class="flex justify-content-between align-items-center mb-2 flex-none w-full">
+            <span class="text-700 text-sm overflow-hidden white-space-nowrap text-overflow-ellipsis">
+              {{ selectedFacture.documents[0]?.filename }}
+            </span>
+            <a [href]="selectedFacture.documents[0]?.fileUrl" target="_blank" rel="noopener noreferrer" pButton
+              type="button" class="p-button-text p-button-sm" label="Ouvrir" icon="pi pi-external-link">
+            </a>
+          </div>
+
+          <!-- ZONE PDF -->
+          <div class="border-1 surface-border border-round overflow-auto flex-1" style="min-height: 0;">
+            <iframe [src]="selectedFacture.documents[0]?.fileUrl | safeUrl"
+              style="width: 100%; height: 100%; border: none; display: block;">
+            </iframe>
+          </div>
+
+          <!-- AUTRES DOCS -->
+          <div class="mt-2 flex-none" *ngIf="selectedFacture.documents.length > 1">
+            <div class="text-600 text-xs mb-1">Autres documents</div>
+            <div class="flex flex-wrap gap-2">
+              <a *ngFor="let d of selectedFacture.documents.slice(1)" [href]="d.fileUrl" target="_blank"
+                rel="noopener noreferrer" pButton type="button" class="p-button-text p-button-sm" [label]="d.filename"
+                icon="pi pi-paperclip"></a>
+            </div>
+          </div>
+        </ng-container>
+
+        <ng-template #noPdf>
+          <div class="flex flex-column align-items-center justify-content-center h-full text-600">
+            <i class="pi pi-file-pdf text-2xl mb-2"></i>
+            <span>Aucun fichier PDF disponible.</span>
+          </div>
+        </ng-template>
+      </div>
+    </div>
+
+  </div>
+</p-dialog>

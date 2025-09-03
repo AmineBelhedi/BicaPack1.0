@@ -10,7 +10,7 @@ export const environment = {
     measurementId: "G-H93SV5WSYR"
   },
  
-  //apiUrl: 'https://bicapack.bicadev.com/api/'
+//  apiUrl: 'https://bicapack.bicadev.com/api/'
   // apiUrl: 'https://api.bicadev.com/api/'
     apiUrl: 'https://localhost:8444/api/'
   // apiUrl : 'http://44.199.105.225:8080/SIPCONFECTION-API-0.0.1/api/'

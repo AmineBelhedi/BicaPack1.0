@@ -1,117 +1,43 @@
-import { RouterModule, Routes } from '@angular/router';
-import { NgModule } from '@angular/core';
-import { AppLayoutComponent } from './layout/app.layout.component';
-import { NotfoundComponent } from './pages/notfound/notfound.component';
-import { authGuard } from './guard/auth.guard';
-import { StockComponent } from './pages/stock/stock.component';
-
-const routes: Routes = [
-  {
-    path: '',
-    component: AppLayoutComponent,
-    canActivate: [authGuard],
-    children: [
-      {
-        path: '',
-        loadChildren: () =>
-          import('./pages/commandes/commandes.module').then(m => m.CommandesModule),
-        canActivate: [authGuard],
-        data: { roles: ['OWNER'] }
-      },
-      {
-        path: 'pages/import',
-        loadChildren: () =>
-          import('./pages/import/import.module').then(m => m.ImportModule),
-        canActivate: [authGuard],
-        data: { roles: ['OWNER'] }
-      },
-      {
-        path: 'pages/empty',
-        loadChildren: () =>
-          import('./pages/empty/emptydemo-routing.module').then(m => m.EmptyDemoRoutingModule),
-        canActivate: [authGuard],
-        data: { roles: ['OWNER'] }
-      },
-      {
-        path: 'pages/import-details/:id',
-        loadChildren: () =>
-          import('./pages/import-details/import-details.module').then(m => m.ImportDetailsModule),
-        canActivate: [authGuard],
-        data: { roles: ['OWNER'] }
-      },
-      {
-        path: 'model',
-        loadChildren: () =>
-          import('./pages/model/model.module').then(m => m.ModelModule),
-        canActivate: [authGuard],
-        data: { roles: ['OWNER'] }
-      },
-
-      // ✅ Détail commande
-      {
-        path: 'pages/detail-commande',
-        loadChildren: () =>
-          import('./pages/detail-commande/detail-commande.module')
-            .then(m => m.DetailCommandeModule),
-        canActivate: [authGuard],
-        data: { roles: ['OWNER'] }
-      },
-      {
-        path: 'pages/users',
-        loadChildren: () =>
-          import('./pages/list-users/list-users.module')
-            .then(m => m.ListUsersModule),
-        canActivate: [authGuard],
-        data: { roles: ['OWNER'] }
-      },
-
-      // Liste commandes (si tu l’utilises toujours)
-      {
-        path: 'pages/commandes',
-        loadChildren: () =>
-          import('./pages/commandes/commandes.module').then(m => m.CommandesModule),
-        canActivate: [authGuard],
-        data: { roles: ['OWNER'] }
-      },
-        {
-    path: 'production',
-    loadChildren: () =>
-      import('./pages/production/production.module').then(m => m.ProductionModule)
-  },
-        {
-    path: 'stock',
-    loadChildren: () =>
-      import('./pages/stock/stock.module').then(m => m.StockModule)
-  },
-    ]
-  },
-
-  { path: 'auth', loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule) },
-
-  {
-    path: 'home',
-    loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent),
-    canActivate: [authGuard],
-    data: { roles: ['OWNER'] }
-  },
-   {
-    path: '',
-    loadComponent: () => import('./pages/home/home.component').then(m => m.HomeComponent),
-    canActivate: [authGuard],
-    data: { roles: ['OWNER'] }
-  },
-
-  { path: '**', component: NotfoundComponent }
-];
-
-@NgModule({
-  imports: [
-    RouterModule.forRoot(routes, {
-      scrollPositionRestoration: 'enabled',
-      anchorScrolling: 'enabled',
-      onSameUrlNavigation: 'reload'
+    import { RouterModule } from '@angular/router';
+    import { NgModule } from '@angular/core';
+    import { AppLayoutComponent } from "./layout/app.layout.component";
+    import { authGuard } from './guard/auth.guard';
+    import { ErrorComponent } from './auth/error/error.component';
+    @NgModule({
+        imports: [
+            RouterModule.forRoot([
+                // Redirection de la racine vers /home
+                { path: '', redirectTo: 'home', pathMatch: 'full' },
+    
+                {
+                    path: '', component: AppLayoutComponent, canActivate:[authGuard],
+                    children: [
+                    
+                        { 
+                            path: 'pages', 
+                            loadChildren: () => import('./pages/pages.module').then(m => m.PagesModule) 
+                        },
+                    ]
+                },
+    
+                {
+                    path: 'home',
+                    loadChildren: () => import('./pages/home/home.module').then(m => m.HomeBicapackModule),
+                    canActivate: [authGuard],
+                    data: { roles: ['OWNER', 'PERSONNEL', 'ADMIN', 'COUPE','ST', 'DELAVAGE','DELAVAGE_RH','GRH_BJ','MAG TISSU','COLLECTION','LMD','RMD',"PRODUCTION",'SUPERADMIN',"COMPTABILITE",'BJ_ADMIN'] }
+                },
+    
+                { path: 'auth', loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule) },
+                // { path: 'landing', loadChildren: () => import('./demo/components/landing/landing.module').then(m => m.LandingModule) },
+                { path: 'notfound', component: ErrorComponent },
+                { path: '**', redirectTo: '/notfound' },
+            ], {
+                scrollPositionRestoration: 'enabled',
+                anchorScrolling: 'enabled',
+                onSameUrlNavigation: 'reload'
+            })
+        ],
+        exports: [RouterModule]
     })
-  ],
-  exports: [RouterModule]
-})
-export class AppRoutingModule {}
+    export class AppRoutingModule { }
+    

@@ -1,0 +1,468 @@
+<ng-container *ngIf="loading">
+    <div class="spinner-overlay">
+        <p-progressSpinner
+            styleClass="w-6rem h-6rem"
+            strokeWidth="2"
+            fill="var(--surface-ground)"
+            animationDuration=".5s"
+        ></p-progressSpinner>
+    </div>
+</ng-container>
+
+<div class="grid">
+    <div class="col-12">
+        <!-- Version Desktop -->
+        <div class="card px-6 py-6" *ngIf="isDesktop">
+            <p-toast></p-toast>
+            <p-toolbar styleClass="mb-4">
+                <ng-template pTemplate="left">
+                    <div class="my-2">
+                        <button
+                            pButton
+                            pRipple
+                            label="Nouveau"
+                            icon="pi pi-plus"
+                            class="p-button-success mr-2"
+                            (click)="openNew()"
+                        ></button>
+                        <button
+                            pButton
+                            pRipple
+                            label="Supprimer"
+                            icon="pi pi-trash"
+                            class="p-button-danger"
+                            (click)="deleteSelectedSousTraitants()"
+                            [disabled]="!selectedSousTraitants || !selectedSousTraitants.length"
+                        ></button>
+                    </div>
+                </ng-template>
+            </p-toolbar>
+
+            <p-table
+                #dt
+                [value]="sousTraitants"
+                [columns]="cols"
+                responsiveLayout="scroll"
+                [rows]="10"
+                [globalFilterFields]="['name', 'matFiscale', 'id']"
+                [paginator]="true"
+                [rowsPerPageOptions]="[10, 20, 30]"
+                [showCurrentPageReport]="true"
+                currentPageReportTemplate="Affichage {first} à {last} de {totalRecords} entrées"
+                [(selection)]="selectedSousTraitants"
+                selectionMode="multiple"
+                [rowHover]="true"
+                dataKey="id"
+            >
+                <ng-template pTemplate="caption">
+                    <div class="flex flex-column md:flex-row md:justify-content-between md:align-items-center">
+                        <h5 class="m-0">Façonnier</h5>
+                        <span class="block mt-2 md:mt-0 p-input-icon-left">
+                            <i class="pi pi-search"></i>
+                            <input
+                                pInputText
+                                type="text"
+                                (input)="onGlobalFilter(dt, $event)"
+                                placeholder="Rechercher..."
+                                class="w-full sm:w-auto"
+                            />
+                        </span>
+                    </div>
+                </ng-template>
+                <ng-template pTemplate="header">
+                    <tr>
+                        
+                        <th style="width: 3rem">
+                            <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                        </th>
+                        <th></th>
+                        <th pSortableColumn="id">
+                            Code Usine <p-sortIcon field="id"></p-sortIcon>
+                        </th>
+                        <th pSortableColumn="name">
+                            Nom <p-sortIcon field="name"></p-sortIcon>
+                        </th>
+                        <th pSortableColumn="name">
+                            Responsable <p-sortIcon field="name"></p-sortIcon>
+                        </th>
+                        
+                        <th pSortableColumn="matFiscale">
+                            Matricule Fiscale <p-sortIcon field="matFiscale"></p-sortIcon>
+                        </th>
+                        <!-- <th pSortableColumn="dateCreation">
+                            Date de Création <p-sortIcon field="dateCreation"></p-sortIcon>
+                        </th> -->
+                        <!-- <th pSortableColumn="createdBy">
+                            Créé Par <p-sortIcon field="createdBy"></p-sortIcon>
+                        </th> -->
+                        <th pSortableColumn="contact">
+                            Contact <p-sortIcon field="contact"></p-sortIcon>
+                        </th>
+                        <th></th>
+                    </tr>
+                </ng-template>
+                <ng-template pTemplate="body" let-sousTraitant>
+                    <tr>
+                        <td>
+                            <p-tableCheckbox [value]="sousTraitant"></p-tableCheckbox>
+                        </td>
+                        <td>
+                            <span
+                                class="status-indicator"
+                                [ngStyle]="{
+                                    'background-color': hasEmptyFields(sousTraitant) ? 'red' : 'transparent'
+                                }"
+                                title="This model has empty fields"
+                            ></span>
+                        </td>
+                        <td>
+                            <span class="p-column-title">ID</span>
+                            {{ (sousTraitant?.codeUsine) || "N/A" }}
+                        </td>
+                        <td>
+                            <span class="p-column-title">Nom</span>
+                            {{ sousTraitant?.name | uppercase }}
+                        </td>
+                        <td>
+                            <span class="p-column-title">Nom</span>
+                            {{ (sousTraitant?.responsable | uppercase) || "N/A" }}
+                        </td>
+                        <td>
+                            <span class="p-column-title">Matricule Fiscale</span>
+                            {{ sousTraitant?.matFiscale || "N/A" }}
+                        </td>
+                        <!-- <td>
+                            <span class="p-column-title">Date de Création</span>
+                            {{ sousTraitant.dateCreation | date : "dd/MM/yyyy"  }}
+                        </td>
+                        <td>
+                            <span class="p-column-title">Créé Par</span>
+                            {{ sousTraitant.createdBy }}
+                        </td> -->
+                        <td>
+                            <span class="p-column-title">Contact</span>
+                            {{ sousTraitant?.contact || "N/A" }}
+                        </td>
+                        <td>
+                            <div class="flex">
+                                <p-button
+                                    icon="pi pi-pencil"
+                                    (onClick)="editSousTraitant(sousTraitant)"
+                                    severity="info"
+                                    class="mr-2"
+                                ></p-button>
+                                <p-button
+                                    pRipple
+                                    icon="pi pi-trash"
+                                    severity="danger"
+                                    (onClick)="deleteSousTraitant(sousTraitant)"
+                                ></p-button>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
+        </div>
+
+        <!-- Version Mobile -->
+        <div class="card" *ngIf="!isDesktop">
+            <h5 class="m-0">Gestion des sous-traitants</h5>
+
+            <p-toolbar>
+                <div class="p-toolbar-group-start">
+                    <button
+                        pButton
+                        pRipple
+                        [rounded]="true"
+                        icon="pi pi-plus"
+                        class="p-button-success"
+                        (click)="openNew()"
+                    ></button>
+                </div>
+            </p-toolbar>
+
+            <p-dataView [value]="sousTraitants" layout="list">
+                <ng-template pTemplate="list" let-sousTraitant let-first="first">
+                    <div class="grid grid-nogutter">
+                        <div class="col-12" *ngFor="let sousTraitant of sousTraitants; let first = first">
+                            <div
+                                class="flex flex-column sm:flex-row sm:align-items-center p-4 gap-3"
+                                [ngClass]="{ 'border-top-1 surface-border': !first }"
+                            >
+                                <div
+                                    class="flex flex-column md:flex-row justify-content-between md:align-items-center flex-1 gap-4"
+                                >
+                                    <div class="flex flex-column md:flex-row justify-content-between align-items-start gap-2">
+                                        <div>
+                                            <span class="font-medium text-secondary text-sm">
+                                                ID SOUS-TRAITANT: {{ sousTraitant.id }}
+                                            </span>
+                                            <div class="text-lg font-medium text-900 mt-2">
+                                                Nom: {{ sousTraitant.name | uppercase }}
+                                            </div>
+                                            <div class="text-md font-medium text-900 mt-2">
+                                                Matricule Fiscale: {{ sousTraitant.matFiscale }}
+                                            </div>
+                                            <div class="text-md font-medium text-900 mt-2">
+                                                Contact: {{ sousTraitant.contact }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-column md:align-items-end gap-5">
+                                        <div class="flex flex-row-reverse md:flex-row gap-2">
+                                            <p-button
+                                                icon="pi pi-pencil"
+                                                label="Modifier"
+                                                (click)="editSousTraitant(sousTraitant)"
+                                                [rounded]="true"
+                                                severity="info"
+                                            ></p-button>
+                                            <p-button
+                                                pRipple
+                                                icon="pi pi-trash"
+                                                severity="danger"
+                                                [rounded]="true"
+                                                (click)="deleteSousTraitant(sousTraitant)"
+                                            ></p-button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </ng-template>
+            </p-dataView>
+        </div>
+
+        <!-- Dialogue pour Ajouter/Modifier un sous-traitant -->
+        <p-dialog
+            [(visible)]="sousTraitantDialog"
+            [maximizable]="true"
+            [style]="{ width: '550px', height: '100%' }"
+            header="Sous-traitant"
+            [modal]="true"
+            class="p-fluid"
+        >
+            <ng-template pTemplate="content">
+                <div class="grid">
+                    <div class="col-12">
+                        <div class="field">
+                            <label for="name">Nom</label>
+                            <input
+                                type="text"
+                                pInputText
+                                id="name"
+                                [(ngModel)]="sousTraitant.name"
+                                required
+                                autofocus
+                                [ngClass]="{ 'ng-invalid ng-dirty': submitted && !sousTraitant.name }"
+                            />
+                            <small
+                                class="ng-dirty ng-invalid"
+                                *ngIf="submitted && !sousTraitant.name"
+                                >Le nom est requis.</small
+                            >
+                        </div>
+                        <div class="field">
+                            <label for="codeUsine">Code Usine</label>
+                            <input
+                                type="text"
+                                pInputText
+                                id="codeUsine"
+                                [(ngModel)]="sousTraitant.codeUsine"
+                                required
+                                autofocus
+                                [ngClass]="{ 'ng-invalid ng-dirty': submitted && !sousTraitant.codeUsine }"
+                            />
+                            <small
+                                class="ng-dirty ng-invalid"
+                                *ngIf="submitted && !sousTraitant.codeUsine"
+                                >Le codeUsine est requis.</small
+                            >
+                        </div>
+
+                        <div class="field">
+                            <label for="responsable">Responsable</label>
+                            <input
+                                type="text"
+                                pInputText
+                                id="responsable"
+                                [(ngModel)]="sousTraitant.responsable"
+                                required
+                                autofocus
+                                [ngClass]="{ 'ng-invalid ng-dirty': submitted && !sousTraitant.responsable }"
+                            />
+                            <small
+                                class="ng-dirty ng-invalid"
+                                *ngIf="submitted && !sousTraitant.responsable"
+                                >Le responsable est requis.</small
+                            >
+                        </div>
+                        <div class="field">
+                            <label for="matFiscale">Matricule Fiscale</label>
+                            <input
+                                type="text"
+                                pInputText
+                                id="matFiscale"
+                                [(ngModel)]="sousTraitant.matFiscale"
+                                required
+                                [ngClass]="{ 'ng-invalid ng-dirty': submitted && !sousTraitant.matFiscale }"
+                            />
+                            <small
+                                class="ng-dirty ng-invalid"
+                                *ngIf="submitted && !sousTraitant.matFiscale"
+                                >Le matricule fiscale est requis.</small
+                            >
+                        </div>
+                        <!-- <div class="field">
+                            <label for="dateCreation">Date de Création</label>
+                            <p-calendar
+                                [iconDisplay]="'input'"
+                                [showIcon]="true"
+                                [autoZIndex]="true"
+                                [(ngModel)]="sousTraitant.dateCreation"
+                                inputId="dateCreation"
+                                dateFormat="dd/mm/yy"
+                            ></p-calendar>
+                            <small
+                                class="ng-dirty ng-invalid"
+                                *ngIf="submitted && !sousTraitant.dateCreation"
+                                >La date de création est requise.</small
+                            >
+                        </div> -->
+                        <!-- <div class="field">
+                            <label for="createdBy">Créé Par</label>
+                            <input
+                                type="text"
+                                pInputText
+                                id="createdBy"
+                                [(ngModel)]="sousTraitant.createdBy"
+                                required
+                                [ngClass]="{ 'ng-invalid ng-dirty': submitted && !sousTraitant.createdBy }"
+                            />
+                            <small
+                                class="ng-dirty ng-invalid"
+                                *ngIf="submitted && !sousTraitant.createdBy"
+                                >Le champ 'Créé par' est requis.</small
+                            >
+                        </div> -->
+                        <div class="field">
+                            <label for="contact">Contact</label>
+                            <input
+                                type="text"
+                                pInputText
+                                id="contact"
+                                [(ngModel)]="sousTraitant.contact"
+                                required
+                                [ngClass]="{ 'ng-invalid ng-dirty': submitted && !sousTraitant.contact }"
+                            />
+                            <small
+                                class="ng-dirty ng-invalid"
+                                *ngIf="submitted && !sousTraitant.contact"
+                                >Le contact est requis.</small
+                            >
+                        </div>
+                        <div class="field">
+                            <label for="address">Adresse</label>
+                            <textarea
+                                rows="3"
+                                cols="30"
+                                [(ngModel)]="sousTraitant.address"
+                                pInputTextarea
+                                [autoResize]="true"
+                            ></textarea>
+                            <small
+                                class="ng-dirty ng-invalid"
+                                *ngIf="submitted && !sousTraitant.address"
+                                >L'adresse est requise.</small
+                            >
+                        </div>
+                    </div>
+                </div>
+            </ng-template>
+
+            <ng-template pTemplate="footer">
+                <button
+                    pButton
+                    pRipple
+                    label="Annuler"
+                    icon="pi pi-times"
+                    class="p-button-text"
+                    (click)="hideDialog()"
+                ></button>
+                <button
+                    pButton
+                    pRipple
+                    label="Enregistrer"
+                    icon="pi pi-check"
+                    class="p-button-text"
+                    (click)="saveSousTraitant()"
+                ></button>
+            </ng-template>
+        </p-dialog>
+
+        <!-- Dialogue de confirmation de suppression d'un sous-traitant -->
+        <p-dialog
+            [(visible)]="deleteSousTraitantDialog"
+            header="Confirmation"
+            [modal]="true"
+            [style]="{ width: '450px' }"
+        >
+            <div class="flex align-items-center justify-content-center">
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+                <span *ngIf="sousTraitant">
+                    Êtes-vous sûr de vouloir supprimer le sous-traitant <b>{{ sousTraitant.name }}</b> ?
+                </span>
+            </div>
+            <ng-template pTemplate="footer">
+                <button
+                    pButton
+                    pRipple
+                    icon="pi pi-times"
+                    class="p-button-text"
+                    label="Non"
+                    (click)="deleteSousTraitantDialog = false"
+                ></button>
+                <button
+                    pButton
+                    pRipple
+                    icon="pi pi-check"
+                    class="p-button-text"
+                    label="Oui"
+                    (click)="confirmDelete()"
+                ></button>
+            </ng-template>
+        </p-dialog>
+
+        <!-- Dialogue de confirmation de suppression de plusieurs sous-traitants -->
+        <p-dialog
+            [(visible)]="deleteSousTraitantsDialog"
+            header="Confirmation"
+            [modal]="true"
+            [style]="{ width: '450px' }"
+        >
+            <div class="flex align-items-center justify-content-center">
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+                <span>Êtes-vous sûr de vouloir supprimer les sous-traitants sélectionnés ?</span>
+            </div>
+            <ng-template pTemplate="footer">
+                <button
+                    pButton
+                    pRipple
+                    icon="pi pi-times"
+                    class="p-button-text"
+                    label="Non"
+                    (click)="deleteSousTraitantsDialog = false"
+                ></button>
+                <button
+                    pButton
+                    pRipple
+                    icon="pi pi-check"
+                    class="p-button-text"
+                    label="Oui"
+                    (click)="confirmDeleteSelected()"
+                ></button>
+            </ng-template>
+        </p-dialog>
+    </div>
+</div>

@@ -24,7 +24,12 @@ export class AppMenuComponent implements OnInit {
                 label: 'Production',
                 items: [
                     // { label: 'Models', icon: 'pi pi-box', routerLink: ['/model'], badge: 'NEW' },
-                    { label: 'Commandes', icon: 'pi pi-shopping-bag', routerLink: ['/pages/commandes'] }
+                    { label: 'Commandes', icon: 'pi pi-shopping-bag', routerLink: ['/pages/commandes'] }, 
+                       {
+                        label: 'Fournisseurs',
+                        icon: 'pi pi-sitemap',
+                        routerLink: ['/pages/fournisseurs']
+                    },
 
                 ]
             },
@@ -37,6 +42,58 @@ export class AppMenuComponent implements OnInit {
                         routerLink: ['/pages/import']
                     },
                 ]
+            },
+            //    {
+            //     label: 'Fournisseurs',
+            //     items: [
+            //         {
+            //             label: 'Imports',
+            //             icon: 'pi pi-cloud-download',
+            //             routerLink: ['/pages/import']
+            //         },
+            //     ]
+            // },
+              {
+                label: 'Comptabilité',
+                items: [
+                          {
+                                label: 'Achats',
+                                icon: 'pi pi-receipt',
+                                routerLink: ['/pages/factures-achat'],
+                            },
+                            {
+                                label: 'Ventes',
+                                icon: 'pi pi-receipt',
+                                routerLink: ['/pages/factures-vente'],
+                            },
+                            //  {
+                            //     label: 'Comptes',
+                            //     icon: 'pi pi-fw pi-receipt',
+                            //     routerLink: ['/pages/comptes-comptable'],
+                            // },
+                ],
+                
+            },
+                {
+                label: 'GRH',
+                items: [
+                          {
+                                label: 'Employées',
+                                icon: 'pi pi-users',
+                                routerLink: ['/pages/employees'],
+                            },
+                            {
+                                label: 'Fiche Présence',
+                                icon: 'pi  pi-address-book',
+                                routerLink: ['/pages/attendance-presence/1'],
+                            },
+                            //  {
+                            //     label: 'Comptes',
+                            //     icon: 'pi pi-fw pi-receipt',
+                            //     routerLink: ['/pages/comptes-comptable'],
+                            // },
+                ],
+                
             },
             // {
             //     label: 'Pages',

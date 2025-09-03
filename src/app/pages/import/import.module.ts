@@ -40,6 +40,6 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
         DialogModule,
         CalendarModule
     ],
-    declarations: [ImportComponent]
+    declarations: []
 })
 export class ImportModule { }

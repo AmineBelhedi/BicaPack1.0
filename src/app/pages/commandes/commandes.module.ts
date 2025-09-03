@@ -61,7 +61,7 @@ import { CardModule } from 'primeng/card';
     RouterModule,
     CardModule
   ],
-  declarations: [CommandeComponent],
+  declarations: [],
   providers: [MessageService, ConfirmationService]
 })
 export class CommandesModule {}

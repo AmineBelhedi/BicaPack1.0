@@ -1,0 +1,14 @@
+.status-indicator {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+
+::ng-deep .my-autocomplete .ui-autocomplete-dropdown,
+::ng-deep .my-autocomplete .p-autocomplete-dropdown {
+  background-color: #c4c8cb;
+  color: #000;
+  border: none;
+}

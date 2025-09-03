@@ -1,0 +1,56 @@
+
+
+::ng-deep .p-speeddial {
+    position: relative !important; /* empêche de sortir du tableau */
+    display: inline-flex;          /* reste à côté comme un bouton */
+  }
+  ::ng-deep .my-autocomplete .ui-autocomplete-dropdown,
+::ng-deep .my-autocomplete .p-autocomplete-dropdown {
+  background-color: #c4c8cb;
+  color: #000;
+  border: none;
+}
+
+.accounts { width: 100%; }
+
+/* Tuile flex verticale, même hauteur, responsive */
+.account-tile{
+  flex: 1 1 280px;            /* grandit, rétrécit, base ~280px */
+  min-width: 240px;           /* évite de devenir trop étroit */
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  background: var(--surface-card);
+  padding: 12px 14px;
+  box-sizing: border-box;
+}
+
+/* En-tête */
+.account-head{
+  display: flex; align-items: center; gap: .5rem;
+  font-weight: 600; color: var(--text-color-secondary);
+}
+.account-head i{ font-size: 1.2rem; }
+
+/* Valeur principale */
+.account-value{
+  font-size: 1.05rem; font-weight: 600; color: var(--text-color);
+  background: var(--surface-200);
+  border-radius: 8px;
+  padding: 8px 10px;
+  word-break: break-word;
+}
+
+/* Ligne “Taux” */
+.account-meta{
+  display: flex; align-items: center; gap: .5rem;
+  margin-top: .25rem;
+}
+.muted{ color: var(--text-color-secondary); font-size: .85rem; }
+
+
+ 

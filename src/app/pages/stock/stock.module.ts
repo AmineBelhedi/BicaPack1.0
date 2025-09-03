@@ -23,7 +23,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { ToolbarModule } from 'primeng/toolbar';             // <-- AJOUT
 
 @NgModule({
-  declarations: [StockComponent],
+  declarations: [],
   imports: [
     CommonModule,
     FormsModule,

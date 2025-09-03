@@ -305,9 +305,9 @@
                         'is-green': (getProdTotal(c) / c.quantite) >= 0.5 && (getProdTotal(c) / c.quantite) < 1,
                         'is-complete': (getProdTotal(c) / c.quantite) >= 1}"></div>
                   </div>
-                  <div class="today" *ngIf="getProdToday(c) > 0">
-                    <i class="pi pi-bolt"></i> {{ getProdToday(c) | number:'1.0-0':'fr-FR' }} aujourd’hui <!-- CHANGED -->
-                  </div>
+                  <!-- <div class="today" *ngIf="getProdToday(c) > 0">
+                    <i class="pi pi-bolt"></i> {{ getProdToday(c) | number:'1.0-0':'fr-FR' }} aujourd’hui 
+                  </div> -->
                 </div>
 
                 <div class="divider"></div>

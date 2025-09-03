@@ -1,0 +1,523 @@
+<ng-container *ngIf="loading">
+    <div class="spinner-overlay">
+        <p-progressSpinner styleClass="w-6rem h-6rem" strokeWidth="2" fill="var(--surface-ground)"
+            animationDuration=".5s"></p-progressSpinner>
+    </div>
+</ng-container>
+
+<div class="grid">
+    <div class="col-12">
+        <div class="card px-6 py-6" *ngIf="isDesktop">
+            <p-toast></p-toast>
+            <div class="flex flex-column md:flex-row md:align-items-center md:justify-content-between mb-4">
+
+                <h5 class="m-2 mb-2 md:mb-0">
+                    GESTION DES EMPLOYÉS :
+                    <span class="text-gray-600">{{ st?.name }}</span>
+                </h5>
+                <p-selectButton [options]="stateOptions" [(ngModel)]="isTable" optionLabel="label" optionValue="value"
+                    [unselectable]="false" class="w-full md:w-auto">
+                    <ng-template let-item pTemplate="item">
+                        <i [class]="item.icon + ' mr-2'"></i>{{ item.label }}
+                    </ng-template>
+                </p-selectButton>
+            </div>
+
+            <ng-container *ngIf="isTable === 'true'; else cardView">
+
+                <div class="mb-3">
+                    <p-toolbar class="mb-4">
+                        <ng-template pTemplate="left">
+                            <div class="flex align-items-center gap-2">
+                                <button pButton pRipple label="Nouveau" icon="pi pi-plus" class="p-button-success"
+                                    (click)="openNew()">
+                                </button>
+
+                                <button pButton pRipple *ngIf="!suspended" label="Suspendus" icon="pi pi-ban" class="p-button-info p-button-outlined mr-2"
+                                (click)="getAllSuspendedEmployees()">
+                              
+                            </button>
+                            <button pButton pRipple *ngIf="suspended" label="Retour" icon="pi pi-arrow-left" class="p-button-danger p-button-outlined"
+                            (click)="getSt()"> </button>
+                            <button pButton pRipple  label="Fiche Présence" icon="pi pi-users" class="p-button-help p-button-outlined"
+                            (click)="fichePresence()"></button>
+                         
+                            </div>
+                        </ng-template>
+
+                        <ng-template pTemplate="right">
+                            <span class="p-input-icon-left w-full md:w-auto">
+                                <i class="pi pi-search"></i>
+                                <input pInputText type="text" (input)="onGlobalFilter(dt, $event)"
+                                    placeholder="Rechercher un employé..." class="w-full md:w-20rem" />
+                            </span>
+                        </ng-template>
+                    </p-toolbar>
+                </div>
+                <p-table #dt [value]="employees" [columns]="cols" responsiveLayout="scroll" [rows]="10"
+                    [globalFilterFields]="['firstname', 'lastname', 'email', 'id']" [paginator]="true"
+                    [rowsPerPageOptions]="[10, 20, 30]" [showCurrentPageReport]="true"
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                    [(selection)]="selectedEmployees" selectionMode="multiple" [rowHover]="true" dataKey="id">
+
+                    <ng-template pTemplate="header">
+                        <tr>
+                            <th style="width: 3rem">
+                                <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+                            </th>
+                            <!-- <th pSortableColumn="id">
+                                ID <p-sortIcon field="id"></p-sortIcon>
+                            </th> -->
+                            <th>Prénom</th>
+                            <th>Nom</th>
+                            <th>CIN</th>
+                            <th>Matricule</th>
+                            <th>N° sécurité sociale</th>
+                            <th></th>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-employee>
+                        <tr class="employee-row">
+                            <td>
+                                <div class="avatar-container">
+                                  <!-- Avatar avec initiales -->
+                                  <div class="avatar-rect" [ngClass]="getAvatarColor(employee)">
+                                    {{ employee.firstname[0] |uppercase }}{{ employee.lastname[0] |uppercase }}
+                                  </div>
+                          
+                                  <!-- Checkbox caché par défaut -->
+                                  <p-tableCheckbox class="hover-checkbox" [value]="employee"></p-tableCheckbox>
+                                </div>
+                              </td>
+                            <!-- <td style="width: 10%; min-width: 7rem">
+                                <span class="p-column-title">ID</span>
+                                {{ employee?.id }}
+                            </td> -->
+                            <td style="width: 14%; min-width: 10rem">
+                                <span class="p-column-title">Prénom</span>
+                                {{ employee?.firstname | uppercase }}
+                            </td>
+                            <td style="width: 14%; min-width: 10rem">
+                                <span class="p-column-title">Nom</span>
+                                {{ employee?.lastname | uppercase }}
+                            </td>
+                            <td>
+                                <span class="p-column-title">CIN</span>
+                                {{ employee?.cin }}
+                            </td>
+                            <td>
+                                <span class="p-column-title">Mat</span>
+                                {{ employee?.matricule }}
+                            </td>
+                            <td>
+                                <span class="p-column-title">Numéro de sécurité sociale</span>
+                                {{ employee?.socialSecurityNumber }}
+                            </td>
+                            <td>
+
+                                <div class="flex">
+                                    <p-button icon="pi pi-user-edit" (onClick)="detailsEmployee(employee.id)"
+                                        severity="info" class="mr-2" />
+                                    <p-button icon="pi pi-pencil" (onClick)="editEmployee(employee)" severity="success"
+                                        class="mr-2" />
+                                    <p-button pRipple icon="pi pi-trash" severity="danger" [outlined]="false"
+                                        (onClick)="deleteEmployee(employee)" />
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-template>
+                    <ng-template pTemplate="emptymessage">
+                        <tr>
+                            <td colspan="7">
+                                <div
+                                    class="flex flex-column align-items-center justify-content-center py-6 text-center">
+                                    <i class="pi pi-users text-4xl text-gray-400 mb-3"></i>
+                                    <p class="text-lg font-medium text-gray-600">Aucun employé trouvé</p>
+                                    <p class="text-sm text-gray-500">Ajoutez de nouveaux employés pour commencer à
+                                        remplir
+                                        le tableau.</p>
+                                </div>
+                            </td>
+                        </tr>
+                    </ng-template>
+                </p-table>
+            </ng-container>
+        </div>
+       
+        <ng-template #cardView>
+            <p-dataView [value]="employees" [layout]="'grid'" [paginator]="true" [rows]="8"
+                [rowsPerPageOptions]="[8, 12, 16]">
+                <ng-template let-employee pTemplate="grid"  let-employees>
+                    <div class="grid">
+                        <div class="col-12 sm:col-6 lg:col-4 xl:col-3" *ngFor="let emp of employees">
+                            <div
+                                class="surface-card border-1 surface-border border-round-xl shadow-1 p-4 h-full flex flex-column justify-between">
+                                <!-- PHOTO -->
+                                <div class="flex justify-content-center mb-4">
+                                    <div class="border-circle bg-gray-100 overflow-hidden shadow-1 flex align-items-center justify-content-center"
+                                        style="width: 100px; height: 100px;">
+                                        <img *ngIf="emp?.photo" [src]="emp.photo" alt="Photo"
+                                            style="width: 100%; height: 100%; object-fit: cover;" />
+                                        <i *ngIf="!emp.photo" class="pi pi-user text-3xl text-gray-500"></i>
+                                    </div>
+                                </div>
+                                <div class="w-full mb-3" style="height: 1px; background-color: #e0e0e0;"></div>
+
+                                <!-- INFOS -->
+                                <div class="mb-4">
+                                    <div class="text-xl font-semibold text-800 mb-1 text-center mb-3">
+                                        {{ (emp.firstname + ' ' + emp.lastname) | uppercase }}
+                                    </div>
+                                    <div class="text-m text-600 text-center font-medium mb-1">
+                                        <i class="pi pi-id-card mr-1 text-blue-500"></i> {{ emp?.cin || 'N/A' }}
+                                    </div>
+                                    <div class="text-m text-600 text-center font-medium mb-1">
+                                        <i class="pi pi-user mr-1 text-purple-500"></i> {{ emp?.gender || 'N/A' }}
+                                    </div>
+                                    <div class="text-m text-600 text-center font-medium">
+                                        <i class="pi pi-tag mr-1 text-green-500"></i> {{ emp?.categorie || ' N/A' }}
+                                    </div>
+                                </div>
+
+                                <!-- BOUTONS -->
+                                <div class="mt-auto text-center flex flex-column gap-2">
+                                    <div class="flex justify-content-center gap-2 mb-3">
+                                        <button pButton icon="pi pi-pencil" class="p-button-sm p-button-success"
+                                            (click)="editEmployee(emp)"></button>
+                                        <button pButton icon="pi pi-trash" class="p-button-sm p-button-danger"
+                                            (click)="deleteEmployee(emp)"></button>
+                                    </div>
+                                    <div class="flex justify-content-center mt-2">
+                                        <button pButton icon="pi pi-user-edit" label="Fiche RH"
+                                            (click)="detailsEmployee(emp.id)" severity="primary" [outlined]="true"
+                                            class="w-12rem"></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </ng-template>
+            </p-dataView>
+            <!-- MESSAGE SI VIDE -->
+            <div *ngIf="employees.length === 0" class="card text-center mt-6 p-4">
+                <i class="pi pi-users text-4xl text-gray-400 mb-3"></i>
+                <p class="text-lg font-medium text-gray-600">Aucun employé trouvé</p>
+                <p class="text-sm text-gray-500 mb-3">Ajoutez de nouveaux employés pour les afficher ici.</p>
+                <p-button pButton icon="pi pi-plus" label="Ajouter un employé" class="p-button-rounded p-button-primary"
+                    (click)="openNew()"></p-button>
+            </div>
+        </ng-template>
+
+        <!-- <div class="card" *ngIf="!isDesktop">
+            <h5 class="m-0">Gestion des employés</h5>
+
+            <p-toolbar>
+                <div class="p-toolbar-group-start">
+                    <button pButton pRipple [rounded]="true" icon="pi pi-plus" class="p-button-success"
+                        (click)="openNew()"></button>
+                </div>
+            </p-toolbar>
+
+            <p-dataView [value]="employees" layout="list">
+                <ng-template pTemplate="list" let-employee let-first="first">
+                    <div class="grid grid-nogutter">
+                        <div class="col-12" *ngFor="
+                                let employee of employees;
+                                let first = first
+                            ">
+                            <div class="flex flex-column sm:flex-row sm:align-items-center p-4 gap-3" [ngClass]="{
+                                    'border-top-1 surface-border': !first
+                                }">
+                                <div
+                                    class="flex flex-column md:flex-row justify-content-between md:align-items-center flex-1 gap-4">
+                                    <div
+                                        class="flex flex-column md:flex-row justify-content-between align-items-start gap-2">
+                                        <div>
+                                            <span class="font-medium text-secondary text-sm">ID EMPLOYEE:
+                                                {{ employee.id }}</span>
+                                            <div class="text-lg font-medium text-900 mt-2">
+                                                Prénom:
+                                                {{
+                                                employee.firstname
+                                                | uppercase
+                                                }}
+                                            </div>
+                                            <div class="text-md font-medium text-900 mt-2">
+                                                Nom:
+                                                {{
+                                                employee.lastname
+                                                | uppercase
+                                                }}
+                                            </div>
+                                            <div class="text-md font-medium text-900 mt-2">
+                                                Email: {{ employee.email }}
+                                            </div>
+                                            <div class="text-md font-medium text-900 mt-2">
+                                                Numéro de sécurité sociale:
+                                                {{
+                                                employee.socialSecurityNumber
+                                                }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-column md:align-items-end gap-5">
+                                        <div class="flex flex-row-reverse md:flex-row gap-2">
+                                            <p-button icon="pi pi-pencil" label="Edit" (click)="editEmployee(employee)"
+                                                [rounded]="true" severity="success" />
+                                            <p-button pRipple icon="pi pi-trash" severity="danger" [rounded]="true"
+                                                [outlined]="false" (click)="
+                                                    deleteEmployee(employee)
+                                                " />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </ng-template>
+            </p-dataView>
+        </div> -->
+
+        <p-dialog [(visible)]="employeeDialog" [maximizable]="true" [style]="{ width: '750px', height: '90%' }"
+            header="Ajouter/Modifier Employé" [modal]="true" class="p-fluid">
+            <ng-template pTemplate="content">
+                <div class="grid">
+                    <div class="col-6">
+
+                        <div class="field" *ngIf="employee.id">
+                            <label>Photo de l'employé</label>
+
+                            <div class="flex flex-column align-items-center justify-content-center border-2 border-dashed border-300 surface-hover border-round-xl p-4 gap-3 text-center transition-all hover:border-primary"
+                                (dragover)="onDragOver($event)" (drop)="onFileDrop($event)"
+                                (dragleave)="onDragLeave($event)" style="min-height: 180px; position: relative;">
+                                <ng-container *ngIf="!employee.photo; else photoPreview">
+                                    <i class="pi pi-user text-400" style="font-size: 3rem;"></i>
+                                    <span class="text-m text-600">Glissez-déposez une image ici</span>
+                                    <button pButton icon="pi pi-upload" label="Choisir une image"
+                                        class="p-button-sm p-button-outlined" (click)="fileInput.click()"></button>
+                                </ng-container>
+
+                                <ng-template #photoPreview>
+                                    <div class="relative">
+                                        <img [src]="employee.photo" alt="Photo" class="border-circle shadow-2"
+                                            style="width: 100px; height: 100px; object-fit: cover;" />
+
+                                        <div class="flex justify-content-center mt-3 gap-2">
+                                            <button pButton icon="pi pi-pencil" class="p-button-sm p-button-outlined"
+                                                (click)="fileInput.click()" label="Modifier"></button>
+                                            <button pButton icon="pi pi-trash"
+                                                class="p-button-sm p-button-danger p-button-outlined"
+                                                (click)="removePhoto()" label="Supprimer"></button>
+                                        </div>
+                                    </div>
+                                </ng-template>
+
+                                <input #fileInput type="file" accept="image/*" hidden
+                                    (change)="onFileSelected($event)" />
+                            </div>
+                        </div>
+
+                        <div class="field">
+                            <label for="firstname">Prénom</label>
+                            <input type="text" pInputText id="firstname" [(ngModel)]="employee.firstname" required
+                                autofocus [ngClass]="{
+                                    'ng-invalid ng-dirty':
+                                        submitted && !employee.firstname
+                                }" />
+                            <small class="ng-dirty ng-invalid" *ngIf="submitted && !employee.firstname">Firstname is
+                                required.</small>
+                        </div>
+                        <div class="field">
+                            <label for="lastname">Nom</label>
+                            <input type="text" pInputText id="lastname" [(ngModel)]="employee.lastname" required
+                                autofocus [ngClass]="{
+                                    'ng-invalid ng-dirty':
+                                        submitted && !employee.lastname
+                                }" />
+                            <small class="ng-dirty ng-invalid" *ngIf="submitted && !employee.lastname">Lastname is
+                                required.</small>
+                        </div>
+                        <div class="field">
+                            <label for="birthDate">Date de naissance</label>
+                            <p-calendar [iconDisplay]="'input'" [showIcon]="true" [autoZIndex]="true"
+                                dateFormat="dd/mm/yy" [(ngModel)]="employee.birthDate" inputId="icondisplay" />
+                            <small class="ng-dirty ng-invalid" *ngIf="submitted && !employee.birthDate">Date de
+                                naissance est requis.</small>
+                        </div>
+                        <div class="field">
+                            <label for="email">Email</label>
+                            <input type="text" pInputText id="email" [(ngModel)]="employee.email" 
+                                />
+                         
+                        </div>
+                        <div class="field">
+                            <label for="gender">Genre</label>
+                            <p-dropdown [options]="genders" [(ngModel)]="employee.gender" optionLabel="label"
+                                optionValue="value" placeholder="Sélectionner un genre" inputId="gender"></p-dropdown>
+
+                            <small class="p-error" *ngIf="submitted && !employee.gender">
+                                Le genre est requis.
+                            </small>
+                        </div>
+
+                        <div class="field">
+                            <label for="phoneNumber">Numéro téléphone</label>
+                            <input type="text" pInputText id="phoneNumber" [(ngModel)]="employee.phoneNumber" 
+                              />
+                        </div>
+                        <div class="field">
+                            <label for="cin">N° carte d'identité</label>
+                            <input type="text" pInputText id="cin" [(ngModel)]="employee.cin"  
+                                />
+                        </div>
+                        <div class="field">
+                            <label for="matricule">Matricule</label>
+                            <input type="text" pInputText id="matricule" [(ngModel)]="employee.matricule"  
+                                />
+                      
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="field">
+                            <label for="socialSecurityNumber">Numéro sécurité sociale</label>
+                            <input type="text" pInputText id="socialSecurityNumber"
+                                [(ngModel)]="employee.socialSecurityNumber" required />
+
+                        </div>
+
+                        <div class="field">
+                            <label for="categorie">Catégorie</label>
+                            <input type="text" pInputText id="categorie" [(ngModel)]="employee.categorie" 
+                              />
+                        </div>
+                        <div class="field">
+                            <label for="employmentType">Type d'emploi</label>
+                            <p-dropdown [options]="types" [(ngModel)]="employee.employmentType" optionLabel="label"
+                                optionValue="value" placeholder="Sélectionner un type"
+                                inputId="employmentType"></p-dropdown>
+                        </div>
+
+
+                        <div class="field">
+                            <label for="jobTitle">Titre du poste</label>
+                            <input type="text" pInputText id="jobTitle" [(ngModel)]="employee.jobTitle" 
+                               />
+
+                        </div>
+                        <div class="field">
+                            <label for="hireDate">Date d'embauche</label>
+                            <p-calendar [iconDisplay]="'input'" [showIcon]="true" [autoZIndex]="true"
+                                dateFormat="dd/mm/yy" [(ngModel)]="employee.hireDate" inputId="icondisplay" />
+                            <small class="ng-dirty ng-invalid" *ngIf="submitted && !employee.hireDate">Date d'embauche
+                                est requis.</small>
+                        </div>
+                        <div class="field">
+                            <label for="department">Département</label>
+                            <input type="text" pInputText id="department" [(ngModel)]="employee.department" required
+                                autofocus [ngClass]="{
+                                    'ng-invalid ng-dirty':
+                                        submitted && !employee.department
+                                }" />
+
+                        </div>
+                        <div class="field">
+                            <label for="salary">Salaire</label>
+                            <p-inputNumber 
+                            [(ngModel)]="employee.salary" 
+                            suffix=" DT" 
+                            inputId="currency-tunisie"
+                            [minFractionDigits]="3"
+                            [maxFractionDigits]="3"
+                            locale="en-US">
+                          </p-inputNumber>
+                          
+                          
+                            <small class="ng-dirty ng-invalid" *ngIf="submitted && !employee.salary">Salaire is
+                                required.</small>
+                        </div>
+                        <div class="field">
+                            <label for="address">Adresse</label>
+
+                            <textarea rows="3" cols="30" [(ngModel)]="employee.address" pInputTextarea
+                                [autoResize]="true"></textarea>
+                            <small class="ng-dirty ng-invalid" *ngIf="submitted && !employee.address">address is
+                                required.</small>
+                        </div>
+
+                        <div class="field-checkbox mt-3">
+                            <p-checkbox 
+                              inputId="suspended" 
+                              [(ngModel)]="employee.suspended" 
+                              binary="true">
+                            </p-checkbox>
+                            <label for="suspended">Contrat suspendu ?</label>
+                          </div>
+                         
+                          
+                          <!-- Champs conditionnels affichés si suspended == true -->
+                          <div *ngIf="employee.suspended" >
+                            <div class="field ">
+                              <label for="dateSuspension">Date de suspension</label>
+                              <p-calendar 
+                                inputId="dateSuspension"
+                                [(ngModel)]="employee.dateSuspension" 
+                                dateFormat="dd/mm/yy"
+                                [showIcon]="true"
+                                [autoZIndex]="true">
+                              </p-calendar>
+                            </div>
+                          
+                            <div class="field">
+                              <label for="raisonSuspension">Raison de la suspension</label>
+                              <textarea 
+                                pInputTextarea 
+                                [(ngModel)]="employee.raisonSuspension" 
+                                id="raisonSuspension"
+                                rows="4" 
+                                autoResize="true"
+                                placeholder="Décrivez brièvement la raison de la suspension...">
+                              </textarea>
+                            </div>
+                          </div>
+                          
+                    </div>
+                </div>
+            </ng-template>
+
+            <ng-template pTemplate="footer">
+                <button pButton pRipple label="Cancel" icon="pi pi-times" class="p-button-text"
+                    (click)="hideDialog()"></button>
+                <button pButton pRipple label="Save" icon="pi pi-check" class="p-button-text"
+                    (click)="saveEmployee()"></button>
+            </ng-template>
+        </p-dialog>
+
+        <p-dialog [(visible)]="deleteEmployeeDialog" header="Confirm" [modal]="true" [style]="{ width: '450px' }">
+            <div class="flex align-items-center justify-content-center">
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+                <span *ngIf="employee">Are you sure you want to delete <b>{{ employee.firstname + ' '+ employee.lastname
+                        }}</b>?</span>
+            </div>
+            <ng-template pTemplate="footer">
+                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No"
+                    (click)="deleteEmployeeDialog = false"></button>
+                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Yes"
+                    (click)="confirmDelete()"></button>
+            </ng-template>
+        </p-dialog>
+
+        <p-dialog [(visible)]="deleteEmployeesDialog" header="Confirm" [modal]="true" [style]="{ width: '450px' }">
+            <div class="flex align-items-center justify-content-center">
+                <i class="pi pi-exclamation-triangle mr-3" style="font-size: 2rem"></i>
+                <span>Are you sure you want to delete selected employees?</span>
+            </div>
+            <ng-template pTemplate="footer">
+                <button pButton pRipple icon="pi pi-times" class="p-button-text" label="No"
+                    (click)="deleteEmployeesDialog = false"></button>
+                <button pButton pRipple icon="pi pi-check" class="p-button-text" label="Yes"
+                    (click)="confirmDeleteSelected()"></button>
+            </ng-template>
+        </p-dialog>
+    </div>
+</div>

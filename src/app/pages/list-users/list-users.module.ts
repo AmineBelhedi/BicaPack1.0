@@ -22,7 +22,7 @@ import { DataViewModule } from 'primeng/dataview';
 
 
 @NgModule({
-  declarations: [ListUsersComponent ],
+  declarations: [ ],
   imports: [
     CommonModule,
     ListUsersRoutingModule,

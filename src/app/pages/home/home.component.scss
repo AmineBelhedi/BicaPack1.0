@@ -137,7 +137,30 @@
       color: #3f51b5;
     }
   }
-
+  &.fournisseur {
+    .circle-icon {
+      background-color: #3f9ab5;
+    }
+    .module-label {
+      color: #3f88b5;
+    }
+  }
+   &.achat {
+    .circle-icon {
+      background-color: #b5863f;
+    }
+    .module-label {
+      color: #b5863f;
+    }
+  }
+    &.vente {
+    .circle-icon {
+      background-color: #b5b33f;
+    }
+    .module-label {
+      color: #abb53f;
+    }
+  }
   &.model {
     .circle-icon {
       background-color: #009688;

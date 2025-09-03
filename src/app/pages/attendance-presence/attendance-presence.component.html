@@ -1,0 +1,331 @@
+<p-toast></p-toast>
+
+<div class="card">
+  <!-- <section class="attendance-header surface-section border-round p-4">
+    <h2 class="header-title">Fiche Présence — {{ sousTraitant?.name || '-' }}</h2>
+
+    <div class="kpi-row">
+
+      <div class="kpi-card">
+        <div class="kpi-head">
+          <span class="kpi-label">Effectif Total</span>
+          <i class="pi pi-users"></i>
+        </div>
+        <div class="kpi-value">{{ summary?.effectifActif ?? 0 }}</div>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-head">
+          <span class="kpi-label">Présents</span>
+          <i class="pi pi-check-circle"></i>
+        </div>
+        <div class="kpi-value text-green-600">{{ summary?.presents ?? 0 }}</div>
+        <p-progressBar [value]="presenceRate" [showValue]="true" styleClass="mt-3 pb-presence"></p-progressBar>
+      </div>
+
+      <div class="kpi-card">
+        <div class="kpi-head">
+          <span class="kpi-label">Absents</span>
+          <i class="pi pi-exclamation-circle"></i>
+        </div>
+        <div class="kpi-value text-red-500">{{ summary?.absents ?? 0 }}</div>
+        <p-progressBar [value]="absenceRate" [showValue]="true" styleClass="mt-3 pb-absence"></p-progressBar>
+      </div>
+    </div>
+  </section>
+  <p-toolbar styleClass="mb-3 surface-card border-round shadow-1">
+    <ng-template pTemplate="start">
+      <div class="flex flex-wrap gap-2">
+        <button pButton label="Marquer Absents (sélection)" icon="pi pi-user-minus" severity="warning"
+          (click)="markSelectedAbsent()" [disabled]="!hasPresentSelected || loading">
+        </button>
+
+        <button pButton label="Annuler Absence (sélection)" icon="pi pi-user-plus" severity="success"
+          (click)="unmarkSelected()" [disabled]="!hasAbsentSelected || loading">
+        </button>
+
+        <p-divider layout="vertical" class="hidden md:flex"></p-divider>
+
+        <button pButton label="Rafraîchir" icon="pi pi-refresh" [text]="true" (click)="refresh()" [disabled]="loading">
+        </button>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="end">
+      <p-calendar name="attendanceDate" [(ngModel)]="dateModel" (onSelect)="onDateChange($event)" [showIcon]="true"
+        [touchUI]="true" dateFormat="yy-mm-dd">
+      </p-calendar>
+    </ng-template>
+  </p-toolbar> -->
+
+  <section class="attendance-header surface-card shadow-2 border-round p-4 mb-4">
+    <div class="flex justify-content-between align-items-center mb-4">
+      <h2 class="header-title text-900 font-meduim">
+        <b>FICHE PRÉSENCE
+        </b> —  <span class="text-700"> {{ dateModel | date: 'EEEE d MMMM y' | uppercase }}</span>
+      </h2>
+      <h2 class="header-title text-900 font-meduim">
+      <span class="text-primary"><b>{{ sousTraitant?.name || '-' }}</b></span>
+      </h2>
+    </div>
+
+    <div class="flex flex-wrap gap-4">
+      <!-- Effectif -->
+      <div class="kpi-card flex-1 surface-ground border-round p-3 shadow-1">
+        <div class="flex justify-content-between align-items-center">
+          <span class="kpi-label text-600">Effectif Total</span>
+          <i class="pi pi-users text-blue-500 text-xl"></i>
+        </div>
+        <div class="kpi-value text-3xl font-bold text-blue-700">{{ summary?.effectifActif ?? 0 }}</div>
+      </div>
+
+      <!-- Présents -->
+      <div class="kpi-card flex-1 surface-ground border-round p-3 shadow-1">
+        <div class="flex justify-content-between align-items-center mb-2">
+          <span class="kpi-label text-600">Présents</span>
+          <i class="pi pi-check-circle text-green-500 text-xl"></i>
+        </div>
+        <div class=" text-3xl font-bold text-green-600">{{ summary?.presents ?? 0 }}</div>
+        <p-progressBar [value]="presenceRate" [showValue]="true" styleClass="mt-3 pb-presence"></p-progressBar>
+      </div>
+
+      <!-- Absents -->
+      <div class="kpi-card flex-1 surface-ground border-round p-3 shadow-1" (click)="openAbsencesEmployees()">
+        <div class="flex justify-content-between align-items-center mb-2">
+          <span class="kpi-label text-600">Absents</span>
+          <i class="pi pi-exclamation-circle text-red-500 text-xl"></i>
+        </div>
+        <div class="text-3xl font-bold text-red-500">{{ summary?.absents ?? 0 }}</div>
+        <p-progressBar [value]="absenceRate" [showValue]="true" styleClass="mt-3 pb-absence"></p-progressBar>
+
+      </div>
+
+      <!-- Taux d’absentéisme -->
+      <div class="kpi-card flex-1 surface-ground border-round p-3 shadow-1">
+        <div class="flex justify-content-between align-items-center mb-2">
+          <span class="kpi-label text-600">Taux d'absentéisme</span>
+          <i class="pi pi-gauge text-red-500 text-xl"></i>
+        </div>
+        <div class="text-3xl font-bold text-red-500">{{ absenteeismRate }}%</div>
+        <!-- <p-progressBar [value]="absenteeismRate" [showValue]="true" styleClass="mt-3 pb-absence"></p-progressBar> -->
+      </div>
+      <div class="kpi-card flex-1 surface-ground border-round p-3 shadow-1">
+        <div class="flex justify-content-between align-items-center mb-2">
+          <span class="kpi-label text-600">PRODUCTION</span>
+          <i class="pi pi-chart-line text-teal-700 text-xl"></i>
+        </div>
+        <div *ngIf="user?.role==='OWNER'"
+        class="text-xl font-bold text-teal-700">
+     Réel {{ totalLivraison }} pièces
+   </div>
+        <!-- Cas 1 : effectifSt non null et a un id -->
+        <ng-container *ngIf="effectifSt?.id; else noPresence">
+          
+          <!-- Cas 1a : production déjà saisie -->
+          <div *ngIf="effectifSt?.productionDujour; else noProd" 
+               class="text-3xl font-bold text-teal-700">
+            {{ effectifSt.productionDujour }} pièces
+          </div>
+         
+      
+          <!-- Cas 1b : pas encore de production -->
+          <ng-template #noProd>
+            <div class="text-sm text-500 italic mb-2">Veuillez saisir la production du jour</div>
+            <p-button label="Saisir" icon="pi pi-plus"
+                      (onClick)="openProductionDialog()"
+                      size="small" severity="success"></p-button>
+          </ng-template>
+        </ng-container>
+      
+        <!-- Cas 2 : pas d'effectif.id => présence non remplie -->
+        <ng-template #noPresence>
+          <div class="text-sm text-orange-600 font-medium">
+            La production n'est pas encore remplie depuis la page Confection
+          </div>
+        </ng-template>
+      </div>
+      
+
+   
+
+
+    </div>
+  </section>
+
+  <p-toolbar styleClass="mb-3 surface-card border-round shadow-2">
+    <ng-template pTemplate="start">
+      <div class="flex flex-wrap gap-2">
+        <button pButton label="Marquer Absents" icon="pi pi-user-minus" severity="warning"
+          (click)="markSelectedAbsent()" [disabled]="!hasPresentSelected || loading"></button>
+
+        <button pButton label="Annuler Absence" icon="pi pi-user-plus" severity="success" (click)="unmarkSelected()"
+          [disabled]="!hasAbsentSelected || loading"></button>
+
+        <p-divider layout="vertical" class="hidden md:flex"></p-divider>
+
+        <button pButton label="Rafraîchir" icon="pi pi-refresh" [text]="true" (click)="refresh()"
+          [disabled]="loading"></button>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="end">
+      <p-calendar name="attendanceDate" [(ngModel)]="dateModel" (onSelect)="onDateChange($event)" [showIcon]="true"
+        [touchUI]="true" dateFormat="yy-mm-dd">
+      </p-calendar>
+    </ng-template>
+  </p-toolbar>
+
+
+
+
+  <p-table #dt [value]="rows" [paginator]="true" [rows]="30" [loading]="loading" [(selection)]="selectedRows"
+    dataKey="employeeId" [rowHover]="true" [showLoader]="true" [autoLayout]="true" [rowsPerPageOptions]="[10, 20, 30]"
+    [showCurrentPageReport]="true" currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+    [globalFilterFields]="['name','matricule','jobTitle','phoneNumber','status']">
+
+    <!-- 🔍 Barre de recherche -->
+    <ng-template pTemplate="caption">
+      <div class="flex justify-content-between align-items-center">
+        <h5 class="m-0">Liste des employés</h5>
+        <span class="p-input-icon-left">
+          <i class="pi pi-search"></i>
+          <input pInputText type="text" (input)="onGlobalFilter(dt, $event)" placeholder="Search..."
+            class="w-full sm:w-auto mr-2" />
+        </span>
+      </div>
+    </ng-template>
+
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width:3rem">
+          <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+        </th>
+        <th>Employé</th>
+        <th>Matricule</th>
+        <th>Poste</th>
+        <th>Téléphone</th>
+        <th style="width: 170px;">Statut</th>
+        <th></th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-r>
+      <tr [pSelectableRow]="r">
+        <td><p-tableCheckbox [value]="r"></p-tableCheckbox></td>
+        <td><b>{{ r.name | uppercase }}</b></td>
+        <td>{{ r.matricule || '-' }}</td>
+        <td>{{ r.jobTitle?.toUpperCase() || '-' }}</td>
+        <td>{{ r.phoneNumber || '-' }}</td>
+
+        <td>
+          <span *ngIf="r.status==='ABSENT'">{{ r.status }}</span>
+          <span *ngIf="r.status==='PRESENT'">-</span>
+        </td>
+        <td>
+          <p-inputSwitch [ngModel]="r.status === 'PRESENT'" (ngModelChange)="toggle(r)" [disabled]="loading"
+            [styleClass]="r.status === 'PRESENT' ? 'switch-present' : 'switch-absent'">
+          </p-inputSwitch>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="7" class="text-center p-3">Aucune donnée à afficher</td>
+      </tr>
+    </ng-template>
+  </p-table>
+
+</div>
+
+
+
+
+
+
+
+<p-dialog [header]="'ABSENCES – ' + (dateModel | date:'dd/MM/yyyy')" [(visible)]="showAbsencesEmployee" [maximizable]="true"
+[modal]="true" [style]="{ width: '80%' }">
+<p-dataView [value]="absences" *ngIf="absences.length>0" [layout]="'grid'" [paginator]="true" [rows]="8"
+[rowsPerPageOptions]="[8, 12, 16]">
+<ng-template let-employee pTemplate="grid"  let-absences>
+    <div class="grid">
+        <div class="col-12 sm:col-6 lg:col-4 xl:col-3" *ngFor="let emp of absences">
+            <div
+                class="surface-card border-1 surface-border border-round-xl shadow-1 p-4 h-full flex flex-column justify-between">
+                <!-- PHOTO -->
+                <div class="flex justify-content-center mb-4">
+                    <div class="border-circle bg-gray-100 overflow-hidden shadow-1 flex align-items-center justify-content-center"
+                        style="width: 100px; height: 100px;">
+                        <img *ngIf="emp?.employee.photo" [src]="emp.employee.photo" alt="Photo"
+                            style="width: 100%; height: 100%; object-fit: cover;" />
+                        <i *ngIf="!emp.employee.photo" class="pi pi-user text-3xl text-gray-500"></i>
+                    </div>
+                </div>
+                <div class="w-full mb-3" style="height: 1px; background-color: #e0e0e0;"></div>
+
+                <!-- INFOS -->
+                <div class="mb-4">
+                    <div class="text-xl font-semibold text-800 mb-1 text-center mb-3">
+                        {{ (emp.employee.firstname + ' ' + emp.employee.lastname) | uppercase }}
+                    </div>
+                    <div class="text-m text-600 text-center font-medium mb-1">
+                        <i class="pi pi-id-card mr-1 text-blue-500"></i> {{ emp?.employee.cin || 'N/A' }}
+                    </div>
+                    <div class="text-m text-600 text-center font-medium mb-1">
+                        <i class="pi pi-user mr-1 text-purple-500"></i> {{ emp?.employee.jobTitle?.toUpperCase() || 'N/A' }}
+                    </div>
+                    <div class="text-m text-600 text-center font-medium">
+                        <i class="pi pi-tag mr-1 text-green-500"></i> {{ emp?.employee.categorie || ' N/A' }}
+                    </div>
+                </div>
+
+                <!-- BOUTONS -->
+                <!-- <div class="mt-auto text-center flex flex-column gap-2">
+                    <div class="flex justify-content-center mt-2">
+                        <button pButton icon="pi pi-user-edit" label="Fiche RH"
+                            (click)="detailsEmployee(emp.employee.id)" severity="primary" [outlined]="true"
+                            class="w-12rem"></button>
+                    </div>
+                </div> -->
+            </div>
+        </div>
+    </div>
+</ng-template>
+</p-dataView>
+<!-- MESSAGE SI VIDE -->
+<div *ngIf="absences.length === 0" class="card text-center mt-6 p-4">
+<i class="pi pi-users text-4xl text-gray-400 mb-3"></i>
+<p class="text-lg font-medium text-gray-600">Aucun employé Absent</p>
+
+</div>
+</p-dialog>
+
+
+
+<p-dialog header="Saisie Production du jour"
+          [(visible)]="dialogProduction"
+          [modal]="true" [closable]="true"
+          [style]="{width:'400px'}">
+  
+  <div class="p-fluid">
+    <div class="field">
+      <label for="production">Production du jour</label>
+      <p-inputNumber [(ngModel)]="effectifStToEdit.productionDujour"
+                     inputId="production"
+                     [min]="0"
+                     [showButtons]="true"
+                     suffix=" pièces">
+      </p-inputNumber>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <p-button label="Annuler" icon="pi pi-times" 
+              (onClick)="dialogProduction = false" 
+              severity="secondary"></p-button>
+    <p-button label="Enregistrer" icon="pi pi-check" 
+              (onClick)="saveProduction()" 
+              [disabled]="!effectifStToEdit?.productionDujour"></p-button>
+  </ng-template>
+</p-dialog>

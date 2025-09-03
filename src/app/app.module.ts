@@ -13,6 +13,7 @@ import { AuthInterceptor } from './services/auth.interceptor';
 import { HttpClientModule } from '@angular/common/http';
 import { registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
+import { SafeUrlPipe } from './safe-url.pipe';
 
 
 registerLocaleData(localeFr);

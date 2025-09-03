@@ -1,0 +1,46 @@
+/* Container */
+.avatar-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Avatar rectangulaire avec taille fixe */
+  .avatar-rect {
+    width: 25px;              /* largeur fixe */
+    height: 25px;             /* hauteur fixe */
+    border-radius: 4px;       /* coins arrondis */
+    background-color: #134ecc; /* couleur par défaut si classe manquante */
+    color: white;
+    font-weight: 800;         /* texte bien gras */
+    font-size: 1rem;
+    display: flex;            /* centrage horizontal + vertical */
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase; /* toujours en majuscules */
+    transition: opacity 0.2s;
+  }
+  
+  /* Couleurs dynamiques */
+  .avatar-blue   { background-color: #134ecc; }
+  .avatar-green  { background-color: #157a19; }
+  .avatar-orange { background-color: #c07608; }
+  .avatar-purple { background-color: #821d94; }
+  .avatar-pink   { background-color: #b01b4d; }
+  
+  /* Checkbox caché par défaut */
+  .hover-checkbox {
+    position: absolute;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  
+  /* Hover effet */
+  .p-datatable-tbody > tr:hover .avatar-rect {
+    opacity: 0;
+  }
+  .p-datatable-tbody > tr:hover .hover-checkbox {
+    opacity: 1;
+  }
+  
