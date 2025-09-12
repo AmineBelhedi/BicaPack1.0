@@ -7,6 +7,7 @@ import { Fournisseur } from '../models/fournisseur';
 import { Employee } from '../models/employee';
 import { SousTraitant } from '../models/sousTraitant';
 import { EffectifSousTraitant } from '../models/effectifSousTraitant';
+import { Absence } from './attendance.service';
 
 @Injectable({
   providedIn: 'root'
@@ -88,7 +89,9 @@ updateUser(user: User): Observable<User> {
             employee
         );
     }
-
+     getAbsencesEmployee(employeeId : number): Observable<Absence[]> {
+        return this.http.get<Absence[]>(this.apiEmployee+'absences/'+employeeId);
+    }
     uploadEmployeePhoto(employeeId: number, file: File): Observable<void> {
         const formData = new FormData();
         formData.append('file', file);

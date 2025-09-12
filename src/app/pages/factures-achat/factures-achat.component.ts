@@ -503,9 +503,7 @@ deleteDocument(factureId: number, documentId: number) {
       f.numeroFacture &&
       f.dateFacture &&
       f.modePaiement &&
-      f.devise &&
-      f.compteCredit &&
-      f.compteDebit 
+      f.devise 
     );
   }
   

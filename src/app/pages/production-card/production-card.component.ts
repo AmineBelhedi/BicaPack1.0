@@ -84,7 +84,8 @@ export class ProductionCardComponent implements OnChanges ,OnInit {
           .reduce((s, r) => s + (r.quantite || 0), 0);
 
         // ✅ notifier après avoir mis à jour rows/today
-        this.api.changed$.next(this.commandeId);
+        this.api.notifyChanged(this.commandeId);
+
       },
       error: () => { this.rows = []; this.today = 0; }
     });
@@ -97,7 +98,8 @@ export class ProductionCardComponent implements OnChanges ,OnInit {
         this.remain = this.cible > 0 ? Math.max(0, this.cible - this.total) : 0;
 
         // ✅ notifier après avoir mis à jour total/progress/remain
-        this.api.changed$.next(this.commandeId);
+        this.api.notifyChanged(this.commandeId);
+
       },
       error: () => { this.total = 0; this.progress = 0; this.remain = 0; }
     });
@@ -179,7 +181,8 @@ export class ProductionCardComponent implements OnChanges ,OnInit {
         }
         this.remain = this.cible > 0 ? Math.max(0, this.cible - this.total) : 0;
         // ✅ prévenir la liste des commandes
-        this.api.changed$.next(this.commandeId);
+        this.api.notifyChanged(this.commandeId);
+
 
       }
     });
@@ -246,7 +249,8 @@ export class ProductionCardComponent implements OnChanges ,OnInit {
         this.editVisible = false;
         this.resetEdit();
         // ✅ prévenir la liste des commandes
-        this.api.changed$.next(this.commandeId);
+        this.api.notifyChanged(this.commandeId);
+
 
       }
     });
@@ -279,7 +283,8 @@ export class ProductionCardComponent implements OnChanges ,OnInit {
             this.progress = this.cible > 0 ? Math.min(100, Math.round((this.total / this.cible) * 100)) : 0;
             this.remain = this.cible > 0 ? Math.max(0, this.cible - this.total) : 0;
             // ✅ prévenir la liste des commandes
-            this.api.changed$.next(this.commandeId);
+            this.api.notifyChanged(this.commandeId);
+
 
           }
         });

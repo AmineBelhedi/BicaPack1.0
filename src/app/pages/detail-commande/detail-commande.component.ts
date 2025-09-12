@@ -56,7 +56,7 @@ export class DetailCommandeComponent implements OnInit {
   formAlloc: { rouleauId: number | null; poids: number | null } = { rouleauId: null, poids: null };
 
   private localAllocs: Allocation[] = [];
-
+ commandeId : any ; 
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -74,6 +74,7 @@ export class DetailCommandeComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.commandeId = this.route.snapshot.paramMap.get('id'); 
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (!id) { this.notFound = true; this.loading = false; return; }
 
@@ -120,6 +121,46 @@ export class DetailCommandeComponent implements OnInit {
     });
   }
 
+  getCommandeById(){
+    this.svc.getById(this.commandeId).subscribe({
+      next: (cmd) => {
+        this.commande = cmd;
+
+        // ⬇️ normaliser le type venant du back
+        (this.commande as any).typeSac = this.normalizeTypeSac((cmd as any).typeSac);
+
+        this.qrValue = `${location.origin}/pages/detail-commande/${this.commandeId}`;
+
+        // init switches
+        this.hasPoigner = !!(cmd.poidsPoigner && cmd.poidsPoigner > 0);
+        this.hasSoufflet = !!(cmd.soufflet && cmd.soufflet > 0);
+
+        // init plis (on lit directement les champs du back)
+        this.pliLTmp = (cmd as any).plilongueur ?? 1;
+        this.pliWTmp = (cmd as any).plilargeur  ?? 0;
+
+        // copies temporaires
+        this.poidsPoignerTmp = Number(cmd.poidsPoigner) || 0;
+        this.souffletTmp     = Number(cmd.soufflet)     || 0;
+
+        // Rouleaux compatibles
+        this.getRouleaux();
+
+        // Allocations (serveur + locales)
+        this.localAllocs = this.loadLocalAllocations(this.commandeId);
+        this.reloadAllocations();
+
+        this.loading = false;
+        if (this.viewMode === 'production') {
+          setTimeout(() => {
+            document.getElementById('productionTop')
+              ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
+        }
+        },
+      error: () => { this.notFound = true; this.loading = false; }
+    });
+  }
   // =================== Image (upload + cache-bust) ===================
   onPickImage(evt: Event, commandeId: number): void {
     const input = evt.target as HTMLInputElement;
@@ -184,7 +225,10 @@ export class DetailCommandeComponent implements OnInit {
       longueur: this.toNum(view.longueur, 0),
       grammage: this.toNum(view.grammage, 0),
       soufflet: this.toNum(view.soufflet, 0),
-
+  prixKilo: this.toNum(view.prixKilo, 0),
+  marge : this.toNum(view.marge,0),
+   tauxPerte : this.toNum(view.tauxPerte,0),
+   nombreDePieceParColis : this.toNum(view.nombreDePieceParColis,0), 
       // champs attendus par le back
       typeSac,
       plilongueur: this.toNum(this.pliLTmp, 0),
@@ -227,10 +271,12 @@ export class DetailCommandeComponent implements OnInit {
       ...this.commande,
       poidsPoigner: this.hasPoigner ? this.toNum(this.poidsPoignerTmp, 0) : 0,
       soufflet:     this.hasSoufflet ? this.toNum(this.souffletTmp, 0)     : 0,
+      prixKilo : this.commande.prixKilo,tauxPerte : this.commande.tauxPerte, nombreDePieceParColis : this.commande.nombreDePieceParColis
+      
     };
 
     const payload = this.viewToApiPayload(commandeAEnvoyer);
-
+    console.log(this.commande)
     this.svc.update(payload).subscribe({
       next: () => {
         this.toast.add({ severity: 'success', summary: 'Mis à jour', detail: 'Commande modifiée' });
@@ -246,6 +292,7 @@ export class DetailCommandeComponent implements OnInit {
 
         this.pliLTmp = payload.plilongueur ?? 0;
         this.pliWTmp = payload.plilargeur  ?? 0;
+        this.getCommandeById(); 
 
         this.getRouleaux();
       },
@@ -320,6 +367,13 @@ export class DetailCommandeComponent implements OnInit {
     });
   }
 
+  getNombreDeColis(qte : number , nbPiece : number){
+    if ( qte > 0 && nbPiece > 0){
+      return Math.round(qte / nbPiece); 
+    }else {
+      return 0 ; 
+    }
+  }
   reserver(rouleauId: number | null, poids: number | null): void {
     if (!this.commande?.id) return;
     if (!rouleauId || !poids || poids <= 0) {

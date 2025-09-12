@@ -196,6 +196,134 @@
                     [style]="{ width: '110px' }"/>
             </div>
           </div>
+            <p-divider></p-divider>
+
+          <h5 class="muted mb-2">Prix ( € )</h5>
+          <div style="display:flex; gap:.75rem; align-items:flex-end; flex-wrap:wrap;">
+            <div>
+              <label style="font-size:.82rem; color:#6b7280; display:block; margin-bottom:.2rem;">
+                Par Kilo
+              </label>
+              <p-inputNumber
+                inputId="dimW"
+                [(ngModel)]="c.prixKilo"
+                [min]="0" [mode]="'decimal'"
+                [minFractionDigits]="0" [maxFractionDigits]="5"
+                [locale]="'en-US'" [useGrouping]="false"
+              
+                [inputStyle]="{ width: '90px' }">
+              </p-inputNumber>
+            </div>
+                <div>
+              <label style="font-size:.82rem; color:#6b7280; display:block; margin-bottom:.2rem;">
+                Par Unité
+              </label>
+              <input pInputText class="compact-text" [readonly]="true"
+                    [value]="c.prixUnitaire?.toFixed(5)"
+                    [style]="{ width: '110px' }"/>
+            </div>
+             <div>
+              <label style="font-size:.82rem; color:#6b7280; display:block; margin-bottom:.2rem;">
+                Marge
+              </label>
+              <p-inputNumber
+                inputId="dimW"
+                [(ngModel)]="c.marge"
+                [min]="0" [mode]="'decimal'"
+                [minFractionDigits]="0" [maxFractionDigits]="5"
+                [locale]="'en-US'" [useGrouping]="false"
+              
+                [inputStyle]="{ width: '90px' }">
+              </p-inputNumber>
+            </div>
+        
+             <div>
+              <label style="font-size:.82rem; color:#6b7280; display:block; margin-bottom:.2rem;">
+                Par Unité + Marge
+              </label>
+              <input pInputText class="compact-text" [readonly]="true"
+                    [value]="c.prixUnitaireAvecMarge?.toFixed(5)"
+                    [style]="{ width: '110px' }"/>
+            </div>
+               <div>
+              <label style="font-size:.82rem; color:#6b7280; display:block; margin-bottom:.2rem;">
+                Taux de perte
+              </label>
+            <p-inputNumber
+  inputId="dimW"
+  [(ngModel)]="c.tauxPerte"
+  [min]="0"
+  mode="decimal"
+  [minFractionDigits]="0"
+  [maxFractionDigits]="2"
+  [locale]="'en-US'"
+  [useGrouping]="false"
+  suffix="%"
+  [inputStyle]="{ width: '100px' }">
+</p-inputNumber>
+
+            </div>
+                 <div>
+              <label style="font-size:.82rem; color:#6b7280; display:block; margin-bottom:.2rem;">
+                Par Unité + Perte
+              </label>
+              <input pInputText class="compact-text" [readonly]="true"
+                    [value]="c.prixUnitaireAvecPerte?.toFixed(5)"
+                    [style]="{ width: '110px' }"/>
+            </div>
+                  <div>
+              <label style="font-size:.82rem; color:#6b7280; display:block; margin-bottom:.2rem;">
+                Par Unité + Marge + Perte
+              </label>
+              <input pInputText class="compact-text" [readonly]="true"
+                    [value]="c.prixUnitaireAvecMargeEtPerte?.toFixed(5)"
+                    [style]="{ width: '110px' }"/>
+            </div>
+          </div>
+           <p-divider></p-divider>
+
+          <h5 class="muted mb-2">Colisage</h5>
+          <div style="display:flex; gap:.75rem; align-items:flex-end; flex-wrap:wrap;">
+            <div>
+              <label style="font-size:.82rem; color:#6b7280; display:block; margin-bottom:.2rem;">
+                Nb pièce par colis
+              </label>
+                <p-inputNumber
+                inputId="dimW"
+                [(ngModel)]="c.nombreDePieceParColis"
+                [min]="0" [mode]="'decimal'"
+                [minFractionDigits]="0" [maxFractionDigits]="0"
+                [locale]="'en-US'" [useGrouping]="false"
+              
+                [inputStyle]="{ width: '90px' }">
+              </p-inputNumber>
+            </div>
+            <div>
+              <label style="font-size:.82rem; color:#6b7280; display:block; margin-bottom:.2rem;">
+                Prix Colis
+              </label>
+        <div class="prix-colis-wrapper">
+
+  <input pInputText class="compact-text prix-colis-input"
+         [readonly]="true"
+         [value]="c.prixColis | number:'1.2-2':'fr-FR'"
+         [style]="{ width: '110px' }"/>
+</div>
+
+            </div>
+              <div>
+              <label style="font-size:.82rem; color:#6b7280; display:block; margin-bottom:.2rem;">
+                Nombre de Colis
+              </label>
+        <div class="prix-colis-wrapper">
+
+  <input pInputText class="compact-text nb-colis-input"
+         [readonly]="true"
+         [value]="getNombreDeColis(c.quantite,c.nombreDePieceParColis) | number:'1.2-2':'fr-FR'"
+         [style]="{ width: '110px' }"/>  
+</div>
+</div>
+          </div>
         </section>
 
         <!-- COL 3 : Options -->

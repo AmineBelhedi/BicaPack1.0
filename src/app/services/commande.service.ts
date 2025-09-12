@@ -23,6 +23,10 @@ export class CommandeService {
 
   /* CRUD */
   getAll(): Observable<CommandeDTO[]> { return this.http.get<CommandeDTO[]>(this.baseUrl); }
+  getAllOkFacturation(): Observable<CommandeDTO[]> { return this.http.get<CommandeDTO[]>(`${this.baseUrl}/facturees`); }
+  getAllOkExport(): Observable<CommandeDTO[]> { return this.http.get<CommandeDTO[]>(`${this.baseUrl}/exporte`); }
+  getAllNonExportNonFacturation(): Observable<CommandeDTO[]> { return this.http.get<CommandeDTO[]>(`${this.baseUrl}/non-facturees-et-non-exporte`); }
+
   getById(id: number): Observable<CommandeDTO> { return this.http.get<CommandeDTO>(`${this.baseUrl}/${id}`); }
   create(payload: CommandeDTO): Observable<CommandeDTO> { return this.http.post<CommandeDTO>(this.baseUrl, payload); }
   update(payload: CommandeDTO): Observable<CommandeDTO> { return this.http.put<CommandeDTO>(`${this.baseUrl}/${payload.id}`, payload); }
@@ -50,6 +54,13 @@ export class CommandeService {
   getAllocations(commandeId: number): Observable<RouleauCommandeDTO[]> {
     return this.http.get<RouleauCommandeDTO[]>(`${this.baseUrl}/${commandeId}/allocations`);
   }
+getByExportStatus(status: string): Observable<CommandeDTO[]> {
+  return this.http.get<CommandeDTO[]>(`${this.baseUrl}/export-status/${status}`);
+}
+
+updateExportStatus(commandeId: number, status: string): Observable<string> {
+  return this.http.put(`${this.baseUrl}/${commandeId}/export-status?status=${status}`, null, { responseType: 'text' });
+}
 
   uploadImage(commandeId: number, file: File): Observable<void> {
     const form = new FormData();
@@ -57,33 +68,32 @@ export class CommandeService {
     return this.http.post<void>(`${this.baseUrl}/${commandeId}/fichier/upload`, form);
   }
 
+  addAllocation(commandeId: number, payload: { rouleauId: number; poidsReserve: number }) {
+    return this.http.post<RouleauCommandeDTO>(
+      `${this.baseUrl}/${commandeId}/allocations`,
+      payload
+    );
+  }
 
+  consumeAllocation(commandeId: number, allocationId: number) {
+    return this.http.post<RouleauCommandeDTO>(
+      `${this.baseUrl}/${commandeId}/allocations/${allocationId}/consommer`,
+      null
+    );
+  }
 
+  deleteAllocation(commandeId: number, allocationId: number) {
+    return this.http.delete<void>(
+      `${this.baseUrl}/${commandeId}/allocations/${allocationId}`
+    );
+  }
 
+  /* === ✅ Nouveaux endpoints === */
+  updateExport(commandeId: number, okExport: boolean): Observable<string> {
+    return this.http.put(`${this.baseUrl}/${commandeId}/export?okExport=${okExport}`, null, { responseType: 'text' });
+  }
 
-  // models déjà présents:
-// export interface RouleauCommandeDTO { id:number; commandeId:number; rouleauId:number; poidsReserve:number; etat:'RESERVED'|'CONSUMED'|'CANCELED'; ... }
-
-addAllocation(commandeId: number, payload: { rouleauId: number; poidsReserve: number }) {
-  return this.http.post<RouleauCommandeDTO>(
-    `${this.baseUrl}/${commandeId}/allocations`,
-    payload
-  );
-}
-
-consumeAllocation(commandeId: number, allocationId: number) {
-  // marque une allocation comme CONSUMED
-  return this.http.post<RouleauCommandeDTO>(
-    `${this.baseUrl}/${commandeId}/allocations/${allocationId}/consommer`,
-    null
-  );
-}
-
-// (optionnel) supprimer une allocation
-deleteAllocation(commandeId: number, allocationId: number) {
-  return this.http.delete<void>(
-    `${this.baseUrl}/${commandeId}/allocations/${allocationId}`
-  );
-}
-
+  updateFacturation(commandeId: number, okFacturation: boolean): Observable<string> {
+    return this.http.put(`${this.baseUrl}/${commandeId}/facturation?okFacturation=${okFacturation}`, null, { responseType: 'text' });
+  }
 }

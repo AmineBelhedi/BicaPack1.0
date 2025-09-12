@@ -18,6 +18,7 @@ import { ToastModule } from 'primeng/toast';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { CalendarModule } from 'primeng/calendar';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { ImportDetailsRoutingModule } from './import-details-routing.module';
 
 
 @NgModule({
@@ -25,7 +26,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
   imports: [
     CommonModule,
     FormsModule,
-   
+    ImportDetailsRoutingModule,
     TableModule,
     ButtonModule,
     ToastModule, 

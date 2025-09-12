@@ -19,8 +19,8 @@
               <i class="pi pi-briefcase text-2xl text-white"></i>
             </div>
             <div>
-              <h2 class="m-0">Commandes</h2>
-              <small class="text-600">Gestion & suivi des commandes</small>
+              <h2 class="m-0">COMMANDES EN FACTURATION</h2>
+              <small class="text-600">Suivi des commandes en facturations</small>
             </div>
           </div>
 
@@ -41,9 +41,9 @@
       <div class="filters px-5 py-3">
         <div class="filters-row">
           <div class="filters-left">
-            <button pButton pRipple label="Nouveau" icon="pi pi-plus"
+            <!-- <button pButton pRipple label="Nouveau" icon="pi pi-plus"
                     class="p-button-success p-button-sm"
-                    (click)="openNew()"></button>
+                    (click)="openNew()"></button> -->
 
             <!--<button pButton pRipple label="Supprimer" icon="pi pi-trash"
                     class="p-button-danger p-button-sm"
@@ -140,7 +140,7 @@
               <!-- header -->
               <th class="th-produced text-right">
                 <div class="th-line is-right">
-                  <span class="th-title"><i class="pi pi-cog"></i> Quantité Produite</span>
+                  <span class="th-title"><i class="pi pi-euro"></i> Prix Unité</span>
                 </div>
               </th>
 
@@ -148,9 +148,8 @@
               <th class="th-weight text-right">
                 <div class="th-line is-right">
                   <span class="th-title">
-                    <i class="pi pi-weight"></i>
-                    Poids (unité)
-                  </span>
+                    <i class="pi pi-money-bill"></i>
+                    Prix Total                  </span>
                 </div>
               </th>
 
@@ -197,11 +196,11 @@
 
               <!-- quantité produite -->
               <td class="td-produced text-right mono">
-                {{ (c.prodTotal || 0) | number:'1.0-0':'fr-FR' }} <!-- CHANGED -->
+                {{ c.prixUnitaire.toFixed(5)  }} €<!-- CHANGED -->
               </td>
 
               <!-- Poids -->
-              <td class="td-weight text-right mono">{{ formatGrams(calculPoidsUnitaireFromRow(c)) }}</td>
+              <td class="td-weight text-right mono">{{ c.prixTotal?.toFixed(4)}} €</td>
 
               <!-- Image -->
               <td class="td-image">
@@ -223,38 +222,38 @@
 </button>
 
 <!-- Bouton Production -->
-<button pButton pRipple icon="pi pi-chart-line"
+<!-- <button pButton pRipple icon="pi pi-chart-line"
         class="p-button-rounded p-button-sm p-button-warning"
         pTooltip="Production"
         [routerLink]="['/pages/detail-commande', c.id]"
         [queryParams]="{ view: 'production' }">
-</button>
+</button> -->
 
 <!-- Bouton Modifier -->
-<button pButton pRipple icon="pi pi-pencil"
+<!-- <button pButton pRipple icon="pi pi-pencil"
         class="p-button-rounded p-button-sm p-button-success"
         (click)="edit(c)"
         pTooltip="Modifier">
-</button>
+</button> -->
 
 <!-- Bouton Supprimer -->
-<button pButton pRipple icon="pi pi-trash"
+<!-- <button pButton pRipple icon="pi pi-trash"
         class="p-button-rounded p-button-sm p-button-danger"
         (click)="askDelete($event, c)"
         pTooltip="Supprimer">
-</button>
+</button> -->
 <!-- ✅ Nouveau bouton Facturer -->
 <button pButton pRipple icon="pi pi-receipt" tooltipPosition="left" 
-        class="p-button-rounded p-button-sm p-button-primary"
+        class="p-button-rounded p-button-sm p-button-danger"
         (click)="confirmerFacturation(c.id)"
-        pTooltip="Facturation">
+        pTooltip="Annuler Facturation">
 </button>
 <!-- ✅ Nouveau bouton Exporter -->
-<!-- <button pButton pRipple icon="pi pi-upload"
+<button pButton pRipple icon="pi pi-upload"
         class="p-button-rounded p-button-sm p-button-secondary"
         (click)="confirmerExport(c.id)"
         pTooltip="Exporter">
-</button> -->
+</button>
 
 
 
@@ -277,7 +276,15 @@
       
       <!-- ================= ADDED: CARD VIEW ================= -->
       <div class="px-5 pb-4 cards-section" *ngIf="viewMode==='card'">
-        <div class="grid cards-row">
+
+          <div *ngIf="!cardsSlice || cardsSlice.length === 0" class="no-data">
+    <p class="text-center text-muted py-5">
+      <i class="pi pi-info-circle mr-2"></i> Aucune Commande en facturation
+    </p>
+  </div>
+
+        <div class="grid cards-row" *ngIf="cardsSlice && cardsSlice.length > 0">
+   
           <!-- 🔁 pagination côté TS via cardsSlice -->
           <div class="col-12 sm:col-6 lg:col-4 xl:col-3" *ngFor="let c of cardsSlice">
             <p-card class="cmd-card">
@@ -315,9 +322,9 @@
                 </div>
 
                 <div class="meta">
-                  <span class="muted">Poids (unité):</span>
+                  <span class="muted">Prix Total</span>
                   <span class="meta-item">
-                    <i class="pi pi-weight"></i>{{ formatGrams(calculPoidsUnitaireFromRow(c)) }}
+                    <i class="pi pi-weight"></i>{{ c.prixTotal?.toFixed(4)}} €
                   </span>
                 </div>
 
@@ -349,23 +356,20 @@
                 <div class="actions">
                   <button pButton pRipple icon="pi pi-eye" class="p-button-rounded p-button-sm p-button-info" tooltipPosition="top" 
                           pTooltip="Détails" [routerLink]="['/pages/detail-commande', c.id]"></button>
-                  <button pButton pRipple icon="pi pi-chart-line" class="p-button-rounded p-button-sm p-button-warning"tooltipPosition="top" 
-                          pTooltip="Production" [routerLink]="['/pages/detail-commande', c.id]"
-                          [queryParams]="{ view: 'production' }"></button>
-                  <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-sm p-button-success"tooltipPosition="top" 
-                          (click)="edit(c)" pTooltip="Modifier"></button>
-                  <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-sm p-button-danger" tooltipPosition="top" 
-                          (click)="askDelete($event, c)" pTooltip="Supprimer"></button>
-                          <button pButton pRipple icon="pi pi-receipt" tooltipPosition="top" 
-        class="p-button-rounded p-button-sm p-button-primary"
+                  
+            
+              
+                   <button pButton pRipple icon="pi pi-receipt" tooltipPosition="left" 
+        class="p-button-rounded p-button-sm p-button-danger"
         (click)="confirmerFacturation(c.id)"
-        pTooltip="Facturation">
+        pTooltip="Annuler Facturation">
 </button>
-                          <!-- <button pButton pRipple icon="pi pi-upload"
+<!-- ✅ Nouveau bouton Exporter -->
+<button pButton pRipple icon="pi pi-upload"
         class="p-button-rounded p-button-sm p-button-secondary"
-        (click)="confirmerExport(c.id)" tooltipPosition="top" 
+        (click)="confirmerExport(c.id)"
         pTooltip="Exporter">
-</button> -->
+</button>
 
 <!-- ✅ Nouveau bouton Facturer -->
 
@@ -517,3 +521,31 @@
     </p-dialog>
   </div>
 </div>
+
+
+
+
+<p-dialog header="Mise à jour Export"
+          [(visible)]="exportDialogVisible"
+          [modal]="true"
+          [closable]="true"
+          [style]="{width: '400px'}">
+
+  <div class="p-fluid">
+    <div class="field">
+      <label for="status">Statut export</label>
+      <p-dropdown 
+        id="status"
+        [options]="exportStatusOptions"
+        appendTo="body"
+        [(ngModel)]="selectedExportStatus"
+        placeholder="Choisir un statut">
+      </p-dropdown>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="exportDialogVisible=false"></button>
+    <button pButton label="Valider" icon="pi pi-check" (click)="validerExport()" [disabled]="!selectedExportStatus"></button>
+  </ng-template>
+</p-dialog>

@@ -329,3 +329,37 @@
               [disabled]="!effectifStToEdit?.productionDujour"></p-button>
   </ng-template>
 </p-dialog>
+
+<p-dialog [(visible)]="absDialog.visible" [modal]="true" [closable]="!absDialog.saving" [style]="{width:'430px'}"
+  header="Enregistrer une absence">
+  <div class="p-fluid">
+    <div class="field">
+      <label>Type d'absence</label>
+      <div class="flex gap-3">
+        <p-radioButton name="type" inputId="auth" value="AUTORISEE" [(ngModel)]="absDialog.model.type"></p-radioButton>
+        <label for="auth" class="mr-4">Autorisée</label>
+        <p-radioButton name="type" inputId="na" value="NON_AUTORISEE"
+          [(ngModel)]="absDialog.model.type"></p-radioButton>
+        <label for="na">Non autorisée</label>
+      </div>
+    </div>
+
+    <div class="field" *ngIf="absDialog.model.type==='AUTORISEE'">
+      <label for="reason">Raison</label>
+      <p-dropdown inputId="reason" [options]="authorizedReasons" optionLabel="label" optionValue="value"
+        [(ngModel)]="absDialog.model.reason" placeholder="Choisir une raison"></p-dropdown>
+    </div>
+
+    <div class="field">
+      <label for="note">Note (facultatif)</label>
+      <textarea id="note" pInputTextarea rows="3" [(ngModel)]="absDialog.model.note"></textarea>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton label="Annuler" class="p-button-text" (click)="closeAbsDialog()"
+      [disabled]="absDialog.saving"></button>
+    <button pButton label="Enregistrer" icon="pi pi-check" (click)="confirmAbsence()"
+      [disabled]="absDialog.saving || !canSaveAbsDialog()"></button>
+  </ng-template>
+</p-dialog>

@@ -16,4 +16,18 @@ export interface CommandeDTO {
   poidsNecessaire?: number;
   poidsReserve?: number;
   poidsConsomme?: number;
+  okExport ?: boolean ; 
+  okFacturation ?: boolean ; 
+  exportStatus ?: string ; 
+  poidsUnitaire ?: number ; 
+  prixUnitaire?: number ; 
+  prixUnitaireAvecMarge ?: number ; 
+  prixUnitaireAvecPerte ?: number ; 
+  prixUnitaireAvecMargeEtPerte ?: number ; 
+  nombreDePieceParColis ?: number ; 
+  prixColis ?: number ; 
+  tauxPerte ?: number ; 
+  prixKilo ?: number ; 
+  prixTotal ?: number ; 
+  marge ?: number ; 
 }

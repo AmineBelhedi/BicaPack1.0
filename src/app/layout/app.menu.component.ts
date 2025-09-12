@@ -33,6 +33,27 @@ export class AppMenuComponent implements OnInit {
 
                 ]
             },
+              {
+                label: 'Facturation & Export',
+                items: [
+                          {
+                                label: 'Facturation',
+                                icon: 'pi pi-receipt',
+                                routerLink: ['/pages/facturation-commandes'],
+                            },
+                            {
+                                label: 'Exportées',
+                                icon: 'pi pi-truck',
+                                routerLink: ['/pages/exportation-commandes'],
+                            },
+                            //  {
+                            //     label: 'Comptes',
+                            //     icon: 'pi pi-fw pi-receipt',
+                            //     routerLink: ['/pages/comptes-comptable'],
+                            // },
+                ],
+                
+            },
             {
                 label: 'STOCK',
                 items: [
@@ -53,27 +74,7 @@ export class AppMenuComponent implements OnInit {
             //         },
             //     ]
             // },
-              {
-                label: 'Comptabilité',
-                items: [
-                          {
-                                label: 'Achats',
-                                icon: 'pi pi-receipt',
-                                routerLink: ['/pages/factures-achat'],
-                            },
-                            {
-                                label: 'Ventes',
-                                icon: 'pi pi-receipt',
-                                routerLink: ['/pages/factures-vente'],
-                            },
-                            //  {
-                            //     label: 'Comptes',
-                            //     icon: 'pi pi-fw pi-receipt',
-                            //     routerLink: ['/pages/comptes-comptable'],
-                            // },
-                ],
-                
-            },
+            
                 {
                 label: 'GRH',
                 items: [
@@ -86,6 +87,27 @@ export class AppMenuComponent implements OnInit {
                                 label: 'Fiche Présence',
                                 icon: 'pi  pi-address-book',
                                 routerLink: ['/pages/attendance-presence/1'],
+                            },
+                            //  {
+                            //     label: 'Comptes',
+                            //     icon: 'pi pi-fw pi-receipt',
+                            //     routerLink: ['/pages/comptes-comptable'],
+                            // },
+                ],
+                
+            },
+              {
+                label: 'Comptabilité',
+                items: [
+                          {
+                                label: 'Achats',
+                                icon: 'pi pi-receipt',
+                                routerLink: ['/pages/factures-achat'],
+                            },
+                            {
+                                label: 'Ventes',
+                                icon: 'pi pi-receipt',
+                                routerLink: ['/pages/factures-vente'],
                             },
                             //  {
                             //     label: 'Comptes',

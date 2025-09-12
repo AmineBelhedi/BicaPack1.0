@@ -19,7 +19,7 @@
               <i class="pi pi-briefcase text-2xl text-white"></i>
             </div>
             <div>
-              <h2 class="m-0">Commandes</h2>
+              <h2 class="m-0">     COMMANDES EXPORTÉES</h2>
               <small class="text-600">Gestion & suivi des commandes</small>
             </div>
           </div>
@@ -41,10 +41,14 @@
       <div class="filters px-5 py-3">
         <div class="filters-row">
           <div class="filters-left">
-            <button pButton pRipple label="Nouveau" icon="pi pi-plus"
-                    class="p-button-success p-button-sm"
-                    (click)="openNew()"></button>
-
+            <label for="exportStatus" class="font-bold">Filtrer par statut d’export :</label>
+  <p-dropdown 
+    id="exportStatus"
+    [options]="exportStatusOptionsFiltre"
+    [(ngModel)]="selectedStatus"
+    placeholder="Choisir un statut"
+    (onChange)="getByExportStatus()">
+  </p-dropdown>
             <!--<button pButton pRipple label="Supprimer" icon="pi pi-trash"
                     class="p-button-danger p-button-sm"
                     (click)="deleteSelected()"
@@ -138,11 +142,7 @@
                 </div>
               </th>
               <!-- header -->
-              <th class="th-produced text-right">
-                <div class="th-line is-right">
-                  <span class="th-title"><i class="pi pi-cog"></i> Quantité Produite</span>
-                </div>
-              </th>
+           
 
               <!-- Poids (non triable) -->
               <th class="th-weight text-right">
@@ -153,7 +153,11 @@
                   </span>
                 </div>
               </th>
-
+   <th class="th-produced text-right">
+                <div class="th-line is-right">
+                  <span class="th-title"><i class="pi pi-cog"></i> Status</span>
+                </div>
+              </th>
               <!-- Image -->
               <th class="th-image">
                 <div class="th-line">
@@ -196,12 +200,17 @@
               </td>
 
               <!-- quantité produite -->
-              <td class="td-produced text-right mono">
-                {{ (c.prodTotal || 0) | number:'1.0-0':'fr-FR' }} <!-- CHANGED -->
-              </td>
+            
 
               <!-- Poids -->
               <td class="td-weight text-right mono">{{ formatGrams(calculPoidsUnitaireFromRow(c)) }}</td>
+<td class="td-produced text-right mono">
+  <p-tag 
+    [value]="c.exportStatus" 
+    [severity]="getExportSeverity(c.exportStatus)" 
+    styleClass="px-3 py-1 text-sm border-round">
+  </p-tag>
+</td>
 
               <!-- Image -->
               <td class="td-image">
@@ -223,38 +232,33 @@
 </button>
 
 <!-- Bouton Production -->
-<button pButton pRipple icon="pi pi-chart-line"
+<!-- <button pButton pRipple icon="pi pi-chart-line"
         class="p-button-rounded p-button-sm p-button-warning"
         pTooltip="Production"
         [routerLink]="['/pages/detail-commande', c.id]"
         [queryParams]="{ view: 'production' }">
-</button>
+</button> -->
 
 <!-- Bouton Modifier -->
-<button pButton pRipple icon="pi pi-pencil"
+<!-- <button pButton pRipple icon="pi pi-pencil"
         class="p-button-rounded p-button-sm p-button-success"
         (click)="edit(c)"
         pTooltip="Modifier">
-</button>
+</button> -->
 
 <!-- Bouton Supprimer -->
-<button pButton pRipple icon="pi pi-trash"
-        class="p-button-rounded p-button-sm p-button-danger"
-        (click)="askDelete($event, c)"
-        pTooltip="Supprimer">
-</button>
-<!-- ✅ Nouveau bouton Facturer -->
-<button pButton pRipple icon="pi pi-receipt" tooltipPosition="left" 
-        class="p-button-rounded p-button-sm p-button-primary"
-        (click)="confirmerFacturation(c.id)"
-        pTooltip="Facturation">
+
+<button pButton pRipple icon="pi pi-times"
+        class="p-button-rounded p-button-sm p-button-danger"tooltipPosition="left" 
+         (click)="annulerExport(c.id)"
+        pTooltip="Retour Facturation">
 </button>
 <!-- ✅ Nouveau bouton Exporter -->
-<!-- <button pButton pRipple icon="pi pi-upload"
-        class="p-button-rounded p-button-sm p-button-secondary"
-        (click)="confirmerExport(c.id)"
-        pTooltip="Exporter">
-</button> -->
+<button pButton pRipple icon="pi pi-info"
+        class="p-button-rounded p-button-sm p-button-success"tooltipPosition="left" 
+         (click)="confirmerExport(c.id)"
+        pTooltip="Export">
+</button>
 
 
 
@@ -321,27 +325,22 @@
                   </span>
                 </div>
 
-                <!-- Progress production -->
-                <div class="progress-wrap" *ngIf="c.quantite">
-                  <div class="progress-row">
-                    <span class="label">Avancement</span>
-                    <span class="value mono">
-                      {{(c.prodTotal || 0) | number:'1.0-0':'fr-FR' }}/{{ c.quantite | number:'1.0-0':'fr-FR' }}
-                    </span>
-                  </div>
-                  <div class="progress">
-                    <div class="bar"
-                        [style.width.%]="((c.prodTotal || 0) / c.quantite) * 100"
-                        [ngClass]="{
-                          'is-green': ((c.prodTotal || 0) / c.quantite) >= 0.5 && ((c.prodTotal || 0) / c.quantite) < 1,
-                          'is-complete': ((c.prodTotal || 0) / c.quantite) >= 1
-                        }">
-                    </div>
-                  </div>
-                  <div class="today" *ngIf="(c.prodToday || 0) > 0">
-                    <i class="pi pi-bolt"></i> {{ (c.prodToday || 0) | number:'1.0-0':'fr-FR' }} aujourd’hui
-                  </div>
+                <div class="meta">
+                  <span class="muted">Quantité :</span>
+                  <span class="meta-item">
+                    <i class="pi pi-weight"></i>{{ c.quantite | number:'1.0-0':'fr-FR'}}
+                  </span>
                 </div>
+
+                <!-- Progress production -->
+            <div class="etat-export">
+  <p-tag 
+    [value]="c.exportStatus" 
+    [severity]="getExportSeverity(c.exportStatus)" 
+    styleClass="px-3 py-1 text-sm border-round">
+  </p-tag>
+</div>
+
 
                 <div class="divider"></div>
 
@@ -349,24 +348,18 @@
                 <div class="actions">
                   <button pButton pRipple icon="pi pi-eye" class="p-button-rounded p-button-sm p-button-info" tooltipPosition="top" 
                           pTooltip="Détails" [routerLink]="['/pages/detail-commande', c.id]"></button>
-                  <button pButton pRipple icon="pi pi-chart-line" class="p-button-rounded p-button-sm p-button-warning"tooltipPosition="top" 
-                          pTooltip="Production" [routerLink]="['/pages/detail-commande', c.id]"
-                          [queryParams]="{ view: 'production' }"></button>
-                  <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-sm p-button-success"tooltipPosition="top" 
-                          (click)="edit(c)" pTooltip="Modifier"></button>
-                  <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-sm p-button-danger" tooltipPosition="top" 
-                          (click)="askDelete($event, c)" pTooltip="Supprimer"></button>
-                          <button pButton pRipple icon="pi pi-receipt" tooltipPosition="top" 
-        class="p-button-rounded p-button-sm p-button-primary"
-        (click)="confirmerFacturation(c.id)"
-        pTooltip="Facturation">
+              
+                   <button pButton pRipple icon="pi pi-times"
+        class="p-button-rounded p-button-sm p-button-danger"tooltipPosition="left" 
+         (click)="annulerExport(c.id)"
+        pTooltip="Retour Facturation">
 </button>
-                          <!-- <button pButton pRipple icon="pi pi-upload"
-        class="p-button-rounded p-button-sm p-button-secondary"
-        (click)="confirmerExport(c.id)" tooltipPosition="top" 
-        pTooltip="Exporter">
-</button> -->
-
+<!-- ✅ Nouveau bouton Exporter -->
+<button pButton pRipple icon="pi pi-info"
+        class="p-button-rounded p-button-sm p-button-success"tooltipPosition="left" 
+         (click)="confirmerExport(c.id)"
+        pTooltip="Export">
+</button>
 <!-- ✅ Nouveau bouton Facturer -->
 
                 </div>
@@ -517,3 +510,30 @@
     </p-dialog>
   </div>
 </div>
+
+
+
+<p-dialog header="Mise à jour Export"
+          [(visible)]="exportDialogVisible"
+          [modal]="true"
+          [closable]="true"
+          [style]="{width: '400px'}">
+
+  <div class="p-fluid">
+    <div class="field">
+      <label for="status">Statut export</label>
+      <p-dropdown 
+        id="status"
+        [options]="exportStatusOptions"
+         appendTo="body"
+        [(ngModel)]="selectedExportStatus"
+        placeholder="Choisir un statut">
+      </p-dropdown>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton label="Annuler" icon="pi pi-times" class="p-button-text" (click)="exportDialogVisible=false"></button>
+    <button pButton label="Valider" icon="pi pi-check" (click)="validerExport()" [disabled]="!selectedExportStatus"></button>
+  </ng-template>
+</p-dialog>

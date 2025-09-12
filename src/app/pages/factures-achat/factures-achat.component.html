@@ -210,14 +210,16 @@
   <div class="px-3 py-2 bg-green-50 border border-green-200 rounded-lg shadow-sm text-center flex-1">
     <div class="text-xs text-green-700 font-semibold">Total TND</div>
     <div class="text-lg font-bold text-green-900">
-      {{ totaux['TND'] | number:'1.2-2' }} TND
+      {{ totaux['TND']| number:'1.3-3':'fr-FR'
+ }} TND
     </div>
   </div>
 
   <div class="px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg shadow-sm text-center flex-1">
     <div class="text-xs text-blue-700 font-semibold">Total EUR</div>
     <div class="text-lg font-bold text-blue-900">
-      {{ totaux['EUR'] | number:'1.2-2' }} EUR
+      {{ totaux['EUR'] | number:'1.3-3':'fr-FR'
+ }} EUR
     </div>
   </div>
 </div>
@@ -264,11 +266,11 @@
         <ng-template pTemplate="body" let-facture>
           <tr>
             <td><b>{{ facture.numeroFacture || '-' }} </b></td>
-            <td><b>{{ facture?.dateFacture | date: 'shortDate' }}</b></td>
+            <td><b>{{ facture?.dateFacture | date: 'dd/MM/yyyy' }}</b></td>
             <td>{{ facture?.fournisseur?.nom || '-' }}</td>
        
         
-       <td><b>{{ facture?.datePaiement ? (facture.datePaiement | date:'shortDate') : '-' }}</b></td>
+       <td><b>{{ facture?.datePaiement ? (facture.datePaiement | date: 'dd/MM/yyyy') : '-' }}</b></td>
 
       
 
@@ -276,7 +278,8 @@
 
             <td><b>{{ facture?.modePaiement || '-'}} </b></td>
                    <td>
-              {{ facture.netAPayer ?? facture.totalTTC | number:'1.2-2' }} {{ facture.devise }}
+              {{ facture.netAPayer ?? facture.totalTTC| number:'1.3-3':'fr-FR'
+ }} {{ facture.devise }}
             </td>
             <td>
               <div class="flex">
@@ -294,7 +297,8 @@
           <tr>
             <td colspan="4" class="text-right font-bold">Total TND :</td>
             <td class="text-left font-bold text-green-600">
-              {{ getTotalByDevise('TND') | number:'1.2-2' }} TND
+              {{ getTotalByDevise('TND') | number:'1.3-3':'fr-FR'
+ }} TND
             </td>
             <td colspan="3"></td>
           </tr>
@@ -302,7 +306,8 @@
           <tr>
             <td colspan="4" class="text-right font-bold">Total EUR :</td>
             <td class="text-left font-bold text-blue-600">
-              {{ getTotalByDevise('EUR') | number:'1.2-2' }} EUR
+              {{ getTotalByDevise('EUR') | number:'1.3-3':'fr-FR'
+ }} EUR
             </td>
             <td colspan="3"></td>
           </tr>
@@ -486,7 +491,8 @@
                     <!-- <td><input type="number" pInputText [(ngModel)]="ligne.tot" /></td> -->
                     <!-- <td>{{ (ligne.quantite * ligne.prixUnitaire  * (1 + ligne.taxe/100))* (1 - ligne.reduction/100) | number:'1.2-2' }}</td>
                      -->
-                     <td>{{ getTotalLigne(ligne) | number:'1.2-2' }}</td>
+                     <td>{{ getTotalLigne(ligne) | number:'1.3-3':'fr-FR'
+ }}</td>
       
                     <td class="text-center">
                       <div class="flex justify-content-center gap-2">
@@ -516,36 +522,44 @@
                 <div class="text-right text-sm">
                   <div>Total HT :
                     <b>
-                      {{ totalHT | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                      {{ totalHT| number:'1.3-3':'fr-FR'
+ }} {{ nouvelleFacture.devise }}
                       <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
-                        ({{ (totalHT * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                        ({{ (totalHT * nouvelleFacture.cours) | number:'1.3-3':'fr-FR'
+ }} TND)
                       </span>
                     </b>
                   </div>
               
                   <div>TVA :
                     <b>
-                      {{ totalTVA | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                      {{ totalTVA | number:'1.3-3':'fr-FR'
+}} {{ nouvelleFacture.devise }}
                       <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
-                        ({{ (totalTVA * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                        ({{ (totalTVA * nouvelleFacture.cours) | number:'1.3-3':'fr-FR'
+}} TND)
                       </span>
                     </b>
                   </div>
               
                   <div>Réduction :
                     <b>
-                      {{ totalReduction | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                      {{ totalReduction | number:'1.3-3':'fr-FR'
+ }} {{ nouvelleFacture.devise }}
                       <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
-                        ({{ (totalReduction * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                        ({{ (totalReduction * nouvelleFacture.cours) | number:'1.3-3':'fr-FR'
+ }} TND)
                       </span>
                     </b>
                   </div>
               
                   <div>Total :
                     <b>
-                      {{ totalTTC | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                      {{ totalTTC| number:'1.3-3':'fr-FR'
+ }} {{ nouvelleFacture.devise }}
                       <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
-                        ({{ (totalTTC * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                        ({{ (totalTTC * nouvelleFacture.cours) | number:'1.3-3':'fr-FR'
+ }} TND)
                       </span>
                     </b>
                   </div>
@@ -554,9 +568,11 @@
                   <div *ngIf="nouvelleFacture.compteRetenue?.taux">
                     Retenue ({{ nouvelleFacture.compteRetenue.taux }}%) :
                     <b>
-                      {{ totalRetenue | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                      {{ totalRetenue| number:'1.3-3':'fr-FR'
+ }} {{ nouvelleFacture.devise }}
                       <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
-                        ({{ (totalRetenue * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                        ({{ (totalRetenue * nouvelleFacture.cours) | number:'1.3-3':'fr-FR'
+ }} TND)
                       </span>
                     </b>
                   </div>
@@ -565,9 +581,11 @@
                   <div class="mt-2 font-bold text-lg text-green-700">
                     Net à Payer :
                     <b>
-                      {{ netAPayer | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                      {{ netAPayer| number:'1.3-3':'fr-FR'
+ }} {{ nouvelleFacture.devise }}
                       <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
-                        ({{ (netAPayer * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                        ({{ (netAPayer * nouvelleFacture.cours)| number:'1.3-3':'fr-FR'
+ }} TND)
                       </span>
                     </b>
                   </div>
@@ -879,7 +897,8 @@
               <!-- <td><input type="number" pInputText [(ngModel)]="ligne.tot" /></td> -->
               <!-- <td>{{ (ligne.quantite * ligne.prixUnitaire  * (1 + ligne.taxe/100))* (1 - ligne.reduction/100) | number:'1.2-2' }}</td>
                -->
-               <td>{{ getTotalLigne(ligne) | number:'1.2-2' }}</td>
+               <td>{{ getTotalLigne(ligne) | number:'1.3-3':'fr-FR'
+ }}</td>
 
               <td class="text-center">
                 <div class="flex justify-content-center gap-2">
@@ -919,36 +938,44 @@
           <div class="text-right text-sm">
             <div>Total HT :
               <b>
-                {{ totalHT | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                {{ totalHT | number:'1.3-3':'fr-FR'
+}} {{ nouvelleFacture.devise }}
                 <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
-                  ({{ (totalHT * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                  ({{ (totalHT * nouvelleFacture.cours) | number:'1.3-3':'fr-FR'
+ }} TND)
                 </span>
               </b>
             </div>
         
             <div>TVA :
               <b>
-                {{ totalTVA | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                {{ totalTVA | number:'1.3-3':'fr-FR'
+ }} {{ nouvelleFacture.devise }}
                 <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
-                  ({{ (totalTVA * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                  ({{ (totalTVA * nouvelleFacture.cours) | number:'1.3-3':'fr-FR'
+ }} TND)
                 </span>
               </b>
             </div>
         
             <div>Réduction :
               <b>
-                {{ totalReduction | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                {{ totalReduction | number:'1.3-3':'fr-FR'
+ }} {{ nouvelleFacture.devise }}
                 <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
-                  ({{ (totalReduction * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                  ({{ (totalReduction * nouvelleFacture.cours) | number:'1.3-3':'fr-FR'
+ }} TND)
                 </span>
               </b>
             </div>
         
             <div>Total :
               <b>
-                {{ totalTTC | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                {{ totalTTC| number:'1.3-3':'fr-FR'
+ }} {{ nouvelleFacture.devise }}
                 <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
-                  ({{ (totalTTC * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                  ({{ (totalTTC * nouvelleFacture.cours)| number:'1.3-3':'fr-FR'
+}} TND)
                 </span>
               </b>
             </div>
@@ -957,9 +984,11 @@
             <div *ngIf="nouvelleFacture.compteRetenue?.taux">
               Retenue ({{ nouvelleFacture.compteRetenue.taux }}%) :
               <b>
-                {{ totalRetenue | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                {{ totalRetenue | number:'1.3-3':'fr-FR'
+}} {{ nouvelleFacture.devise }}
                 <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
-                  ({{ (totalRetenue * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                  ({{ (totalRetenue * nouvelleFacture.cours)| number:'1.3-3':'fr-FR'
+ }} TND)
                 </span>
               </b>
             </div>
@@ -968,9 +997,11 @@
             <div class="mt-2 font-bold text-lg text-green-700">
               Net à Payer :
               <b>
-                {{ netAPayer | number:'1.2-2' }} {{ nouvelleFacture.devise }}
+                {{ netAPayer| number:'1.3-3':'fr-FR'
+ }} {{ nouvelleFacture.devise }}
                 <span *ngIf="nouvelleFacture.devise === 'EUR' && nouvelleFacture.cours">
-                  ({{ (netAPayer * nouvelleFacture.cours) | number:'1.2-2' }} TND)
+                  ({{ (netAPayer * nouvelleFacture.cours)| number:'1.3-3':'fr-FR'
+}} TND)
                 </span>
               </b>
             </div>
@@ -1758,10 +1789,12 @@
               <td class="text-900">{{ l?.produit || '-' }}</td>
               <td class="text-700">{{ l?.description || '-' }}</td>
               <td class="text-center">{{ l?.quantite || 0 }}</td>
-              <td class="text-right">{{ l?.prixUnitaire | number:'1.2-2' }} {{ selectedFacture?.devise }}</td>
+              <td class="text-right">{{ l?.prixUnitaire| number:'1.3-3':'fr-FR'
+ }} {{ selectedFacture?.devise }}</td>
               <td class="text-center">{{ l?.taxe || 0 }}</td>
               <td class="text-center">{{ l?.reduction || 0 }}</td>
-              <td class="text-right">{{ getTotalLigne(l) | number:'1.2-2' }} {{ selectedFacture?.devise }}</td>
+              <td class="text-right">{{ getTotalLigne(l) | number:'1.3-3':'fr-FR'
+ }} {{ selectedFacture?.devise }}</td>
             </tr>
           </ng-template>
           <ng-template pTemplate="emptymessage">
@@ -1780,22 +1813,26 @@
 
           <div class="col-6 p-1 text-600 font-semibold">Total HT</div>
           <div class="col-6 p-1  text-right text-900 font-medium">
-            {{ selectedTotalHT | number:'1.2-2' }} {{ selectedFacture?.devise }}
+            {{ selectedTotalHT | number:'1.3-3':'fr-FR'
+}} {{ selectedFacture?.devise }}
           </div>
 
           <div class="col-6 p-1 text-600 font-semibold">TVA</div>
           <div class="col-6 p-1 text-right text-900 font-medium">
-            {{ selectedTotalTVA | number:'1.2-2' }} {{ selectedFacture?.devise }}
+            {{ selectedTotalTVA| number:'1.3-3':'fr-FR'
+ }} {{ selectedFacture?.devise }}
           </div>
 
           <div class="col-6 p-1 text-600 font-semibold">Réduction</div>
           <div class="col-6 p-1 text-right text-900 font-medium">
-            -{{ selectedTotalReduction | number:'1.2-2' }} {{ selectedFacture?.devise }}
+            -{{ selectedTotalReduction | number:'1.3-3':'fr-FR'
+ }} {{ selectedFacture?.devise }}
           </div>
 
           <div class="col-6 p-1 text-900 font-semibold text-lg">Total </div>
           <div class="col-6 p-1 text-right text-900 font-semibold text-lg">
-            {{ selectedTotalTTC | number:'1.2-2' }} {{ selectedFacture?.devise }}
+            {{ selectedTotalTTC | number:'1.3-3':'fr-FR'
+ }} {{ selectedFacture?.devise }}
           </div>
 
           <ng-container *ngIf="selectedTotalRetenue > 0">
@@ -1803,20 +1840,23 @@
               Retenue ({{ selectedFacture?.compteRetenue?.taux }}%)
             </div>
             <div class="col-6 text-right text-900 font-medium">
-              -{{ selectedTotalRetenue | number:'1.2-2' }} {{ selectedFacture?.devise }}
+              -{{ selectedTotalRetenue | number:'1.3-3':'fr-FR'
+ }} {{ selectedFacture?.devise }}
             </div>
           </ng-container>
 
           <div class="col-6 p-2 text-900 font-bold text-lg text-green-500">Net à Payer</div>
           <div class="col-6 p-2 text-right text-900 font-bold text-lg text-green-500">
-            {{ selectedNetAPayer | number:'1.2-2' }} {{ selectedFacture?.devise }}
+            {{ selectedNetAPayer | number:'1.3-3':'fr-FR'
+}} {{ selectedFacture?.devise }}
           </div>
 
           <div class="col-12" *ngIf="selectedFacture?.devise === 'EUR' && selectedFacture?.cours">
             <div class="flex justify-content-between text-600 text-sm">
               <span>Conversion (EUR → TND {{ selectedFacture.cours }})</span>
               <span class="text-700 font-medium">
-                {{ (selectedNetAPayer * selectedFacture.cours) | number:'1.2-2' }} TND
+                {{ (selectedNetAPayer * selectedFacture.cours)| number:'1.3-3':'fr-FR'
+ }} TND
               </span>
             </div>
           </div>

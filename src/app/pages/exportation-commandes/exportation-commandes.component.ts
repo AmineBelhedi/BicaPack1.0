@@ -15,18 +15,19 @@ type RowView = CommandeDTO & {
   // Aliases UI
   pliL?: number;
   pliW?: number;
+
   // ✅ Champs calculés (une seule fois par ligne)
   prodTotal?: number;  // total produit cumulé
   prodToday?: number;  // produit aujourd’hui
 };
 
 @Component({
-  selector: 'app-commande',
-  templateUrl: './commande.component.html',
-  styleUrls: ['./commande.component.scss'],
-  providers: [MessageService]
+  selector: 'app-exportation-commandes',
+  templateUrl: './exportation-commandes.component.html',
+  styleUrls: ['./exportation-commandes.component.scss'],
+  providers: [MessageService,ConfirmationService]
 })
-export class CommandeComponent implements OnInit, OnDestroy {
+export class ExportationCommandesComponent implements OnInit, OnDestroy {
   rows: RowView[] = [];
   selected: RowView[] = [];
   rowsPerPageOptions = [10, 20, 30];
@@ -83,11 +84,53 @@ export class CommandeComponent implements OnInit, OnDestroy {
     private prodApi: ProductionApiService,
     private router: Router
   ) {}
+getExportSeverity(status: string): "success" | "info" | "warning" | "danger" | "secondary" {
+  switch (status) {
+    case 'EN_ATTENTE':
+      return 'warning';   // orange
+    case 'PREPARATION':
+      return 'info';      // bleu
+    case 'EXPORTED':
+      return 'success';   // vert
+    default:
+      return 'secondary'; // gris
+  }
+}
 
+
+  
+selectedStatus: string = 'ALL'; // par défaut
   /* ============================ INIT ============================ */
+getByExportStatus() {
+  this.loading = true;
+
+  let obs$ = this.selectedStatus === 'ALL'
+    ? this.svc.getAllOkExport()                   // ✅ récupère toutes les exportées
+    : this.svc.getByExportStatus(this.selectedStatus);  // ✅ filtrées
+
+  obs$.subscribe({
+    next: data => {
+      this.rows = (data || []).map(d => this.dtoToView(d));
+      this.loading = false;
+      this.refreshProdStatsForVisibleRows();
+    },
+    error: err => {
+      console.error('Erreur chargement commandes:', err);
+      this.loading = false;
+    }
+  });
+}
+
+exportStatusOptionsFiltre = [
+  { label: 'Toutes', value: 'ALL' },   // ✅ nouvelle option
+  { label: 'En attente', value: 'EN_ATTENTE' },
+  { label: 'Préparation', value: 'PREPARATION' },
+  { label: 'Exportée', value: 'EXPORTED' }
+];
+
 
   ngOnInit(): void {
-    this.getAll();
+    this.getByExportStatus();;
 
     // ⚡️ refresh ciblé quand la production change (event bus du service)
     this.prodSub = this.prodApi.changed$.subscribe((cmdId) => {
@@ -102,16 +145,64 @@ export class CommandeComponent implements OnInit, OnDestroy {
   }
 
   /* ============================ API ============================ */
+exportDialogVisible = false;
+  selectedExportStatus: string | null = null;
+  currentCommandeId!: number;
 
-   confirmerExport(commandeId: number) {
+  exportStatusOptions = [
+    { label: 'En attente', value: 'EN_ATTENTE' },
+    { label: 'Préparation', value: 'PREPARATION' },
+    { label: 'Exportée', value: 'EXPORTED' }
+  ];
+
+  confirmerExport(commandeId: number) {
+    this.currentCommandeId = commandeId;
+    this.selectedExportStatus = null; // reset
+    this.exportDialogVisible = true;
+  }
+  
+validerExport() {
+  if (!this.selectedExportStatus) {
+    this.toast.add({ severity: 'warn', summary: 'Attention', detail: 'Veuillez choisir un statut.' });
+    return;
+  }
+
+  // Étape 1 : rendre okExport = true
+  this.svc.updateExport(this.currentCommandeId, true).subscribe({
+    next: () => {
+      // Étape 2 : changer le statut après que okExport soit true
+      this.svc.updateExportStatus(this.currentCommandeId, this.selectedExportStatus!).subscribe({
+        next: res => {
+          this.toast.add({ severity: 'success', summary: 'Export', detail: res });
+          this.exportDialogVisible = false;
+          this.getByExportStatus();
+
+        },
+        error: () => {
+          this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de mettre à jour le statut' });
+          this.exportDialogVisible = false;
+          this.getAll();
+
+        }
+      });
+    },
+    error: () => {
+      this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de valider l’export' });
+      this.exportDialogVisible = false;
+      this.getAll();
+    }
+  });
+}
+
+   annulerExport(commandeId: number) {
     this.confirmationService.confirm({
-      message: 'Voulez-vous vraiment marquer cette commande comme exportée ?',
-      header: 'Confirmation Export',
+      message: 'Voulez-vous vraiment annuler l\'export de cette commande ?',
+      header: 'Confirmation Annulation',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        this.svc.updateExport(commandeId, true).subscribe({
+        this.svc.updateExport(commandeId, false).subscribe({
           next: res => {this.toast.add({ severity: 'success', summary: 'Export', detail: res }) ; this.getAll(); },
-          error: () =>{ this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de mettre à jour' }) ; }
+          error: () =>{ this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de mettre à jour' }) ; this.getAll() ; }
         });
       }
     });
@@ -123,7 +214,7 @@ export class CommandeComponent implements OnInit, OnDestroy {
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
         this.svc.updateFacturation(commandeId, true).subscribe({
-          next: res => {this.toast.add({ severity: 'success', summary: 'Facturation', detail: res }); this.getAll();},
+          next: res => this.toast.add({ severity: 'success', summary: 'Facturation', detail: res }),
           error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de mettre à jour' })
         });
       }
@@ -132,7 +223,7 @@ export class CommandeComponent implements OnInit, OnDestroy {
 
   getAll() {
     this.loading = true;
-    this.svc.getAllNonExportNonFacturation().subscribe({
+    this.svc.getAllOkExport().subscribe({
       next: data => {
         this.rows = (data || []).map(d => this.dtoToView(d));
         this.loading = false;

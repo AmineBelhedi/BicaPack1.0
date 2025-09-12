@@ -212,21 +212,60 @@
                     
                 </div>
             </div>
-            <!-- <div class="card">
-                <p-toolbar>
+   <div class="card">
+                <!-- <p-toolbar>
                     <div class="p-toolbar-group-start">
                        
-                        <p-fileUpload #fileUpload mode="basic" name="demo[]" chooseIcon="pi pi-file-arrow-up"
-                            accept=".pdf, .xlsx, .xls" maxFileSize="1000000" (onSelect)="onFileSelected(fileUpload)"
-                            [auto]="false" chooseLabel="Upload" [style]="{
-                                'background-color': '#4CAF50',
-                                color: 'white',
-                                border: 'none'
-                            }" />
+                       
                     </div>
-                </p-toolbar>
-                <h5>Documents Utiles</h5>
-                <p-table [value]="documents" responsiveLayout="scroll" class="p-datatable-gridlines" [paginator]="true"
+                </p-toolbar> -->
+                <h5>ABSENCES</h5>
+                <p-table 
+  [value]="absences" 
+  responsiveLayout="scroll"
+  [paginator]="true" 
+  [rows]="10" 
+  [rowsPerPageOptions]="[10,20,50]" 
+ 
+  responsiveLayout="scroll">
+
+  <ng-template pTemplate="header">
+    <tr>
+      <th>Date</th>
+      <th>Reason</th>
+      <th>Note</th>
+      <!-- <th>Created By</th> -->
+      <th>Created At</th>
+    </tr>
+  </ng-template>
+
+  <ng-template pTemplate="body" let-a>
+    <tr>
+      <td>{{ a.date | date:'dd/MM/yyyy' }}</td>
+      <td>{{ a.reason || '-' }}</td>
+      <td>
+        <span *ngIf="a.note" pTooltip="{{ a.note }}" tooltipPosition="top">
+          {{ a.note | slice:0:20 }}<span *ngIf="a.note.length > 20">...</span>
+        </span>
+        <span *ngIf="!a.note">-</span>
+      </td>
+      <!-- <td>{{ a.createdBy || '-' }}</td> -->
+      <td>{{ a.createdAt | date:'short' }}</td>
+    </tr>
+  </ng-template>
+ <ng-template pTemplate="emptymessage">
+    <tr>
+      <td colspan="4">
+        <div class="flex flex-column align-items-center p-4 text-600">
+          <i class="pi pi-calendar-times text-4xl mb-3 text-gray-400"></i>
+          <span class="font-semibold text-lg">Aucune absence enregistrée</span>
+        </div>
+      </td>
+    </tr>
+  </ng-template>
+</p-table>
+
+                <!-- <p-table [value]="documents" responsiveLayout="scroll" class="p-datatable-gridlines" [paginator]="true"
                     [rows]="5" [rowsPerPageOptions]="[5, 10, 20, 30]">
                     <ng-template pTemplate="header">
                         <tr>
@@ -262,8 +301,8 @@
                             </td>
                         </tr>
                     </ng-template>
-                </p-table>
-            </div> -->
+                </p-table> -->
+            </div>
         </div>
     </div>
 </div>

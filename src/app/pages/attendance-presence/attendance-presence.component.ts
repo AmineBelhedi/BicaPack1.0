@@ -25,6 +25,9 @@ type RowVM = {
   note?: string;
   selected?: boolean;
 };
+type AbsenceReason = 'MALADIE' | 'MATERNITE' | 'CONGE' | 'AUTRE' | 'UNJUSTIFIED' | string;
+
+
 
 @Component({
   selector: 'app-attendance-presence',
@@ -49,6 +52,15 @@ export class AttendancePresenceComponent implements OnInit, OnDestroy {
   pauseStart: Date | null = null; // quand on démarre la pause
   showAbsencesEmployee : boolean = false ; 
 
+
+ authorizedReasons = [
+    { label: 'Maladie', value: 'MALADIE' as AbsenceReason },
+    { label: 'Congé maternité', value: 'MATERNITE' as AbsenceReason },
+    { label: 'Congé', value: 'CONGE' as AbsenceReason },
+    { label: 'Autre', value: 'AUTRE' as AbsenceReason },
+  ];
+
+  private AUTHORIZED_SET = new Set<AbsenceReason>(['MALADIE', 'MATERNITE', 'CONGE', 'AUTRE']);
   constructor(private svc: AttendanceService, private api: ApiService,private auth : AuthService,
     private route: ActivatedRoute, private cdr: ChangeDetectorRef,
     private toast: MessageService) { }
@@ -82,6 +94,89 @@ export class AttendancePresenceComponent implements OnInit, OnDestroy {
       this.auth.getProfile().subscribe(res=>{
         this.user=res ; 
       })
+  }
+
+
+  isAuthorizedReason(r?: string | null): boolean {
+    return !!r && this.AUTHORIZED_SET.has(r as AbsenceReason);
+  }
+
+  formatReason(r?: string | null): string {
+    switch (r) {
+      case 'MALADIE': return 'Maladie';
+      case 'MATERNITE': return 'Congé maternité';
+      case 'CONGE': return 'Congé';
+      case 'AUTRE': return 'Autre';
+      default: return r || '';
+    }
+  }
+
+  absDialog = {
+    visible: false,
+    saving: false,
+    bulk: false,
+    targetRow: null as RowVM | null,
+    model: {
+      type: 'AUTORISEE' as 'AUTORISEE' | 'NON_AUTORISEE',
+      reason: null as AbsenceReason | null,
+      note: ''
+    }
+  };
+
+   openAbsDialogForRow(row: RowVM) {
+    this.absDialog.bulk = false;
+    this.absDialog.targetRow = row;
+    this.absDialog.model = { type: 'AUTORISEE', reason: null, note: '' };
+    this.absDialog.visible = true;
+  }
+
+  openAbsDialogForBulk() {
+    if (!(this.selectedRows || []).some(r => r.status === 'PRESENT')) return;
+    this.absDialog.bulk = true;
+    this.absDialog.targetRow = null;
+    this.absDialog.model = { type: 'AUTORISEE', reason: null, note: '' };
+    this.absDialog.visible = true;
+  }
+
+  closeAbsDialog() {
+    if (this.absDialog.saving) return;
+    this.absDialog.visible = false;
+  }
+
+  canSaveAbsDialog(): boolean {
+    // autorisée => raison obligatoire ; non autorisée => ok sans raison
+    return this.absDialog.model.type === 'AUTORISEE' ? !!this.absDialog.model.reason : true;
+  }
+
+  toggle(row: RowVM): void {
+    if (!this.sousTraitantId) return;
+    if (row.status === 'PRESENT') {
+      this.openAbsDialogForRow(row); // demande type + (éventuelle) raison
+    } else {
+      // annulation standard existante
+      this.loading = true;
+      this.cdr.detectChanges();
+      this.sub.add(this.svc.unmarkAbsent(row.employeeId, this.dateStr).subscribe({
+        next: _ => {
+          row.status = 'PRESENT';
+          row.reason = undefined; // => redeviendra “—”
+          row.note = undefined;
+          this.toast.add({ severity: 'success', summary: 'Présence', detail: `${row.name} redevient présent` });
+          this.refreshSummaryOnly(); this.loading = false;
+        },
+        error: err => {
+          this.loading = false;
+          this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Annulation absence échouée' });
+          console.error(err);
+        }
+      }));
+    }
+  }
+
+  markSelectedAbsent(): void {
+    const hasPresent = (this.selectedRows || []).some(r => r.status === 'PRESENT');
+    if (!hasPresent) return;
+    this.openAbsDialogForBulk();
   }
   // toggle propre de l’overlay du p-calendar
 toggleCalendarOverlay(cal: any): void {
@@ -333,27 +428,128 @@ saveProduction() {
 
   }
 
-  toggle(row: RowVM): void {
-    if (!this.sousTraitantId) return;
-    this.loading = true;
-    if (row.status === 'PRESENT') {
-      this.cdr.detectChanges();
-      this.sub.add(this.svc.markAbsent({ employeeId: row.employeeId, date: this.dateStr, reason: 'UNJUSTIFIED', note: '' })
-        .subscribe({
-          next: _ => { row.status = 'ABSENT'; this.toast.add({ severity: 'success', summary: 'Absence', detail: `${row.name} marqué absent` }); this.refreshSummaryOnly(); this.loading = false; },
-          error: err => { this.loading = false; this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Marquage absent échoué' }); console.error(err); }
-        })
-      );
-    } else {
-      this.cdr.detectChanges();
-      this.sub.add(this.svc.unmarkAbsent(row.employeeId, this.dateStr)
-        .subscribe({
-          next: _ => { row.status = 'PRESENT'; row.reason = ''; row.note = ''; this.toast.add({ severity: 'success', summary: 'Présence', detail: `${row.name} redevient présent` }); this.refreshSummaryOnly(); this.loading = false; },
-          error: err => { this.loading = false; this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Annulation absence échouée' }); console.error(err); }
-        })
-      );
-    }
+
+
+  confirmAbsence() {
+  const isAuthorized = this.absDialog.model.type === 'AUTORISEE';
+  const reasonToSend: AbsenceReason = isAuthorized
+    ? (this.absDialog.model.reason as AbsenceReason)
+    : 'UNJUSTIFIED'; // même code que le back pour absence non autorisée
+
+  const noteToSend = this.absDialog.model.note || '';
+  this.absDialog.saving = true;
+
+  // ----- INDIVIDUEL -----
+  if (!this.absDialog.bulk && this.absDialog.targetRow) {
+    const row = this.absDialog.targetRow;
+
+    this.sub.add(
+      this.svc.markAbsent({
+        employeeId: row.employeeId,
+        date: this.dateStr,
+        reason: reasonToSend,
+        note: noteToSend
+      }).subscribe({
+        next: _ => {
+          row.status = 'ABSENT';
+          // Affichage: si non autorisée -> on laisse reason undefined pour montrer "—"
+          row.reason = isAuthorized ? reasonToSend : undefined;
+          row.note = noteToSend;
+
+          this.toast.add({ severity: 'success', summary: 'Absence', detail: `${row.name} marqué absent` });
+          this.absDialog.saving = false;
+          this.absDialog.visible = false;
+          this.refreshSummaryOnly();
+        },
+        error: err => {
+          this.absDialog.saving = false;
+          this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Marquage absent échoué' });
+          console.error(err);
+        }
+      })
+    );
+
+    return; // on sort ici uniquement pour le cas individuel
   }
+
+  // ----- BULK -----
+  if (this.absDialog.bulk) {
+    // 1) snapshot pour éviter que la sélection ne bouge pendant l'appel
+    const snapshot = [...(this.selectedRows || [])];
+    // 2) ne prendre que les "PRESENT" et dédupliquer
+    const ids = Array.from(
+      new Set(snapshot.filter(r => r.status === 'PRESENT').map(r => r.employeeId))
+    );
+
+    if (!ids.length) {
+      this.absDialog.saving = false;
+      this.absDialog.visible = false;
+      return;
+    }
+
+    // ⚠️ Ton unmark bulk envoie { employeeIds, date }, donc on reste cohérent ici
+    const payload = {
+      employeeIds: ids,
+      date: this.dateStr,
+      reason: reasonToSend,
+      note: noteToSend
+    };
+
+    this.sub.add(
+      this.svc.markAbsentBulk(payload).subscribe({
+        next: _ => {
+          this.toast.add({
+            severity: 'success',
+            summary: 'Absences',
+            detail: `${ids.length} employés marqués absents`
+          });
+
+          this.absDialog.saving = false;
+          this.absDialog.visible = false;
+
+          // Optionnel: mise à jour optimiste (sinon refresh())
+          // snapshot.forEach(r => {
+          //   if (r.status === 'PRESENT') {
+          //     r.status = 'ABSENT';
+          //     r.reason = isAuthorized ? reasonToSend : undefined;
+          //     r.note = noteToSend;
+          //   }
+          // });
+
+          this.refresh(); // sûr et simple
+        },
+        error: err => {
+          this.absDialog.saving = false;
+          this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Bulk absent échoué' });
+          console.error(err);
+        }
+      })
+    );
+  }
+}
+
+
+  // toggle(row: RowVM): void {
+  //   if (!this.sousTraitantId) return;
+  //   this.loading = true;
+  //   if (row.status === 'PRESENT') {
+  //     this.cdr.detectChanges();
+  //     this.sub.add(this.svc.markAbsent({ employeeId: row.employeeId, date: this.dateStr, reason: 'UNJUSTIFIED', note: '' })
+  //       .subscribe({
+  //         next: _ => { row.status = 'ABSENT'; this.toast.add({ severity: 'success', summary: 'Absence', detail: `${row.name} marqué absent` }); this.refreshSummaryOnly(); this.loading = false; },
+  //         error: err => { this.loading = false; this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Marquage absent échoué' }); console.error(err); }
+  //       })
+  //     );
+  //   } else {
+  //     this.cdr.detectChanges();
+  //     this.sub.add(this.svc.unmarkAbsent(row.employeeId, this.dateStr)
+  //       .subscribe({
+  //         next: _ => { row.status = 'PRESENT'; row.reason = ''; row.note = ''; this.toast.add({ severity: 'success', summary: 'Présence', detail: `${row.name} redevient présent` }); this.refreshSummaryOnly(); this.loading = false; },
+  //         error: err => { this.loading = false; this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Annulation absence échouée' }); console.error(err); }
+  //       })
+  //     );
+  //   }
+  // }
   presenceDonut = {
     labels: ['Présents', 'Absents'],
     datasets: [
@@ -396,17 +592,17 @@ saveProduction() {
       datasets: [{ data: [p, a] }]
     };
   }
-  markSelectedAbsent(): void {
-    const ids = (this.selectedRows || []).filter(r => r.status === 'PRESENT').map(r => r.employeeId);
-    if (!ids.length) return;
-    this.loading = true;
-    this.sub.add(this.svc.markAbsentBulk({ employeeIds: ids, date: this.dateStr, reason: 'UNJUSTIFIED', note: 'bulk' })
-      .subscribe({
-        next: _ => { this.toast.add({ severity: 'success', summary: 'Bulk', detail: `${ids.length} employés marqués absents` }); this.refresh(); },
-        error: err => { this.loading = false; this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Bulk absent échoué' }); console.error(err); }
-      })
-    );
-  }
+  // markSelectedAbsent(): void {
+  //   const ids = (this.selectedRows || []).filter(r => r.status === 'PRESENT').map(r => r.employeeId);
+  //   if (!ids.length) return;
+  //   this.loading = true;
+  //   this.sub.add(this.svc.markAbsentBulk({ employeeIds: ids, date: this.dateStr, reason: 'UNJUSTIFIED', note: 'bulk' })
+  //     .subscribe({
+  //       next: _ => { this.toast.add({ severity: 'success', summary: 'Bulk', detail: `${ids.length} employés marqués absents` }); this.refresh(); },
+  //       error: err => { this.loading = false; this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Bulk absent échoué' }); console.error(err); }
+  //     })
+  //   );
+  // }
 
   unmarkSelected(): void {
     const ids = (this.selectedRows || []).filter(r => r.status === 'ABSENT').map(r => r.employeeId);

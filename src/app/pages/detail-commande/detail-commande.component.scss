@@ -269,6 +269,29 @@ $bica-green-dark: #8d9c2e;
 
 
 
+.prix-colis-wrapper {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+}
+
+.euro-icon {
+  color: #22c55e;        /* vert */
+  font-weight: bold;
+  font-size: 1.8rem;
+}
+.nb-colis-input {
+  font-weight: bold;
+   font-size: 1.1rem;
+  color: #99801e !important; /* texte vert */
+  text-align: left;         /* aligne chiffres à droite */
+}
+.prix-colis-input {
+  font-weight: bold;
+   font-size: 1.2rem;
+  color: #22c55e !important; /* texte vert */
+  text-align: left;         /* aligne chiffres à droite */
+}
 
 
 

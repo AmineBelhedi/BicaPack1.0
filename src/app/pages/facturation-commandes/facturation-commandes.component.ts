@@ -21,12 +21,12 @@ type RowView = CommandeDTO & {
 };
 
 @Component({
-  selector: 'app-commande',
-  templateUrl: './commande.component.html',
-  styleUrls: ['./commande.component.scss'],
-  providers: [MessageService]
+  selector: 'app-facturation-commandes',
+  templateUrl: './facturation-commandes.component.html',
+  styleUrls: ['./facturation-commandes.component.scss'],
+  providers: [MessageService,ConfirmationService]
 })
-export class CommandeComponent implements OnInit, OnDestroy {
+export class FacturationCommandesComponent implements OnInit, OnDestroy {
   rows: RowView[] = [];
   selected: RowView[] = [];
   rowsPerPageOptions = [10, 20, 30];
@@ -103,36 +103,82 @@ export class CommandeComponent implements OnInit, OnDestroy {
 
   /* ============================ API ============================ */
 
-   confirmerExport(commandeId: number) {
-    this.confirmationService.confirm({
-      message: 'Voulez-vous vraiment marquer cette commande comme exportée ?',
-      header: 'Confirmation Export',
-      icon: 'pi pi-exclamation-triangle',
-      accept: () => {
-        this.svc.updateExport(commandeId, true).subscribe({
-          next: res => {this.toast.add({ severity: 'success', summary: 'Export', detail: res }) ; this.getAll(); },
-          error: () =>{ this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de mettre à jour' }) ; }
-        });
-      }
-    });
+  exportDialogVisible = false;
+  selectedExportStatus: string | null = null;
+  currentCommandeId!: number;
+
+  exportStatusOptions = [
+    { label: 'En attente', value: 'EN_ATTENTE' },
+    { label: 'Préparation', value: 'PREPARATION' },
+    { label: 'Exportée', value: 'EXPORTED' }
+  ];
+
+  confirmerExport(commandeId: number) {
+    this.currentCommandeId = commandeId;
+    this.selectedExportStatus = null; // reset
+    this.exportDialogVisible = true;
   }
+validerExport() {
+  if (!this.selectedExportStatus) {
+    this.toast.add({ severity: 'warn', summary: 'Attention', detail: 'Veuillez choisir un statut.' });
+    return;
+  }
+
+  // Étape 1 : rendre okExport = true
+  this.svc.updateExport(this.currentCommandeId, true).subscribe({
+    next: () => {
+      // Étape 2 : changer le statut après que okExport soit true
+      this.svc.updateExportStatus(this.currentCommandeId, this.selectedExportStatus!).subscribe({
+        next: res => {
+          this.toast.add({ severity: 'success', summary: 'Export', detail: res });
+          this.exportDialogVisible = false;
+          this.getAll();
+          
+        },
+        error: () => {
+          this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de mettre à jour le statut' });
+          this.exportDialogVisible = false;
+          this.getAll();
+
+        }
+      });
+    },
+    error: () => {
+      this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de valider l’export' });
+      this.exportDialogVisible = false;
+      this.getAll();
+    }
+  });
+}
+  //  confirmerExport(commandeId: number) {
+  //   this.confirmationService.confirm({
+  //     message: 'Voulez-vous vraiment marquer cette commande comme exportée ?',
+  //     header: 'Confirmation Export',
+  //     icon: 'pi pi-exclamation-triangle',
+  //     accept: () => {
+  //       this.svc.updateExport(commandeId, true).subscribe({
+  //           next: res => {this.toast.add({ severity: 'success', summary: 'Export', detail: res }) ; this.getAll(); },
+  //          error: () =>{ this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de mettre à jour' }) ; this.getAll() ; }
+  //       });
+  //     }
+  //   });
+  // }
     confirmerFacturation(commandeId: number) {
     this.confirmationService.confirm({
-      message: 'Voulez-vous vraiment passer cette commande à la facturation ?',
+      message: 'Voulez-vous vraiment annuler la facturation de cette commande ?',
       header: 'Confirmation Facturation',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
-        this.svc.updateFacturation(commandeId, true).subscribe({
-          next: res => {this.toast.add({ severity: 'success', summary: 'Facturation', detail: res }); this.getAll();},
-          error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de mettre à jour' })
+        this.svc.updateFacturation(commandeId, false).subscribe({
+             next: res => {this.toast.add({ severity: 'success', summary: 'Facturation', detail: res }); this.getAll();},
+         error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de mettre à jour' })
         });
       }
     });
   }
-
   getAll() {
     this.loading = true;
-    this.svc.getAllNonExportNonFacturation().subscribe({
+    this.svc.getAllOkFacturation().subscribe({
       next: data => {
         this.rows = (data || []).map(d => this.dtoToView(d));
         this.loading = false;

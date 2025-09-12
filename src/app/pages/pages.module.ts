@@ -71,9 +71,12 @@ import { SousTraitantComponent } from './sous-traitant/sous-traitant.component';
 import { EmployeeDetailsComponent } from './employee-details/employee-details.component';
 import { EmployeesStComponent } from './employees-st/employees-st.component';
 import { AttendancePresenceComponent } from './attendance-presence/attendance-presence.component';
+import { ExportationCommandesComponent } from './exportation-commandes/exportation-commandes.component';
+import { FacturationCommandesComponent } from './facturation-commandes/facturation-commandes.component';
+import { PaginatorModule } from 'primeng/paginator';
 @NgModule({
     declarations: [SafeUrlPipe, DateFormatPipe, ListUsersComponent, FournisseursComponent,ListUsersComponent , CommandeComponent, ProductionComponent,
-         ProductionCardComponent, SousTraitantComponent, EmployeeDetailsComponent, EmployeesStComponent, AttendancePresenceComponent, 
+         ProductionCardComponent, SousTraitantComponent, EmployeeDetailsComponent, EmployeesStComponent, AttendancePresenceComponent, ExportationCommandesComponent, FacturationCommandesComponent,
         StockComponent, ImportDetailsComponent , ImportComponent , DetailCommandeComponent , DashboardComponent, FacturesVenteComponent, FacturesAchatComponent,],
 
 
@@ -113,6 +116,7 @@ import { AttendancePresenceComponent } from './attendance-presence/attendance-pr
         CheckboxModule,
         OverlayPanelModule,
         ChipModule,
+        PaginatorModule,
         InputTextareaModule,
         PanelModule,
         DataViewModule,

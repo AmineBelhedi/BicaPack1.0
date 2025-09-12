@@ -4,6 +4,7 @@ import { Message, MessageService } from 'primeng/api';
 import { DocumentCommande } from 'src/app/models/documentCommande';
 import { Employee } from 'src/app/models/employee';
 import { ApiService } from 'src/app/services/api.service';
+import { Absence } from 'src/app/services/attendance.service';
 
 @Component({
     selector: 'app-employee-details',
@@ -67,6 +68,7 @@ export class EmployeeDetailsComponent implements OnInit {
           
         this.idEmployee = this.route.snapshot.paramMap.get('id');
         this.getEmployee();
+        this.getAbsences();
         this.messages = [{ severity: 'info', detail: 'Cliquez sur modifier pour appliquer les changements ' }];
        
     }
@@ -76,6 +78,27 @@ export class EmployeeDetailsComponent implements OnInit {
             
         }
     }
+  absences : Absence[]=[]; 
+        getAbsences(){
+        this.api.getAbsencesEmployee(this.idEmployee).subscribe(res=>{
+           this.absences =res ; 
+           console.log(this.absences)
+        },err=>{
+
+        })
+    }
+
+      formatReason(r?: string | null): string {
+    switch (r) {
+      case 'MALADIE': return 'Maladie';
+      case 'MATERNITE': return 'Congé maternité';
+      case 'CONGE': return 'Congé';
+      case 'AUTRE': return 'Autre';
+      case 'LATE' : return 'RETARD' ; 
+      default: return r || '';
+    }
+  }
+
     getEmployee() {
         this.api.getEmployeeById(this.idEmployee).subscribe((res) => {
             // Assign the response to employee
