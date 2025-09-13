@@ -6,37 +6,29 @@
   box-shadow: 0 10px 24px rgba(15, 23, 42, .06);
   padding: 1rem 1.25rem;
 }
-
 /* sections internes */
 .section { background: transparent; border: 0; box-shadow: none; padding: 0; }
-
 /* === Palette Bicapack === */
 $bica-orange: #ff9f1c;
 $bica-orange-dark: #e88c12;
 $bica-green: #9fb60c;
 $bica-green-dark: #8d9c2e;
-
 /* ===== HEADER ===== */
 .hero { display: flex; justify-content: space-between; align-items: center; }
 .header-left { display: flex; flex-direction: column; gap: .4rem; }
 .header-top  { display: flex; align-items: center; gap: .6rem; }
-
 .hero h2 {
   margin: 0;
   font-weight: 800;
   letter-spacing: .2px;
   color: #111 !important; /* noir pour tout le h2 */
 }
-
 .accent {
   color: #111 !important; /* noir aussi pour le numéro */
 }
-
-
 .meta-row { display: flex; align-items: center; gap: .5rem; color: var(--bp-muted, #6b7280); }
 .meta-row .sep { width: 6px; height: 6px; border-radius: 50%; background: var(--bp-primary, #ff9f1c); opacity: .6; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
-
 /* p-tag "Modèle" — style identique au bouton copier */
 :host ::ng-deep .p-tag.p-tag-info {
   background: rgba(255,159,28,.08) !important;  /* fond clair */
@@ -292,11 +284,6 @@ $bica-green-dark: #8d9c2e;
   color: #22c55e !important; /* texte vert */
   text-align: left;         /* aligne chiffres à droite */
 }
-
-
-
-
-
 /* ===============================
    PATCH RESPONSIVE — BICAPACK
    (à coller en bas du fichier)
@@ -584,7 +571,225 @@ img, svg, video { max-width: 100%; height: auto; }
 }
 
 
+/* --- Style général du formulaire --- */
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+  justify-content: flex-start;
+  margin-top: 1rem;
+  margin-bottom: 1.5rem;
+}
 
+form input,
+form p-inputNumber {
+  font-size: 1rem;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  width: calc(50% - 0.75rem);
+  margin-bottom: 1rem;
+}
+
+form input:focus,
+form p-inputNumber:focus {
+  border-color: #ff9f1c;
+  outline: none;
+}
+
+form button {
+  padding: 0.6rem 1.2rem;
+  background-color: #ff9f1c;
+  color: white;
+  border-radius: 8px;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+form button:hover {
+  background-color: #e88c12;
+}
+
+form .field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+form label {
+  font-size: 0.9rem;
+  color: #374151;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+form .field .p-inputnumber,
+form .field .p-inputtext {
+  width: 100%;
+  font-size: 1rem;
+  padding: 0.75rem;
+}
+
+form .field + .field {
+  margin-top: 1rem;
+}
+
+form .inline {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* --- Responsive pour mobile --- */
+@media (max-width: 768px) {
+  form input,
+  form p-inputNumber,
+  form button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  form {
+    gap: 0.5rem;
+  }
+  form button {
+    font-size: 0.9rem;
+    padding: 0.5rem;
+  }
+}
+
+/* Ajuster les icônes dans le bouton */
+form button p-button {
+  margin-left: 0.5rem;
+}
+
+/* Formulaire avec espacement fluide et alignement flexible */
+form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+/* Champs prenant 50% de la largeur et bien espacés */
+form input, form p-inputNumber {
+  width: calc(50% - 0.75rem); /* Champs prennent 50% de la largeur */
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  margin-bottom: 1rem;
+}
+
+form input:focus, form p-inputNumber:focus {
+  border-color: #ff9f1c; /* Mise en surbrillance au focus */
+}
+
+/* Réduire la taille du champ sur petits écrans */
+@media (max-width: 768px) {
+  form input, form p-inputNumber {
+    width: 100%;  /* Champs prennent toute la largeur sur petits écrans */
+  }
+}
+
+/* Bouton "Ajouter" style */
+form button {
+  padding: 0.6rem 1.2rem;
+  background-color: #ff9f1c;
+  color: white;
+  border-radius: 8px;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 1rem;
+  width: 100%;
+}
+
+form button:hover {
+  background-color: #e88c12; /* Couleur sur hover */
+}
+
+/* --- Champs spécifiques avec labels --- */
+form .field {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+form label {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+/* Ajuster les labels pour être plus visibles */
+form .field label {
+  font-weight: bold;
+  color: #374151;
+}
+
+/* Affichage du champ de prix fusionné dans un cadre unique */
+form .prix-input-wrapper {
+  display: flex;
+  gap: 0.75rem;
+  width: 100%;
+  justify-content: space-between;
+}
+
+form .prix-input-wrapper input, form .prix-input-wrapper p-inputNumber {
+  width: 48%; /* Chaque champ prend environ 48% de la largeur */
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+/* Styles des champs de prix avec une meilleure gestion de l'espacement */
+form .prix-input-wrapper input:focus,
+form .prix-input-wrapper p-inputNumber:focus {
+  border-color: #ff9f1c;
+}
+
+/* Bouton "Ajouter" (fusionné pour les prix) */
+form .prix-input-wrapper p-button {
+  margin-top: 1.5rem;
+  width: 100%; /* Étend le bouton sur toute la largeur */
+}
+
+/* --- Table de produits --- */
+form table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+form table th, form table td {
+  padding: 0.75rem;
+  border: 1px solid #e5e7eb;
+}
+
+form table th {
+  background-color: #f9fafb;
+  font-weight: bold;
+}
+
+form table td {
+  text-align: center;
+}
+
+/* Table responsive */
+@media (max-width: 768px) {
+  form table th, form table td {
+    font-size: 0.9rem; /* Réduit la taille des textes sur petits écrans */
+  }
+}
 
 
 

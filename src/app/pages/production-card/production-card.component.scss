@@ -257,3 +257,62 @@
 :host ::ng-deep .p-progressbar.bica-progress.is-complete .p-progressbar-value{
   background: var(--bar-green-fill-100) !important;
 }
+
+
+.colisage-row {
+  display: flex;
+  gap: 1rem;
+  margin: 0.5rem 0 0.5rem 0;
+  justify-content: center;
+  align-items: center;
+}
+
+.colisage-item {
+  background: #f3f4f6; /* gris clair neutre */
+  border-radius: 8px;
+  padding: 0.35rem 0.75rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 110px;
+  border-left: 4px solid #ff7a00; /* orange principal par défaut */
+}
+
+.colisage-item:nth-child(1) {
+  border-left-color: #3b82f6; /* bleu doux */
+  background: #e0f2fe;        /* bleu très clair */
+  color: #0369a1;
+}
+.colisage-item:nth-child(2) {
+  border-left-color: #10b981; /* vert doux */
+  background: #dcfce7;        /* vert très clair */
+  color: #15803d;
+}
+
+.colisage-label {
+  font-size: 0.82rem;
+  color: #374151;
+  margin-bottom: 0.1rem;
+  text-align: center;
+}
+
+.colisage-value {
+  font-size: 1rem;
+  font-weight: bold;
+  color: #1f2937;
+  background: #fff;
+  border-radius: 999px;
+  padding: 0.2rem 0.8rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border: 1px solid #e5e7eb;
+  display: inline-block;
+  text-shadow: 0 1px 2px #fff8;
+  animation: pulse 1.5s;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 #ff7a0044; }
+  70% { box-shadow: 0 0 0 10px #ff7a0000; }
+  100% { box-shadow: 0 0 0 0 #ff7a0000; }
+}

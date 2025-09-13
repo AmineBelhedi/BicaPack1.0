@@ -14,6 +14,8 @@ import { AuthService } from 'src/app/services/auth.service';
 export class ProductionCardComponent implements OnChanges ,OnInit {
   @Input() commandeId!: number;
   @Input() cible = 0;
+  @Input() nombreDeColis: number = 0;
+  @Input() prixColis: number = 0;
 
   // KPIs
   total = 0;

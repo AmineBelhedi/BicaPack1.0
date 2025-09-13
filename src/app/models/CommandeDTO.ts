@@ -12,6 +12,8 @@ export interface CommandeDTO {
   poidsPoigner : number ; 
   description: string;
     imageSac ?: string ; 
+    imageFaceAvant ?: string ;
+    imageFaceArriere ?: string ;
   // Champs optionnels exposés par l’API (si présents)
   poidsNecessaire?: number;
   poidsReserve?: number;

@@ -225,3 +225,61 @@
 ::ng-deep .p-fileupload-choose:hover {
   background-color: #01997a !important;
 }
+
+
+
+
+/* Conteneur pour le prix */
+.price-container {
+  display: flex;
+  flex-direction: column; /* Les prix seront l'un sous l'autre */
+  align-items: flex-start; /* Alignement à gauche */
+  gap: 5px; /* Un petit espace entre les deux prix */
+}
+
+/* Le prix de base (sans transport) */
+.price-small {
+  font-size: 0.8rem; /* Petit prix */
+  color: #888; /* Couleur grise */
+}
+
+/* Le prix avec transport */
+.price-large {
+  font-size: 0.8rem; /* Prix plus grand */
+  font-weight: bold;
+  color: #f39c12; /* Couleur orange */
+}
+
+
+/* Conteneur pour le prix */
+.price-container {
+  display: flex;
+  flex-direction: column; /* Les prix seront l'un sous l'autre */
+  align-items: flex-start; /* Alignement à gauche */
+  gap: 5px; /* Un petit espace entre les deux prix */
+}
+
+/* Le prix avec transport (petit) */
+.price-small {
+  font-size: 0.8rem; /* Petit prix */
+  color: #888; /* Couleur grise */
+}
+
+/* Le prix sans transport (grand) */
+.price-large {
+  font-size: 0.8rem; /* Prix plus grand */
+  font-weight: bold;
+  color: #f39c12; /* Couleur orange */
+}
+.field {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem; /* espace entre label et radio */
+}
+
+.prix-transport-input {
+  max-width: 20rem;
+  min-width: 80px;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.5rem;
+}

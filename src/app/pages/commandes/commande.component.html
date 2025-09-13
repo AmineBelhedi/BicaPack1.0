@@ -341,6 +341,18 @@
                   <div class="today" *ngIf="(c.prodToday || 0) > 0">
                     <i class="pi pi-bolt"></i> {{ (c.prodToday || 0) | number:'1.0-0':'fr-FR' }} aujourd’hui
                   </div>
+                  
+                  <!-- AJOUTE ICI -->
+                  <div class="card-colisage-row">
+                    <span class="card-colisage-item">
+                      <i class="pi pi-box"></i>
+                      {{ c.nombreDeColis }} colis
+                    </span>
+                    <span class="card-colisage-item">
+                      <i class="pi pi-euro"></i>
+                      {{ c.prixColis | number:'1.2-2':'fr-FR' }} €
+                    </span>
+                  </div>
                 </div>
 
                 <div class="divider"></div>

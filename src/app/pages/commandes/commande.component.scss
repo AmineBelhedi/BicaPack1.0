@@ -198,5 +198,32 @@
 }
 
 
+.card-colisage-row {
+  display: flex;
+  gap: 1.2rem;
+  margin-top: 0.4rem;
+  margin-bottom: 0.2rem;
+  align-items: center;
+  font-size: 0.82rem;
+  color: #374151;
+  opacity: 0.85;
+}
+.card-colisage-item {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: #f3f4f6;
+  border-radius: 6px;
+  padding: 0.15rem 0.6rem;
+  font-weight: 500;
+}
+.card-colisage-item i {
+  font-size: 1em;
+  color: #3b82f6;
+}
+.card-colisage-item:last-child i {
+  color: #10b981;
+}
+
 
 

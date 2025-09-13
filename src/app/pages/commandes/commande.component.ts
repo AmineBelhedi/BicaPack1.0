@@ -18,6 +18,8 @@ type RowView = CommandeDTO & {
   // ✅ Champs calculés (une seule fois par ligne)
   prodTotal?: number;  // total produit cumulé
   prodToday?: number;  // produit aujourd’hui
+  nombreDeColis?: number; // AJOUTÉ
+  prixColis?: number;
 };
 
 @Component({
@@ -155,7 +157,9 @@ export class CommandeComponent implements OnInit, OnDestroy {
       pliL: dto.plilongueur ?? 0,
       pliW: dto.plilargeur  ?? 0,
       description: dto.description ?? '',
-      imageUrl: (dto as any).imageUrl ?? ''
+      imageUrl: (dto as any).imageUrl ?? '',
+      nombreDeColis: this.getNombreDeColis(dto.quantite, dto.nombreDePieceParColis),
+    prixColis: dto.prixColis
     };
   }
 
@@ -452,4 +456,9 @@ export class CommandeComponent implements OnInit, OnDestroy {
     localStorage.setItem('cmdView', mode);
     if (mode === 'card') this.cardFirst = 0;
   }
+  // Ajoute la fonction utilitaire si elle n'existe pas déjà
+getNombreDeColis(quantite: number, nombreDePieceParColis: number): number {
+  if (!quantite || !nombreDePieceParColis || nombreDePieceParColis === 0) return 0;
+  return Math.ceil(quantite / nombreDePieceParColis);
+}
 }

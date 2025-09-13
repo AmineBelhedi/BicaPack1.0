@@ -415,4 +415,20 @@ saveImportHeader(): void {
   const input = event.target as HTMLInputElement;
   table.filterGlobal(input.value, 'contains');
 }
+
+
+
+
+calculerPrixTotalAvecTransport() {
+  // Si le transport est inclus, on calcule le prix total avec transport
+  if (this.importData.transportInclus === 'oui') {
+    const prix = this.importData.prix || 0;
+    const prixTransport = this.importData.prixTransport || 0;
+    this.importData.prixTotal = prix + prixTransport;
+  } else {
+    // Si le transport n'est pas inclus, le prix total est simplement le prix de l'import
+    this.importData.prixTotal = this.importData.prix || 0;
+  }
+}
+
 }

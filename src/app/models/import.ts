@@ -22,15 +22,19 @@ export interface RouleauImport {
 export interface ImportModel {
   id?: number;
   numeroImport: string;
-  dateImport: string | Date  ;
+  dateImport: string | Date;
   fournisseur: string;
   nomProduit: string;
   
   totalMetrage?: number;
   totalRouleaux?: number;
   prix?: number;
+  prixTransport?: number;   // Prix du transport
+  prixTotal?: number;       // Prix total avec ou sans transport
   observations?: string;
   fichierImport?: string; // nom du fichier PDF importé
-  packingList ?: string ; 
+  packingList?: string; 
+  transportInclus?: string; // 'oui' ou 'non'
   rouleaux?: RouleauImport[]; // liste des rouleaux liés
 }
+

@@ -5,6 +5,7 @@ import { CommandeDTO } from 'src/app/models/CommandeDTO';
 import { RouleauImport } from 'src/app/models/import';
 import { CommandeService } from 'src/app/services/commande.service';
 import { ImportService } from 'src/app/services/import.service';
+import { ProduitService } from 'src/app/services/produit.service';
 
 type Allocation = {
   id: number;
@@ -29,6 +30,8 @@ export class DetailCommandeComponent implements OnInit {
   notFound = false;
   commande?: CommandeDTO;
   qrValue = '';
+  produits: any[] = [];
+  
 
   // Image & upload
   uploading = false;
@@ -57,10 +60,15 @@ export class DetailCommandeComponent implements OnInit {
 
   private localAllocs: Allocation[] = [];
  commandeId : any ; 
+
+  produitsUtilises: { nom: string, prix: number }[] = [];
+  nouveauProduit: { nom: string, prix: number } = { nom: '', prix: null };
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
     private svc: CommandeService,
+    private produitService: ProduitService,
     private importService: ImportService,
     private toast: MessageService
   ) {}
@@ -76,11 +84,16 @@ export class DetailCommandeComponent implements OnInit {
   ngOnInit(): void {
     this.commandeId = this.route.snapshot.paramMap.get('id'); 
     const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (!id) { this.notFound = true; this.loading = false; return; }
+    if (!id) { 
+      this.notFound = true; 
+      this.loading = false; 
+      return; 
+    }
 
     const initialView = this.route.snapshot.queryParamMap.get('view');
     if (initialView === 'production') this.viewMode = 'production';
       
+    // Récupérer la commande
     this.svc.getById(id).subscribe({
       next: (cmd) => {
         this.commande = cmd;
@@ -90,19 +103,22 @@ export class DetailCommandeComponent implements OnInit {
 
         this.qrValue = `${location.origin}/pages/detail-commande/${id}`;
 
-        // init switches
+        // Initialiser les flags pour Poigner et Soufflet
         this.hasPoigner = !!(cmd.poidsPoigner && cmd.poidsPoigner > 0);
         this.hasSoufflet = !!(cmd.soufflet && cmd.soufflet > 0);
 
-        // init plis (on lit directement les champs du back)
+        // Initialiser les dimensions (plis, etc.)
         this.pliLTmp = (cmd as any).plilongueur ?? 1;
         this.pliWTmp = (cmd as any).plilargeur  ?? 0;
 
-        // copies temporaires
+        // Copies temporaires pour l'édition sans sauvegarde
         this.poidsPoignerTmp = Number(cmd.poidsPoigner) || 0;
         this.souffletTmp     = Number(cmd.soufflet)     || 0;
 
-        // Rouleaux compatibles
+        // Récupérer les produits associés à la commande
+        this.loadProduits(id);
+
+        // Récupérer les rouleaux compatibles
         this.getRouleaux();
 
         // Allocations (serveur + locales)
@@ -110,18 +126,35 @@ export class DetailCommandeComponent implements OnInit {
         this.reloadAllocations();
 
         this.loading = false;
+
+        // Si en mode production, faire défiler la page vers le bas
         if (this.viewMode === 'production') {
           setTimeout(() => {
-            document.getElementById('productionTop')
-              ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            document.getElementById('productionTop')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
           });
         }
-        },
-      error: () => { this.notFound = true; this.loading = false; }
+      },
+      error: () => { 
+        this.notFound = true; 
+        this.loading = false; 
+      }
     });
   }
 
-  getCommandeById(){
+  // Méthode pour charger les produits associés à la commande
+  loadProduits(commandeId: number): void {
+    this.produitService.getProduitsByCommande(commandeId).subscribe({
+      next: (produits) => {
+        this.produits = produits;  // Assigner les produits récupérés à la propriété 'produits'
+      },
+      error: (err) => {
+        console.error('Erreur lors de la récupération des produits', err);
+      }
+    });
+  }
+
+
+  getCommandeById(): void {
     this.svc.getById(this.commandeId).subscribe({
       next: (cmd) => {
         this.commande = cmd;
@@ -150,6 +183,9 @@ export class DetailCommandeComponent implements OnInit {
         this.localAllocs = this.loadLocalAllocations(this.commandeId);
         this.reloadAllocations();
 
+        // Récupérer les produits associés à cette commande
+        this.loadProduits(this.commandeId);
+
         this.loading = false;
         if (this.viewMode === 'production') {
           setTimeout(() => {
@@ -157,10 +193,13 @@ export class DetailCommandeComponent implements OnInit {
               ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
           });
         }
-        },
+      },
       error: () => { this.notFound = true; this.loading = false; }
     });
   }
+
+ 
+
   // =================== Image (upload + cache-bust) ===================
   onPickImage(evt: Event, commandeId: number): void {
     const input = evt.target as HTMLInputElement;
@@ -554,4 +593,38 @@ export class DetailCommandeComponent implements OnInit {
   isFondCarre(): boolean {
     return (((this.commande as any)?.typeSac) || 'FOND_V') === 'FOND_CARRE';
   }
+
+  addProduit() {
+    if (this.nouveauProduit.nom && this.nouveauProduit.prix != null && this.commande?.id) {
+      this.produitService.addProduitToCommande(this.commande.id, this.nouveauProduit).subscribe({
+        next: () => {
+          this.loadProduits(this.commande.id); // recharge la liste depuis le backend
+          this.nouveauProduit = { nom: '', prix: null };
+        },
+        error: (err) => {
+          console.error('Erreur lors de l\'ajout du produit', err);
+        }
+      });
+    }
+  }
+
+deleteProduit(produitId: number): void {
+  const commandeId = this.commande?.id;
+  if (!commandeId) {
+    this.toast.add({ severity: 'warn', summary: 'Commande non trouvée', detail: 'Impossible de supprimer le produit.' });
+    return;
+  }
+
+  this.produitService.deleteProduit(commandeId, produitId).subscribe({
+    next: () => {
+      this.toast.add({ severity: 'success', summary: 'Produit supprimé', detail: 'Le produit a été supprimé de la commande.' });
+      this.loadProduits(commandeId);  // Recharger les produits pour mettre à jour l'affichage
+    },
+    error: (err) => {
+      console.error('Erreur lors de la suppression du produit', err);
+      this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de supprimer le produit.' });
+    }
+  });
+}
+
 }

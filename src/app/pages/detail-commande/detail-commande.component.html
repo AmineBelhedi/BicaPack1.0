@@ -77,7 +77,23 @@
         <!-- COL 1 : Aperçu + upload -->
         <section class="card section">
           <h4 class="card-title">Aperçu</h4>
+          <!--Face Avant-->
+          <div class="image-box">
+            <ng-container *ngIf="c.imageSac; else noimg">
+              <p-image [src]="c.imageSac + (cacheBust ? ('?t=' + cacheBust) : '')" width="100" [preview]="true" alt="image commande"></p-image>
+            </ng-container>
+            <ng-template #noimg><div class="noimg">Pas d’image</div></ng-template>
 
+            <input #fileInput type="file" accept="image/*" class="hidden" (change)="onPickImage($event, c.id!)" />
+            <button pButton type="button" icon="pi pi-upload"
+                    class="p-button-rounded p-button-sm p-button-outlined upload-fab"
+                    [disabled]="uploading" (click)="fileInput.click()" pTooltip="Changer l'image"></button>
+
+            <p-progressSpinner *ngIf="uploading" [style]="{width:'28px',height:'28px'}" strokeWidth="3" class="upload-spinner">
+            </p-progressSpinner>
+          </div>
+          <br>
+          <!--Face Arriére-->
           <div class="image-box">
             <ng-container *ngIf="c.imageSac; else noimg">
               <p-image [src]="c.imageSac + (cacheBust ? ('?t=' + cacheBust) : '')" width="100" [preview]="true" alt="image commande"></p-image>
@@ -429,6 +445,38 @@
                   [style]="{ width: '110px' }" />
           </div>
 
+          <!-- Tableau des produits utilisés -->
+          <div class="field mt-4">
+            <h5 class="card-title mb-2">Produits utilisés</h5>
+            <form (ngSubmit)="addProduit()" #produitForm="ngForm" style="display:flex; gap:1rem; align-items:center;">
+              <input pInputText name="nomProduit" [(ngModel)]="nouveauProduit.nom" placeholder="Nom du produit" required />
+              <p-inputNumber name="prixProduit" [(ngModel)]="nouveauProduit.prix" [min]="0" [mode]="'decimal'" [inputStyle]="{ width: '100px' }" placeholder="Prix (€)" required></p-inputNumber>
+              <button pButton type="submit" icon="pi pi-plus" label="Ajouter" class="p-button-sm"></button>
+            </form>
+            <p-table [value]="produits" styleClass="minimal mt-2" [responsiveLayout]="'stack'" [breakpoint]="'960px'">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>Nom du produit</th>
+                  <th>Prix (€)</th>
+                  <th>Actions</th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-prod let-i="rowIndex">
+                <tr>
+                  <td>{{ prod.nom }}</td>
+                  <td>{{ prod.prix | number:'1.2-2':'fr-FR' }}</td>
+                  <td>
+                    <button pButton icon="pi pi-trash" class="p-button-text p-button-danger p-button-rounded p-button-sm"
+                      (click)="deleteProduit(prod.id)" pTooltip="Supprimer"></button>
+                  </td>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="emptymessage">
+                <tr><td colspan="3" class="muted text-center py-2">Aucun produit ajouté</td></tr>
+              </ng-template>
+            </p-table>
+          </div>
+
           <div class="actions-line"></div>
         </section>
       </div>
@@ -496,7 +544,9 @@
       <div id="productionTop"></div>
       <app-production-card
         [commandeId]="c.id!"
-        [cible]="c.quantite || 0">
+        [cible]="c.quantite || 0"
+        [nombreDeColis]="getNombreDeColis(c.quantite, c.nombreDePieceParColis)"
+        [prixColis]="c.prixColis">
       </app-production-card>
     </ng-container>
 
